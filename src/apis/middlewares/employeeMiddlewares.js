@@ -1,4 +1,4 @@
-const { check, validationResult } = require("express-validator");
+const { check } = require("express-validator");
 
 const createValidate = [
   check("name")
@@ -92,14 +92,4 @@ const updateValidate = [
     .withMessage("National number contain numbers only"),
 ];
 
-const result = (req, res, next) => {
-  const errors = validationResult(req);
-
-  if (!errors.isEmpty()) {
-    res.json(errors);
-  } else {
-    next();
-  }
-};
-
-module.exports = { createValidate, updateValidate, result };
+module.exports = { createValidate, updateValidate };
