@@ -296,7 +296,7 @@ const back = async (req, res) => {
         );
     }
     custodyEmployee.totalQuantity -= +quantity;
-    custodyEmployee.lastDate -= new Date(currentTime());
+    custodyEmployee.lastDate = new Date(currentTime());
 
     //update the custody available
     custody.available += +quantity;

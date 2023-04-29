@@ -3,4 +3,5 @@ module.exports = {
   supplier: require("./supplier"),
   custody: require("./custody"),
   custodyEmployee: require("./custodyEmployee"),
+  material: require("./material"),
 };
