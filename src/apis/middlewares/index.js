@@ -3,4 +3,5 @@ module.exports = {
   validationResult: require("./result"),
   employeeMiddlewares: require("./employeeMiddlewares"),
   supplierMiddlewares: require("./supplierMiddlewares"),
+  custodyMiddlewares: require("./custodyMiddlewares"),
 };
