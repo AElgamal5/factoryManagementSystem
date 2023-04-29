@@ -18,6 +18,10 @@ app.use((req, res, next) => {
   next();
 });
 
+//routers
+const { employee } = require("./apis/routes");
+app.use("/api/employee", employee);
+
 //connect to DB and running the server
 (function start() {
   mongoose

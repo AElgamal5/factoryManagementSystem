@@ -23,7 +23,7 @@ const custodyEmployeeSchema = new Schema(
       type: Date,
     },
 
-    log: [
+    history: [
       {
         date: { type: Date },
         quantity: { type: Number },

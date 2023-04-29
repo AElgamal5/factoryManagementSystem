@@ -28,7 +28,7 @@ const materialSchema = new Schema(
       required: true,
     },
 
-    unit: { type: string, required: true },
+    unit: { type: String, required: true },
 
     role: { type: String, required: true },
 

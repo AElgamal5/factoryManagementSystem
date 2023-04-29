@@ -1,1 +1,4 @@
-module.exports = {};
+module.exports = {
+  idValidation: require("./idValidation"),
+  employeeMiddlewares: require("./employeeMiddlewares"),
+};
