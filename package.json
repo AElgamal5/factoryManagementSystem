@@ -1,0 +1,32 @@
+{
+  "name": "storage-system-apis",
+  "version": "1.0.0",
+  "description": "storage management system APIs using nodeJS",
+  "main": "./src/server.js",
+  "scripts": {
+    "start": "node ./src/server.js",
+    "dev": "nodemon ./src/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AElgamal5/storage-system-APIs.git"
+  },
+  "author": "Elgamal",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AElgamal5/storage-system-APIs/issues"
+  },
+  "homepage": "https://github.com/AElgamal5/storage-system-APIs#readme",
+  "dependencies": {
+    "colors": "^1.4.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "express-validator": "^7.0.1",
+    "mongoose": "^7.1.0",
+    "socket.io": "^4.6.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  }
+}
