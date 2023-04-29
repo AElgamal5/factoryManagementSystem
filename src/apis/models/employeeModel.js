@@ -9,9 +9,10 @@ const employeeSchema = new Schema(
       required: true,
     },
 
+    //0 employee, 1 supervisor
     role: {
-      type: String,
-      required: true,
+      title: { type: String, required: true },
+      num: { type: Number, required: true },
     },
 
     code: {
@@ -25,6 +26,9 @@ const employeeSchema = new Schema(
         id: {
           type: mongoose.Types.ObjectId,
           ref: "Custody",
+        },
+        totalQuantity: {
+          type: Number,
         },
       },
     ],

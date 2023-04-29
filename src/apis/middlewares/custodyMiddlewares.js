@@ -25,16 +25,22 @@ const createValidate = [
     })
     .withMessage("Unit length should be 1 to 20 characters"),
 
-  check("role")
+  check("role.title")
     .notEmpty()
-    .withMessage("Role is required")
+    .withMessage("Role's title is required")
     .isString()
-    .withMessage("Role must be a String")
+    .withMessage("Role's title must be a String")
     .isLength({
       min: 3,
-      max: 20,
+      max: 200,
     })
-    .withMessage("Role length should be 3 to 20 characters"),
+    .withMessage("Role's title length should be 3 to 200 characters"),
+
+  check("role.num")
+    .notEmpty()
+    .withMessage("Role's num is required")
+    .isNumeric()
+    .withMessage("Role's num must be a number"),
 
   check("details")
     .optional()
@@ -94,15 +100,20 @@ const updateValidate = [
     })
     .withMessage("Unit length should be 1 to 20 characters"),
 
-  check("role")
+  check("role.title")
     .optional()
     .isString()
-    .withMessage("Role must be a String")
+    .withMessage("Role's title must be a String")
     .isLength({
       min: 3,
       max: 200,
     })
-    .withMessage("Role length should be 3 to 200 characters"),
+    .withMessage("Role's title length should be 3 to 200 characters"),
+
+  check("role.num")
+    .optional()
+    .isNumeric()
+    .withMessage("Role's num must be a number"),
 
   check("details")
     .optional()

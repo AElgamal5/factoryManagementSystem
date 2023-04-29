@@ -27,12 +27,18 @@ const custodySchema = new Schema(
           type: mongoose.Types.ObjectId,
           ref: "Employee",
         },
+        totalQuantity: {
+          type: Number,
+        },
       },
     ],
 
     unit: { type: String, required: true },
 
-    role: { type: String, required: true },
+    role: {
+      title: { type: String, required: true },
+      num: { type: Number, required: true },
+    },
 
     image: { type: String },
 

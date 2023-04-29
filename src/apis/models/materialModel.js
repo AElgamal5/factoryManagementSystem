@@ -30,7 +30,10 @@ const materialSchema = new Schema(
 
     unit: { type: String, required: true },
 
-    role: { type: String, required: true },
+    role: {
+      title: { type: String, required: true },
+      num: { type: Number, required: true },
+    },
 
     image: { type: String },
 
