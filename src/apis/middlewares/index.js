@@ -4,4 +4,5 @@ module.exports = {
   employeeMiddlewares: require("./employeeMiddlewares"),
   supplierMiddlewares: require("./supplierMiddlewares"),
   custodyMiddlewares: require("./custodyMiddlewares"),
+  custodyEmployeeMiddlewares: require("./custodyEmployeeMiddlewares"),
 };

@@ -6,7 +6,16 @@ const { errorFormat } = require("../utils");
  * path: /api/employee/
  */
 const create = async (req, res) => {
-  const { name, code, role, image, phoneNo, NID, note } = req.body;
+  const {
+    name,
+    code,
+    "role.title": roleTitle,
+    "role.num": roleNum,
+    image,
+    phoneNo,
+    NID,
+    note,
+  } = req.body;
 
   try {
     //check if the code exist
@@ -20,7 +29,8 @@ const create = async (req, res) => {
     const employee = await Employee.create({
       name,
       code,
-      role,
+      "role.title": roleTitle,
+      "role.num": roleNum,
       phoneNo,
       NID,
       note,
@@ -130,7 +140,16 @@ const searchByName = async (req, res) => {
  */
 const updateProfile = async (req, res) => {
   const id = req.params.id;
-  const { name, code, role, image, phoneNo, NID, note } = req.body;
+  const {
+    name,
+    code,
+    "role.title": roleTitle,
+    "role.num": roleNum,
+    image,
+    phoneNo,
+    NID,
+    note,
+  } = req.body;
   try {
     //check if the code exist
     if (code) {
@@ -146,7 +165,8 @@ const updateProfile = async (req, res) => {
     await Employee.findByIdAndUpdate(id, {
       name,
       code,
-      role,
+      "role.title": roleTitle,
+      "role.num": roleNum,
       phoneNo,
       NID,
       note,

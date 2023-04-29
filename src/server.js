@@ -19,10 +19,16 @@ app.use((req, res, next) => {
 });
 
 //routers
-const { employee, supplier, custody } = require("./apis/routes");
+const {
+  employee,
+  supplier,
+  custody,
+  custodyEmployee,
+} = require("./apis/routes");
 app.use("/api/employee", employee);
 app.use("/api/supplier", supplier);
 app.use("/api/custody", custody);
+app.use("/api/custodyEmployee", custodyEmployee);
 
 //connect to DB and running the server
 (function start() {

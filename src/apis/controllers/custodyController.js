@@ -6,7 +6,15 @@ const { errorFormat } = require("../utils");
  * path: /api/custody/
  */
 const create = async (req, res) => {
-  const { name, details, image, unit, role, note } = req.body;
+  const {
+    name,
+    details,
+    image,
+    unit,
+    "role.title": roleTitle,
+    "role.num": roleNum,
+    note,
+  } = req.body;
 
   try {
     const custody = await Custody.create({
@@ -15,7 +23,8 @@ const create = async (req, res) => {
       // available: 0,
       details,
       unit,
-      role,
+      "role.title": roleTitle,
+      "role.num": roleNum,
       note,
     });
 
@@ -70,8 +79,17 @@ const getByID = async (req, res) => {
 const update = async (req, res) => {
   const id = req.params.id;
 
-  const { name, quantity, available, details, image, unit, role, note } =
-    req.body;
+  const {
+    name,
+    quantity,
+    available,
+    details,
+    image,
+    unit,
+    "role.title": roleTitle,
+    "role.num": roleNum,
+    note,
+  } = req.body;
 
   try {
     const custody = await Custody.findByIdAndUpdate(id, {
@@ -80,7 +98,8 @@ const update = async (req, res) => {
       available,
       details,
       unit,
-      role,
+      "role.title": roleTitle,
+      "role.num": roleNum,
       note,
     });
 
