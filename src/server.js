@@ -26,6 +26,7 @@ const {
   custodyEmployee,
   material,
   materialEmployee,
+  buyRequest,
 } = require("./apis/routes");
 app.use("/api/employee", employee);
 app.use("/api/supplier", supplier);
@@ -33,6 +34,7 @@ app.use("/api/custody", custody);
 app.use("/api/custodyEmployee", custodyEmployee);
 app.use("/api/material", material);
 app.use("/api/materialEmployee", materialEmployee);
+app.use("/api/buyRequest", buyRequest);
 
 //connect to DB and running the server
 (function start() {

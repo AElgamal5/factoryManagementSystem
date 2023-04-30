@@ -37,7 +37,7 @@ const getByID = async (req, res) => {
         .status(400)
         .json(errorFormat(id, "No supplier with this id", "id", "header"));
     }
-    res.status(200).json({ date: supplier });
+    res.status(200).json({ data: supplier });
   } catch (error) {
     console.log("Error is in: ".bgRed, "getByID".bgYellow);
     console.log(error);
@@ -51,7 +51,7 @@ const getByID = async (req, res) => {
 const getAll = async (req, res) => {
   try {
     const suppliers = await Supplier.find();
-    res.status(200).json({ date: suppliers });
+    res.status(200).json({ data: suppliers });
   } catch (error) {
     console.log("Error is in: ".bgRed, "getAll".bgYellow);
     console.log(error);

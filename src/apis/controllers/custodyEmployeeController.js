@@ -378,7 +378,7 @@ const allCustodiesForEmployee = async (req, res) => {
       .populate("custody", ["-createdAt", "-updatedAt", "-__v"])
       .select(["-history", "-__v", "-createdAt", "-updatedAt", "-employee"]);
 
-    res.status(200).json({ date: custodies });
+    res.status(200).json({ data: custodies });
   } catch (error) {
     console.log("Error is in: ".bgRed, "allCustodiesForEmployee".bgYellow);
     console.log(error);
@@ -407,7 +407,7 @@ const allEmployeesForCustody = async (req, res) => {
       .populate("employee", ["-createdAt", "-updatedAt", "-__v"])
       .select(["-history", "-__v", "-createdAt", "-updatedAt", "-custody"]);
 
-    res.status(200).json({ date: employees });
+    res.status(200).json({ data: employees });
   } catch (error) {
     console.log("Error is in: ".bgRed, "allEmployeesForCustody".bgYellow);
     console.log(error);

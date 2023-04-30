@@ -70,7 +70,7 @@ const getByID = async (req, res) => {
 const getAll = async (req, res) => {
   try {
     const employees = await Employee.find();
-    res.status(200).json({ date: employees });
+    res.status(200).json({ data: employees });
   } catch (error) {
     console.log("Error is in: ".bgRed, "getAll".bgYellow);
     console.log(error);
@@ -127,7 +127,7 @@ const searchByName = async (req, res) => {
         .status(400)
         .json(errorFormat(name, "No Employees with this name", "name", "body"));
     }
-    res.status(200).json({ date: employees });
+    res.status(200).json({ data: employees });
   } catch (error) {
     console.log("Error is in: ".bgRed, "getByCode".bgYellow);
     console.log(error);

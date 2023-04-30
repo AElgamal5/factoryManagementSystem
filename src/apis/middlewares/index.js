@@ -7,4 +7,5 @@ module.exports = {
   custodyEmployeeMiddlewares: require("./custodyEmployeeMiddlewares"),
   materialMiddlewares: require("./materialMiddlewares"),
   materialEmployeeMiddlewares: require("./materialEmployeeMiddlewares"),
+  buyRequestMiddlewares: require("./buyRequestMiddlewares"),
 };

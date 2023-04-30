@@ -391,7 +391,7 @@ const allMaterialsForEmployee = async (req, res) => {
       .populate("material", ["-createdAt", "-updatedAt", "-__v"])
       .select(["-history", "-__v", "-createdAt", "-updatedAt", "-employee"]);
 
-    res.status(200).json({ date: materials });
+    res.status(200).json({ data: materials });
   } catch (error) {
     console.log("Error is in: ".bgRed, "allMaterialsForEmployee".bgYellow);
     console.log(error);
