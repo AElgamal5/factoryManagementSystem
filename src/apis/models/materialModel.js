@@ -19,6 +19,16 @@ const materialSchema = new Schema(
       default: 0,
     },
 
+    max: {
+      type: Number,
+      default: 0,
+    },
+
+    min: {
+      type: Number,
+      default: 0,
+    },
+
     details: {
       type: String,
     },

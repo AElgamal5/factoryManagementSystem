@@ -15,6 +15,8 @@ const create = async (req, res) => {
     "role.title": roleTitle,
     "role.num": roleNum,
     note,
+    max,
+    min,
   } = req.body;
 
   try {
@@ -26,6 +28,8 @@ const create = async (req, res) => {
       "role.title": roleTitle,
       "role.num": roleNum,
       note,
+      max,
+      min,
     });
 
     res.status(201).json({ data: material });
@@ -91,6 +95,8 @@ const update = async (req, res) => {
     "role.title": roleTitle,
     "role.num": roleNum,
     note,
+    max,
+    min,
   } = req.body;
 
   try {
@@ -104,6 +110,8 @@ const update = async (req, res) => {
       "role.title": roleTitle,
       "role.num": roleNum,
       note,
+      max,
+      min,
     });
 
     //check if material exist

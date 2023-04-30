@@ -14,7 +14,11 @@ const supplierCustodySchema = new Schema(
       ref: "Custody",
     },
 
-    lastPrice: { type: Number },
+    totalQuantity: { type: Number, default: 0 },
+
+    totalCost: { type: Number, default: 0 },
+
+    lastPrice: { type: Number, default: 0 },
 
     lastDate: { type: Date },
 

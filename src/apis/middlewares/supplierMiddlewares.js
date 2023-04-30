@@ -42,6 +42,15 @@ const createValidate = [
       max: 20,
     })
     .withMessage("State length should be 1 to 20 characters"),
+
+  check("note")
+    .optional()
+    .isString()
+    .isLength({
+      min: 3,
+      max: 200,
+    })
+    .withMessage("Note length should be 3 to 200 characters"),
 ];
 
 const updateValidate = [
@@ -84,6 +93,15 @@ const updateValidate = [
       max: 20,
     })
     .withMessage("State length should be 1 to 20 characters"),
+
+  check("note")
+    .optional()
+    .isString()
+    .isLength({
+      min: 3,
+      max: 200,
+    })
+    .withMessage("Note length should be 3 to 200 characters"),
 ];
 
 module.exports = { createValidate, updateValidate };

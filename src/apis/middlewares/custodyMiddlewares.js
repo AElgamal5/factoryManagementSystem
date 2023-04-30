@@ -44,7 +44,7 @@ const createValidate = [
 
   check("details")
     .optional()
-    .isAlphanumeric()
+    .isString()
     .isLength({
       min: 3,
       max: 200,
@@ -53,12 +53,32 @@ const createValidate = [
 
   check("note")
     .optional()
-    .isAlphanumeric()
+    .isString()
     .isLength({
       min: 3,
       max: 200,
     })
     .withMessage("Note length should be 3 to 200 characters"),
+
+  check("max")
+    .notEmpty()
+    .withMessage("Max quantity is required")
+    .isNumeric()
+    .withMessage("Max quantity must contain numbers only")
+    .isFloat({ min: 0.1 })
+    .withMessage("Max quantity must be greater than or equal 0.1")
+    .isFloat({ max: maxNo })
+    .withMessage("Max quantity value is too large"),
+
+  check("min")
+    .notEmpty()
+    .withMessage("Min quantity is required")
+    .isNumeric()
+    .withMessage("Min quantity must contain numbers only")
+    .isFloat({ min: 0.1 })
+    .withMessage("Min quantity must be greater than or equal 0.1")
+    .isFloat({ max: maxNo })
+    .withMessage("Min quantity value is too large"),
 ];
 
 const updateValidate = [
@@ -117,7 +137,7 @@ const updateValidate = [
 
   check("details")
     .optional()
-    .isAlphanumeric()
+    .isString()
     .isLength({
       min: 3,
       max: 200,
@@ -126,12 +146,30 @@ const updateValidate = [
 
   check("note")
     .optional()
-    .isAlphanumeric()
+    .isString()
     .isLength({
       min: 3,
       max: 200,
     })
     .withMessage("Note length should be 3 to 200 characters"),
+
+  check("max")
+    .optional()
+    .isNumeric()
+    .withMessage("Max quantity must contain numbers only")
+    .isFloat({ min: 0.1 })
+    .withMessage("Max quantity must be greater than or equal 0.1")
+    .isFloat({ max: maxNo })
+    .withMessage("Max quantity value is too large"),
+
+  check("min")
+    .optional()
+    .isNumeric()
+    .withMessage("Min quantity must contain numbers only")
+    .isFloat({ min: 0.1 })
+    .withMessage("Min quantity must be greater than or equal 0.1")
+    .isFloat({ max: maxNo })
+    .withMessage("Min quantity value is too large"),
 ];
 
 module.exports = {

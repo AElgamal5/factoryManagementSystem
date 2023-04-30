@@ -8,6 +8,7 @@ const buyRequestSchema = new Schema(
 
     details: { type: String },
 
+    //Not approved || Approved || Delivered
     history: [
       {
         state: { type: String },

@@ -14,6 +14,10 @@ const supplierMaterialSchema = new Schema(
       ref: "Material",
     },
 
+    totalQuantity: { type: Number, default: 0 },
+
+    totalCost: { type: Number, default: 0 },
+
     lastPrice: { type: Number },
 
     lastDate: { type: Date },

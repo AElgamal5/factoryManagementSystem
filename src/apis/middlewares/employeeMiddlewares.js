@@ -52,6 +52,15 @@ const createValidate = [
     .withMessage("National number must be 14 numbers")
     .isNumeric()
     .withMessage("National number contain numbers only"),
+
+  check("note")
+    .optional()
+    .isString()
+    .isLength({
+      min: 3,
+      max: 200,
+    })
+    .withMessage("Note length should be 3 to 200 characters"),
 ];
 
 const updateValidate = [
@@ -101,6 +110,15 @@ const updateValidate = [
     .withMessage("National number must be 14 numbers")
     .isNumeric()
     .withMessage("National number contain numbers only"),
+
+  check("note")
+    .optional()
+    .isString()
+    .isLength({
+      min: 3,
+      max: 200,
+    })
+    .withMessage("Note length should be 3 to 200 characters"),
 ];
 
 module.exports = { createValidate, updateValidate };

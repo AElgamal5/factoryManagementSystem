@@ -356,4 +356,96 @@ const back = async (req, res) => {
   }
 };
 
-module.exports = { assign, back };
+/*
+ * method: GET
+ * path: /api/custodyEmployee/employee/:id
+ */
+const allCustodiesForEmployee = async (req, res) => {
+  const employeeID = req.params.id;
+  try {
+    const employee = await Employee.findById(employeeID);
+    if (!employee) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(employeeID, "No employee with this ID", "id", "header")
+        );
+    }
+
+    const custodies = await CustodyEmployee.find({
+      employee: employeeID,
+    })
+      .populate("custody", ["-createdAt", "-updatedAt", "-__v"])
+      .select(["-history", "-__v", "-createdAt", "-updatedAt", "-employee"]);
+
+    res.status(200).json({ date: custodies });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "allCustodiesForEmployee".bgYellow);
+    console.log(error);
+  }
+};
+
+/*
+ * method: get
+ * path: /api/materialEmployee/custody/:id
+ */
+const allEmployeesForCustody = async (req, res) => {
+  const custodyID = req.params.id;
+  try {
+    const custody = await Custody.findById(custodyID);
+    if (!custody) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(custodyID, "No custody with this ID", "id", "header")
+        );
+    }
+
+    const employees = await CustodyEmployee.find({
+      custody: custodyID,
+    })
+      .populate("employee", ["-createdAt", "-updatedAt", "-__v"])
+      .select(["-history", "-__v", "-createdAt", "-updatedAt", "-custody"]);
+
+    res.status(200).json({ date: employees });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "allEmployeesForCustody".bgYellow);
+    console.log(error);
+  }
+};
+
+/*
+ * method: get
+ * path: /api/materialEmployee/note/:id
+ */
+const updateNote = async (req, res) => {
+  const id = req.params.id;
+  const note = req.body.note;
+
+  try {
+    const custodyEmployee = await CustodyEmployee.findById(id);
+    if (!custodyEmployee) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(id, "No CustodyEmployee doc with this ID", id, "header")
+        );
+    }
+
+    custodyEmployee.note = note;
+    await custodyEmployee.save();
+
+    res.status(200).json({ msg: "note added tmam" });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "updateNote".bgYellow);
+    console.log(error);
+  }
+};
+
+module.exports = {
+  assign,
+  back,
+  allCustodiesForEmployee,
+  allEmployeesForCustody,
+  updateNote,
+};

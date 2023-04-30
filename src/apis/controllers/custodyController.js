@@ -11,6 +11,8 @@ const create = async (req, res) => {
     details,
     image,
     unit,
+    max,
+    min,
     "role.title": roleTitle,
     "role.num": roleNum,
     note,
@@ -26,6 +28,8 @@ const create = async (req, res) => {
       "role.title": roleTitle,
       "role.num": roleNum,
       note,
+      max,
+      min,
     });
 
     res.status(201).json({ data: custody });
@@ -89,6 +93,8 @@ const update = async (req, res) => {
     "role.title": roleTitle,
     "role.num": roleNum,
     note,
+    max,
+    min,
   } = req.body;
 
   try {
@@ -101,6 +107,8 @@ const update = async (req, res) => {
       "role.title": roleTitle,
       "role.num": roleNum,
       note,
+      max,
+      min,
     });
 
     //check if custody exist

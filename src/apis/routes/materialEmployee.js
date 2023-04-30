@@ -35,4 +35,11 @@ router.get(
   materialEmployeeController.allEmployeesForMaterial
 );
 
+router.patch(
+  "/note/:id",
+  materialEmployeeMiddlewares.noteValidate,
+  validationResult,
+  materialEmployeeController.updateNote
+);
+
 module.exports = router;

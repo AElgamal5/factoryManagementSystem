@@ -381,12 +381,7 @@ const allMaterialsForEmployee = async (req, res) => {
       return res
         .status(400)
         .json(
-          errorFormat(
-            employeeID,
-            "No employee with this ID",
-            "employee",
-            "header"
-          )
+          errorFormat(employeeID, "No employee with this ID", "id", "header")
         );
     }
 
@@ -396,7 +391,7 @@ const allMaterialsForEmployee = async (req, res) => {
       .populate("material", ["-createdAt", "-updatedAt", "-__v"])
       .select(["-history", "-__v", "-createdAt", "-updatedAt", "-employee"]);
 
-    res.json(materials);
+    res.status(200).json({ date: materials });
   } catch (error) {
     console.log("Error is in: ".bgRed, "allMaterialsForEmployee".bgYellow);
     console.log(error);
@@ -405,7 +400,7 @@ const allMaterialsForEmployee = async (req, res) => {
 
 /*
  * method: get
- * path: /api/materialEmployee/employee/:id
+ * path: /api/materialEmployee/material/:id
  */
 const allEmployeesForMaterial = async (req, res) => {
   const materialID = req.params.id;
@@ -415,12 +410,7 @@ const allEmployeesForMaterial = async (req, res) => {
       return res
         .status(400)
         .json(
-          errorFormat(
-            materialID,
-            "No material with this ID",
-            "material",
-            "header"
-          )
+          errorFormat(materialID, "No material with this ID", "id", "header")
         );
     }
 
@@ -430,9 +420,37 @@ const allEmployeesForMaterial = async (req, res) => {
       .populate("employee", ["-createdAt", "-updatedAt", "-__v"])
       .select(["-history", "-__v", "-createdAt", "-updatedAt", "-material"]);
 
-    res.json(employees);
+    res.status(200).json({ data: employees });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "allMaterialsForEmployee".bgYellow);
+    console.log("Error is in: ".bgRed, "allEmployeesForMaterial".bgYellow);
+    console.log(error);
+  }
+};
+
+/*
+ * method: PATCH
+ * path: /api/materialEmployee/note/:id
+ */
+const updateNote = async (req, res) => {
+  const id = req.params.id;
+  const note = req.body.note;
+
+  try {
+    const materialEmployee = await MaterialEmployee.findById(id);
+    if (!materialEmployee) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(id, "No MaterialEmployee doc with this ID", id, "header")
+        );
+    }
+
+    materialEmployee.note = note;
+    await materialEmployee.save();
+
+    res.status(200).json({ msg: "note added tmam" });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "updateNote".bgYellow);
     console.log(error);
   }
 };
@@ -442,4 +460,5 @@ module.exports = {
   back,
   allMaterialsForEmployee,
   allEmployeesForMaterial,
+  updateNote,
 };

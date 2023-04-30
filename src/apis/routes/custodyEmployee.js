@@ -6,6 +6,8 @@ const { custodyEmployeeController } = require("../controllers");
 const {
   validationResult,
   custodyEmployeeMiddlewares,
+  materialEmployeeMiddlewares,
+  idValidation,
 } = require("../middlewares");
 
 router.post(
@@ -20,6 +22,25 @@ router.patch(
   custodyEmployeeMiddlewares.validate,
   validationResult,
   custodyEmployeeController.back
+);
+
+router.get(
+  "/employee/:id",
+  idValidation,
+  custodyEmployeeController.allCustodiesForEmployee
+);
+
+router.get(
+  "/custody/:id",
+  idValidation,
+  custodyEmployeeController.allEmployeesForCustody
+);
+
+router.patch(
+  "/note/:id",
+  materialEmployeeMiddlewares.noteValidate,
+  validationResult,
+  custodyEmployeeController.updateNote
 );
 
 module.exports = router;

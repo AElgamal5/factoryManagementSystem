@@ -48,6 +48,19 @@ const validate = [
     .withMessage("Wrong model ID"),
 ];
 
+const noteValidate = [
+  check("note")
+    .notEmpty()
+    .withMessage("Note is required")
+    .isString()
+    .isLength({
+      min: 3,
+      max: 200,
+    })
+    .withMessage("Note length should be 3 to 200 characters"),
+];
+
 module.exports = {
   validate,
+  noteValidate,
 };
