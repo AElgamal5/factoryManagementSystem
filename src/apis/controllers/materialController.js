@@ -45,7 +45,21 @@ const create = async (req, res) => {
  */
 const getAll = async (req, res) => {
   try {
-    const materials = await Material.find();
+    const materials = await Material.find(
+      {},
+      {
+        name: 1,
+        quantity: 1,
+        available: 1,
+        max: 1,
+        min: 1,
+        details: 1,
+        unit: 1,
+        note: 1,
+        image: 1,
+        role: "$role.title",
+      }
+    );
 
     res.status(200).json({ data: materials });
   } catch (error) {

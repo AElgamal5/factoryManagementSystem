@@ -1,4 +1,4 @@
-const { BuyRequest, Supplier, Material } = require("../models");
+const { BuyRequest, Supplier, Material, Custody } = require("../models");
 const { currentTime, errorFormat, idCheck } = require("../utils");
 
 /*
@@ -117,7 +117,6 @@ const updateProfile = async (req, res) => {
  * method: PATCH
  * path: /api/buyRequest/materials/add/:id
  */
-
 const addMaterials = async (req, res) => {
   const id = req.params.id;
   const materials = req.body.materials;
@@ -131,9 +130,9 @@ const addMaterials = async (req, res) => {
         .json(errorFormat(id, "No buy request with this id", "id", "header"));
     }
 
-    materials.forEach(async (mat) => {
-      let supplierID = material.supplier;
-      let materialID = material.material;
+    for (let i = 0; i < materials.length; i++) {
+      let supplierID = materials[i].supplier;
+      let materialID = materials[i].material;
 
       //check id validity
       if (!idCheck(supplierID)) {
@@ -179,7 +178,11 @@ const addMaterials = async (req, res) => {
           );
       }
 
-      if (typeof +material.quantity !== "number" || +material.quantity < 0) {
+      //quantity and price
+      if (
+        typeof materials[i].quantity !== "number" ||
+        materials[i].quantity <= 0
+      ) {
         return res
           .status(400)
           .json(
@@ -191,8 +194,7 @@ const addMaterials = async (req, res) => {
             )
           );
       }
-
-      if (typeof +material.price !== "number" || +material.price < 0) {
+      if (typeof materials[i].price !== "number" || materials[i].price <= 0) {
         return res
           .status(400)
           .json(
@@ -205,10 +207,123 @@ const addMaterials = async (req, res) => {
           );
       }
 
-      res.send("tmam");
-    });
+      buyRequest.materials.push({
+        supplier: supplier._id,
+        material: material._id,
+        quantity: materials[i].quantity,
+        price: materials[i].price,
+      });
+    }
+
+    await buyRequest.save();
+    res.status(200).json({ msg: "materials added tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "addMaterials".bgYellow);
+    console.log(error);
+  }
+};
+
+/*
+ * method: PATCH
+ * path: /api/buyRequest/custodies/add/:id
+ */
+const addCustodies = async (req, res) => {
+  const id = req.params.id;
+  const custodies = req.body.custodies;
+
+  try {
+    const buyRequest = await BuyRequest.findById(id);
+    //check if exist
+    if (!buyRequest) {
+      return res
+        .status(400)
+        .json(errorFormat(id, "No buy request with this id", "id", "header"));
+    }
+
+    for (let i = 0; i < custodies.length; i++) {
+      let supplierID = custodies[i].supplier;
+      let custodyID = custodies[i].custody;
+
+      //check id validity
+      if (!idCheck(supplierID)) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(supplierID, "supplierID is invalid", "supplier", "body")
+          );
+      }
+      if (!idCheck(custodyID)) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(custodyID, "custodyID is invalid", "custody", "body")
+          );
+      }
+
+      //check if the docs
+      let supplier = await Supplier.findById(supplierID);
+      if (!supplier) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              supplierID,
+              "No supplier with this id",
+              "supplier",
+              "body"
+            )
+          );
+      }
+      let custody = await Custody.findById(custodyID);
+      if (!custody) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(custodyID, "No custody with this ID", "custody", "body")
+          );
+      }
+
+      //quantity and price
+      if (
+        typeof custodies[i].quantity !== "number" ||
+        custodies[i].quantity <= 0
+      ) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              custodies[i].quantity,
+              "custody.quantity should be number and greater than 0",
+              "quantity",
+              "body"
+            )
+          );
+      }
+      if (typeof custodies[i].price !== "number" || custodies[i].price <= 0) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              custodies[i].price,
+              "custody.price should be number and greater than 0",
+              "price",
+              "body"
+            )
+          );
+      }
+
+      buyRequest.custodies.push({
+        supplier: supplier._id,
+        custody: custody._id,
+        quantity: custodies[i].quantity,
+        price: custodies[i].price,
+      });
+    }
+
+    await buyRequest.save();
+    res.status(200).json({ msg: "custodies added tmam" });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "addCustodies".bgYellow);
     console.log(error);
   }
 };
@@ -220,4 +335,5 @@ module.exports = {
   deleteOne,
   updateProfile,
   addMaterials,
+  addCustodies,
 };

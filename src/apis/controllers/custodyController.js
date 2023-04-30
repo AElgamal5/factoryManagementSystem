@@ -45,7 +45,22 @@ const create = async (req, res) => {
  */
 const getAll = async (req, res) => {
   try {
-    const custodies = await Custody.find();
+    const custodies = await Custody.find(
+      {},
+      {
+        name: 1,
+        quantity: 1,
+        available: 1,
+        max: 1,
+        min: 1,
+        details: 1,
+        currentEmployees: 1,
+        unit: 1,
+        note: 1,
+        image: 1,
+        role: "$role.title",
+      }
+    );
     res.status(200).json({ data: custodies });
   } catch (error) {
     console.log("Error is in: ".bgRed, "getAll".bgYellow);

@@ -24,6 +24,16 @@ router.delete("/:id", idValidation, buyRequestController.deleteOne);
 
 router.patch("/:id", idValidation, buyRequestController.updateProfile);
 
-router.patch("/:id", idValidation, buyRequestController.addMaterials);
+router.patch(
+  "/materials/add/:id",
+  idValidation,
+  buyRequestController.addMaterials
+);
+
+router.patch(
+  "/custodies/add/:id",
+  idValidation,
+  buyRequestController.addCustodies
+);
 
 module.exports = router;
