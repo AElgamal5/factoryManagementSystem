@@ -6,6 +6,7 @@ const { materialEmployeeController } = require("../controllers");
 const {
   validationResult,
   materialEmployeeMiddlewares,
+  idValidation,
 } = require("../middlewares");
 
 router.post(
@@ -20,6 +21,18 @@ router.patch(
   materialEmployeeMiddlewares.validate,
   validationResult,
   materialEmployeeController.back
+);
+
+router.get(
+  "/employee/:id",
+  idValidation,
+  materialEmployeeController.allMaterialsForEmployee
+);
+
+router.get(
+  "/material/:id",
+  idValidation,
+  materialEmployeeController.allEmployeesForMaterial
 );
 
 module.exports = router;

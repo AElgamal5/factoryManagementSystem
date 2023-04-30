@@ -369,4 +369,77 @@ const back = async (req, res) => {
   }
 };
 
-module.exports = { assign, back };
+/*
+ * method: get
+ * path: /api/materialEmployee/employee/:id
+ */
+const allMaterialsForEmployee = async (req, res) => {
+  const employeeID = req.params.id;
+  try {
+    const employee = await Employee.findById(employeeID);
+    if (!employee) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(
+            employeeID,
+            "No employee with this ID",
+            "employee",
+            "header"
+          )
+        );
+    }
+
+    const materials = await MaterialEmployee.find({
+      employee: employeeID,
+    })
+      .populate("material", ["-createdAt", "-updatedAt", "-__v"])
+      .select(["-history", "-__v", "-createdAt", "-updatedAt", "-employee"]);
+
+    res.json(materials);
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "allMaterialsForEmployee".bgYellow);
+    console.log(error);
+  }
+};
+
+/*
+ * method: get
+ * path: /api/materialEmployee/employee/:id
+ */
+const allEmployeesForMaterial = async (req, res) => {
+  const materialID = req.params.id;
+  try {
+    const material = await Material.findById(materialID);
+    if (!material) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(
+            materialID,
+            "No material with this ID",
+            "material",
+            "header"
+          )
+        );
+    }
+
+    const employees = await MaterialEmployee.find({
+      material: materialID,
+    })
+      .populate("employee", ["-createdAt", "-updatedAt", "-__v"])
+      .select(["-history", "-__v", "-createdAt", "-updatedAt", "-material"]);
+
+    res.json(employees);
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "allMaterialsForEmployee".bgYellow);
+    console.log(error);
+  }
+};
+
+module.exports = {
+  assign,
+  back,
+  allMaterialsForEmployee,
+  allEmployeesForMaterial,
+};
