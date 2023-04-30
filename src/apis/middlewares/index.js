@@ -8,4 +8,5 @@ module.exports = {
   materialMiddlewares: require("./materialMiddlewares"),
   materialEmployeeMiddlewares: require("./materialEmployeeMiddlewares"),
   buyRequestMiddlewares: require("./buyRequestMiddlewares"),
+  roleMiddleware: require("./roleMiddleware"),
 };

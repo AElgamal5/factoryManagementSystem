@@ -6,4 +6,5 @@ module.exports = {
   material: require("./material"),
   materialEmployee: require("./materialEmployee"),
   buyRequest: require("./buyRequest"),
+  role: require("./role"),
 };

@@ -13,4 +13,5 @@ module.exports = {
   Client: require("./clientModel"),
   Order: require("./orderModel"),
   BuyRequest: require("./buyRequestModel"),
+  Role: require("./roleModel"),
 };
