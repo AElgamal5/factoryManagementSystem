@@ -69,7 +69,23 @@ const getByID = async (req, res) => {
  */
 const getAll = async (req, res) => {
   try {
-    const employees = await Employee.find();
+    const employees = await Employee.find(
+      {},
+      {
+        _id: 1,
+        role: "$role.title",
+        code: 1,
+        phoneNo: 1,
+        NID: 1,
+        note: 1,
+        currentCustodies: 1,
+        currentStage: 1,
+        name: 1,
+        currentMachine: 1,
+        image: 1,
+      }
+    );
+    // .select(["-role.title", "-role.num"])
     res.status(200).json({ data: employees });
   } catch (error) {
     console.log("Error is in: ".bgRed, "getAll".bgYellow);
