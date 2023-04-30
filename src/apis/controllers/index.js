@@ -4,4 +4,5 @@ module.exports = {
   custodyController: require("./custodyController"),
   custodyEmployeeController: require("./custodyEmployeeController"),
   materialController: require("./materialController"),
+  materialEmployeeController: require("./materialEmployeeController"),
 };

@@ -4,4 +4,5 @@ module.exports = {
   custody: require("./custody"),
   custodyEmployee: require("./custodyEmployee"),
   material: require("./material"),
+  materialEmployee: require("./materialEmployee"),
 };
