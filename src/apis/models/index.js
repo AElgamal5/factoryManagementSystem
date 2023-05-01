@@ -14,4 +14,6 @@ module.exports = {
   Order: require("./orderModel"),
   BuyRequest: require("./buyRequestModel"),
   Role: require("./roleModel"),
+  Color: require("./colorModel"),
+  Size: require("./sizeModel"),
 };

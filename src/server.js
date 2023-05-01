@@ -28,6 +28,8 @@ const {
   materialEmployee,
   buyRequest,
   role,
+  color,
+  size,
 } = require("./apis/routes");
 app.use("/api/employee", employee);
 app.use("/api/supplier", supplier);
@@ -37,6 +39,8 @@ app.use("/api/material", material);
 app.use("/api/materialEmployee", materialEmployee);
 app.use("/api/buyRequest", buyRequest);
 app.use("/api/role", role);
+app.use("/api/color", color);
+app.use("/api/size", size);
 
 //connect to DB and running the server
 (function start() {

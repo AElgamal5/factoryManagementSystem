@@ -9,4 +9,5 @@ module.exports = {
   materialEmployeeMiddlewares: require("./materialEmployeeMiddlewares"),
   buyRequestMiddlewares: require("./buyRequestMiddlewares"),
   roleMiddleware: require("./roleMiddleware"),
+  colorMiddleware: require("./colorMiddleware"),
 };

@@ -7,4 +7,6 @@ module.exports = {
   materialEmployeeController: require("./materialEmployeeController"),
   buyRequestController: require("./buyRequestController"),
   roleController: require("./roleController"),
+  colorController: require("./colorController"),
+  sizeController: require("./sizeController"),
 };
