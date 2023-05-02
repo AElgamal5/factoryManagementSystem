@@ -389,7 +389,7 @@ const allMaterialsForEmployee = async (req, res) => {
       employee: employeeID,
     })
       .populate("material", ["-createdAt", "-updatedAt", "-__v"])
-      .select(["-history", "-__v", "-createdAt", "-updatedAt", "-employee"]);
+      .select(["-__v", "-createdAt", "-updatedAt", "-employee"]);
 
     res.status(200).json({ data: materials });
   } catch (error) {
@@ -418,7 +418,7 @@ const allEmployeesForMaterial = async (req, res) => {
       material: materialID,
     })
       .populate("employee", ["-createdAt", "-updatedAt", "-__v"])
-      .select(["-history", "-__v", "-createdAt", "-updatedAt", "-material"]);
+      .select(["-__v", "-createdAt", "-updatedAt", "-material"]);
 
     res.status(200).json({ data: employees });
   } catch (error) {

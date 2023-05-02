@@ -215,6 +215,11 @@ const addMaterials = async (req, res) => {
       });
     }
 
+    buyRequest.history.push({
+      state: "Materials Added",
+      date: new Date(currentTime()),
+    });
+
     await buyRequest.save();
     res.status(200).json({ msg: "materials added tmam" });
   } catch (error) {
@@ -320,10 +325,156 @@ const addCustodies = async (req, res) => {
       });
     }
 
+    buyRequest.history.push({
+      state: "Custodies Added",
+      date: new Date(currentTime()),
+    });
+
     await buyRequest.save();
     res.status(200).json({ msg: "custodies added tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "addCustodies".bgYellow);
+    console.log(error);
+  }
+};
+
+/*
+ * method: PATCH
+ * path: /api/buyRequest/materials/remove/:id
+ */
+const removeMaterials = async (req, res) => {
+  const id = req.params.id;
+  const materials = req.body.materials;
+
+  try {
+    const buyRequest = await BuyRequest.findById(id);
+    //check if exist
+    if (!buyRequest) {
+      return res
+        .status(400)
+        .json(errorFormat(id, "No buy request with this id", "id", "header"));
+    }
+
+    for (let i = 0; i < materials.length; i++) {
+      let id = materials[i];
+      buyRequest.materials.pull({ _id: id });
+    }
+
+    buyRequest.history.push({
+      state: "Materials removed",
+      date: new Date(currentTime()),
+    });
+
+    await buyRequest.save();
+
+    res.status(200).json({ msg: "materials removed tmam" });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "removeMaterials".bgYellow);
+    console.log(error);
+  }
+};
+
+/*
+ * method: PATCH
+ * path: /api/buyRequest/custodies/remove/:id
+ */
+const removeCustodies = async (req, res) => {
+  const id = req.params.id;
+  const custodies = req.body.custodies;
+
+  try {
+    const buyRequest = await BuyRequest.findById(id);
+    //check if exist
+    if (!buyRequest) {
+      return res
+        .status(400)
+        .json(errorFormat(id, "No buy request with this id", "id", "header"));
+    }
+
+    for (let i = 0; i < custodies.length; i++) {
+      let id = custodies[i];
+      buyRequest.custodies.pull({ _id: id });
+    }
+
+    buyRequest.history.push({
+      state: "Custodies removed",
+      date: new Date(currentTime()),
+    });
+
+    await buyRequest.save();
+
+    res.status(200).json({ msg: "custodies removed tmam" });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "removeCustodies".bgYellow);
+    console.log(error);
+  }
+};
+
+/*
+ * method: PATCH
+ * path: /api/buyRequest/approve/:id
+ */
+const approve = async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const buyRequest = await BuyRequest.findById(id);
+
+    //check if exist
+    if (!buyRequest) {
+      return res
+        .status(400)
+        .json(errorFormat(id, "No buy request with this id", "id", "header"));
+    }
+
+    buyRequest.history.push({
+      state: "Approved",
+      date: new Date(currentTime()),
+    });
+
+    await buyRequest.save();
+
+    res.status(200).json({ msg: "Buy request approved tmam" });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "approve".bgYellow);
+    console.log(error);
+  }
+};
+
+/*
+ * method: PATCH
+ * path: /api/buyRequest/delivered/:id
+ */
+const delivered = async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const buyRequest = await BuyRequest.findById(id);
+
+    //check if exist
+    if (!buyRequest) {
+      return res
+        .status(400)
+        .json(errorFormat(id, "No buy request with this id", "id", "header"));
+    }
+
+    buyRequest.history.push({
+      state: "Delivered",
+      date: new Date(currentTime()),
+    });
+
+    //---------------------------------------------------------------------------------
+
+    //update SupplierCustody
+    //update Custody
+    //update SupplierMaterial
+    //update Material
+
+    //---------------------------------------------------------------------------------
+
+    await buyRequest.save();
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "delivered".bgYellow);
     console.log(error);
   }
 };
@@ -336,4 +487,8 @@ module.exports = {
   updateProfile,
   addMaterials,
   addCustodies,
+  removeMaterials,
+  removeCustodies,
+  approve,
+  delivered,
 };

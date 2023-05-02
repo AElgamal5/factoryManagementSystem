@@ -36,4 +36,18 @@ router.patch(
   buyRequestController.addCustodies
 );
 
+router.patch(
+  "/materials/remove/:id",
+  idValidation,
+  buyRequestController.removeMaterials
+);
+
+router.patch(
+  "/custodies/remove/:id",
+  idValidation,
+  buyRequestController.removeCustodies
+);
+
+router.patch("/approve/:id", idValidation, buyRequestController.approve);
+
 module.exports = router;

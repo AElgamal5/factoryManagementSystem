@@ -376,7 +376,7 @@ const allCustodiesForEmployee = async (req, res) => {
       employee: employeeID,
     })
       .populate("custody", ["-createdAt", "-updatedAt", "-__v"])
-      .select(["-history", "-__v", "-createdAt", "-updatedAt", "-employee"]);
+      .select(["-__v", "-createdAt", "-updatedAt", "-employee"]);
 
     res.status(200).json({ data: custodies });
   } catch (error) {
@@ -405,7 +405,7 @@ const allEmployeesForCustody = async (req, res) => {
       custody: custodyID,
     })
       .populate("employee", ["-createdAt", "-updatedAt", "-__v"])
-      .select(["-history", "-__v", "-createdAt", "-updatedAt", "-custody"]);
+      .select(["-__v", "-createdAt", "-updatedAt", "-custody"]);
 
     res.status(200).json({ data: employees });
   } catch (error) {
