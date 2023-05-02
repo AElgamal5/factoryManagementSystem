@@ -1,4 +1,11 @@
-const { BuyRequest, Supplier, Material, Custody } = require("../models");
+const {
+  BuyRequest,
+  Supplier,
+  Material,
+  Custody,
+  SupplierCustody,
+  SupplierMaterial,
+} = require("../models");
 const { currentTime, errorFormat, idCheck } = require("../utils");
 
 /*
@@ -209,7 +216,7 @@ const addMaterials = async (req, res) => {
 
       buyRequest.materials.push({
         supplier: supplier._id,
-        material: material._id,
+        id: material._id,
         quantity: materials[i].quantity,
         price: materials[i].price,
       });
@@ -319,7 +326,7 @@ const addCustodies = async (req, res) => {
 
       buyRequest.custodies.push({
         supplier: supplier._id,
-        custody: custody._id,
+        id: custody._id,
         quantity: custodies[i].quantity,
         price: custodies[i].price,
       });
@@ -451,11 +458,33 @@ const delivered = async (req, res) => {
   try {
     const buyRequest = await BuyRequest.findById(id);
 
-    //check if exist
+    //check existence
     if (!buyRequest) {
       return res
         .status(400)
         .json(errorFormat(id, "No buy request with this id", "id", "header"));
+    }
+
+    //check if Approved || Delivered
+    let approved = false;
+    let delivered = false;
+    for (let i = 0; i < buyRequest.history.length; i++) {
+      if (buyRequest.history[i].state === "Approved") {
+        approved = true;
+      }
+      if (buyRequest.history[i].state === "Delivered") {
+        delivered = true;
+      }
+    }
+    if (!approved) {
+      return res
+        .status(400)
+        .json(errorFormat(false, "Can not deliver a not approved buy request"));
+    }
+    if (delivered) {
+      return res
+        .status(400)
+        .json(errorFormat(false, "This buy request is already delivered"));
     }
 
     buyRequest.history.push({
@@ -463,16 +492,104 @@ const delivered = async (req, res) => {
       date: new Date(currentTime()),
     });
 
-    //---------------------------------------------------------------------------------
+    //update/create SupplierCustody
+    for (let i = 0; i < buyRequest.custodies.length; i++) {
+      let supplierCustody = await SupplierCustody.findOne({
+        supplier: buyRequest.custodies[i].supplier,
+        custody: buyRequest.custodies[i].id,
+      });
 
-    //update SupplierCustody
-    //update Custody
-    //update SupplierMaterial
-    //update Material
+      //create new doc if not exist
+      if (!supplierCustody) {
+        supplierCustody = await SupplierCustody.create({
+          supplier: buyRequest.custodies[i].supplier,
+          custody: buyRequest.custodies[i].id,
+        });
+      }
 
-    //---------------------------------------------------------------------------------
+      //update supplierCustody
+      supplierCustody.lastQuantity = buyRequest.custodies[i].quantity;
+      supplierCustody.totalQuantity += buyRequest.custodies[i].quantity;
+      supplierCustody.lastPrice = buyRequest.custodies[i].price;
+      supplierCustody.totalCost += buyRequest.custodies[i].price;
+
+      await supplierCustody.save();
+
+      //update custody
+      const custody = await Custody.findById(buyRequest.custodies[i].id);
+      if (!custody) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              buyRequest.custodies[i].id,
+              "No custody with this ID",
+              "buyRequest.custodies[i].id",
+              "other"
+            )
+          );
+      }
+
+      custody.quantity += buyRequest.custodies[i].quantity;
+      custody.available += buyRequest.custodies[i].quantity;
+
+      await custody.save();
+    }
+
+    for (let i = 0; i < buyRequest.materials.length; i++) {
+      //check current element state
+      if (buyRequest.materials[i].done) {
+        continue;
+      }
+
+      let supplierMaterial = await SupplierMaterial.findOne({
+        supplier: buyRequest.materials[i].supplier,
+        material: buyRequest.materials[i].id,
+      });
+
+      //create new doc if not exist
+      if (!supplierMaterial) {
+        supplierMaterial = await SupplierMaterial.create({
+          supplier: buyRequest.materials[i].supplier,
+          material: buyRequest.materials[i].id,
+        });
+      }
+
+      //update supplierMaterial
+      supplierMaterial.lastQuantity = buyRequest.custodies[i].quantity;
+      supplierMaterial.totalQuantity += buyRequest.custodies[i].quantity;
+      supplierMaterial.lastPrice = buyRequest.custodies[i].price;
+      supplierMaterial.totalCost += buyRequest.custodies[i].price;
+
+      await supplierMaterial.save();
+
+      //update material
+      const material = await Material.findById(buyRequest.materials[i].id);
+      if (!material) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              buyRequest.materials[i].id,
+              "No material with this ID",
+              "buyRequest.materials[i].id",
+              "other"
+            )
+          );
+      }
+
+      material.quantity += buyRequest.materials[i].quantity;
+      material.available += buyRequest.materials[i].quantity;
+
+      //update state of current element
+      buyRequest.materials[i].done = true;
+
+      await material.save();
+    }
 
     await buyRequest.save();
+
+    res.status(200).json({ msg: "Buy request delivered tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "delivered".bgYellow);
     console.log(error);

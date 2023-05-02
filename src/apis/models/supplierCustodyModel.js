@@ -20,6 +20,8 @@ const supplierCustodySchema = new Schema(
 
     lastPrice: { type: Number, default: 0 },
 
+    lastQuantity: { type: Number, default: 0 },
+
     lastDate: { type: Date },
 
     note: { type: String },

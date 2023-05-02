@@ -22,6 +22,7 @@ const buyRequestSchema = new Schema(
         supplier: { type: mongoose.Types.ObjectId, ref: "Supplier" },
         quantity: { type: Number },
         price: { type: Number },
+        done: { type: Boolean, default: false },
       },
     ],
 
@@ -31,6 +32,7 @@ const buyRequestSchema = new Schema(
         supplier: { type: mongoose.Types.ObjectId, ref: "Supplier" },
         quantity: { type: Number },
         price: { type: Number },
+        done: { type: Boolean, default: false },
       },
     ],
 

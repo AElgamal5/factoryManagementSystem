@@ -50,4 +50,6 @@ router.patch(
 
 router.patch("/approve/:id", idValidation, buyRequestController.approve);
 
+router.patch("/delivered/:id", idValidation, buyRequestController.delivered);
+
 module.exports = router;

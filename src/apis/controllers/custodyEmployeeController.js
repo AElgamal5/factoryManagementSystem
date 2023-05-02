@@ -110,9 +110,9 @@ const assign = async (req, res) => {
     }
 
     //check array max length
-    if (custodyEmployee.history.length > 10000) {
+    if (custodyEmployee.history.length > 100000) {
       //remove last element
-      custodyEmployee.history.pop();
+      custodyEmployee.history.shift();
     }
 
     custodyEmployee.history.push({

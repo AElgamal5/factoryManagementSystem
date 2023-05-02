@@ -152,7 +152,7 @@ const assign = async (req, res) => {
     //check array max length
     if (materialEmployee.history.length > 100000) {
       //remove last element
-      materialEmployee.history.pop();
+      materialEmployee.history.shift();
     }
 
     materialEmployee.history.push({
@@ -340,7 +340,7 @@ const back = async (req, res) => {
     //check array max length
     if (materialEmployee.history.length > 100000) {
       //remove last element
-      materialEmployee.history.pop();
+      materialEmployee.history.shift();
     }
 
     materialEmployee.history.push({
