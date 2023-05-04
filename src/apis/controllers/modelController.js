@@ -80,4 +80,196 @@ const deleteOne = async (req, res) => {
   }
 };
 
-module.exports = { create, getByID, getAll, deleteOne };
+/*
+ * method: PATCH
+ * path: /api/model/:id
+ */
+const updateProfile = async (req, res) => {
+  const id = req.params.id;
+  const { name, note, details, image } = req.body;
+
+  try {
+    const model = await Model.findByIdAndUpdate(id, {
+      name,
+      note,
+      details,
+    });
+
+    if (!model) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "No model with this id", "id", "header"));
+    }
+
+    res.status(200).json({ msg: "Model profile updated tmam" });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "updateProfile".bgYellow);
+    console.log(error);
+  }
+};
+
+/*
+ * method: PATCH
+ * path: /api/model/colors/add/:id
+ */
+const addColors = async (req, res) => {
+  const id = req.params.id;
+
+  const colors = req.body.colors;
+
+  try {
+    const model = await Model.findById(id);
+
+    if (!model) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "No model with this id", "id", "header"));
+    }
+
+    for (let i = 0; i < colors.length; i++) {
+      if (!colors[i].name || !colors[i].code) {
+        return res
+          .status(404)
+          .json(
+            errorFormat(
+              colors[i],
+              "there is no name or code",
+              "name || code",
+              "body"
+            )
+          );
+      }
+
+      model.colors.push({
+        name: colors[i].name,
+        code: colors[i].code,
+      });
+    }
+
+    await model.save();
+
+    res.status(200).json({ msg: "Colors added tmam" });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "addColors".bgYellow);
+    console.log(error);
+  }
+};
+
+/*
+ * method: PATCH
+ * path: /api/model/sizes/add/:id
+ */
+const addSizes = async (req, res) => {
+  const id = req.params.id;
+
+  const sizes = req.body.sizes;
+
+  try {
+    const model = await Model.findById(id);
+
+    if (!model) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "No model with this id", "id", "header"));
+    }
+
+    for (let i = 0; i < sizes.length; i++) {
+      if (!sizes[i].name || !sizes[i].code) {
+        return res
+          .status(404)
+          .json(
+            errorFormat(
+              sizes[i],
+              "there is no name or code",
+              "name || code",
+              "body"
+            )
+          );
+      }
+
+      model.sizes.push({
+        name: sizes[i].name,
+        code: sizes[i].code,
+      });
+    }
+
+    await model.save();
+
+    res.status(200).json({ msg: "Sizes added tmam" });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "addSizes".bgYellow);
+    console.log(error);
+  }
+};
+
+/*
+ * method: PATCH
+ * path: /api/model/colors/remove/:id
+ */
+const removeColors = async (req, res) => {
+  const id = req.params.id;
+  const colors = req.body.colors;
+
+  try {
+    const model = await Model.findById(id);
+
+    if (!model) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "No model with this id", "id", "header"));
+    }
+
+    for (let i = 0; i < colors.length; i++) {
+      model.colors.pull(colors[i]);
+    }
+
+    await model.save();
+
+    res.status(200).json({ msg: "Colors removed tmam" });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "removeColors".bgYellow);
+    console.log(error);
+  }
+};
+
+/*
+ * method: PATCH
+ * path: /api/model/sizes/remove/:id
+ */
+const removeSizes = async (req, res) => {
+  const id = req.params.id;
+  const sizes = req.body.sizes;
+
+  try {
+    const model = await Model.findById(id);
+
+    if (!model) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "No model with this id", "id", "header"));
+    }
+
+    for (let i = 0; i < sizes.length; i++) {
+      model.sizes.pull(sizes[i]);
+    }
+
+    await model.save();
+
+    res.status(200).json({ msg: "Sizes removed tmam" });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "removeSizes".bgYellow);
+    console.log(error);
+  }
+};
+
+module.exports = {
+  create,
+  getByID,
+  getAll,
+  deleteOne,
+  updateProfile,
+  addColors,
+  addSizes,
+  removeColors,
+  removeSizes,
+};
