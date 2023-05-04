@@ -10,4 +10,5 @@ module.exports = {
   buyRequestMiddlewares: require("./buyRequestMiddlewares"),
   roleMiddleware: require("./roleMiddleware"),
   colorMiddleware: require("./colorMiddleware"),
+  modelMiddlewares: require("./modelMiddlewares"),
 };

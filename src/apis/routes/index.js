@@ -9,4 +9,5 @@ module.exports = {
   role: require("./role"),
   color: require("./color"),
   size: require("./size"),
+  model: require("./model"),
 };

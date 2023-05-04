@@ -9,4 +9,5 @@ module.exports = {
   roleController: require("./roleController"),
   colorController: require("./colorController"),
   sizeController: require("./sizeController"),
+  modelController: require("./modelController"),
 };
