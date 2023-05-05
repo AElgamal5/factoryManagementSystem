@@ -32,4 +32,16 @@ router.patch("/colors/remove/:id", idValidation, modelController.removeColors);
 
 router.patch("/sizes/remove/:id", idValidation, modelController.removeSizes);
 
+router.patch("/stages/add/:id", idValidation, modelController.addStages);
+
+router.patch("/stages/remove/:id", idValidation, modelController.removeStages);
+
+router.patch("/materials/add/:id", idValidation, modelController.addMaterials);
+
+router.patch(
+  "/materials/remove/:id",
+  idValidation,
+  modelController.removeMaterials
+);
+
 module.exports = router;

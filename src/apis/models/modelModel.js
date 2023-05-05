@@ -27,7 +27,6 @@ const modelSchema = new Schema(
     stages: [
       {
         id: { type: mongoose.Types.ObjectId, ref: "Stage" },
-        name: { type: String },
         priority: { type: Number },
         machineType: { type: String },
       },
@@ -36,7 +35,6 @@ const modelSchema = new Schema(
     materials: [
       {
         id: { type: mongoose.Types.ObjectId, ref: "Material" },
-        name: { type: String },
         quantity: { type: Number },
       },
     ],
