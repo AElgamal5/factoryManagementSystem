@@ -43,4 +43,11 @@ router.patch(
   custodyEmployeeController.updateNote
 );
 
+router.get("/:id", idValidation, custodyEmployeeController.getByID);
+
+router.get(
+  "/custody/:cid/employee/:eid",
+  custodyEmployeeController.getByCustodyIDAndEmployeeID
+);
+
 module.exports = router;

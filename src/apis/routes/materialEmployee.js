@@ -42,4 +42,11 @@ router.patch(
   materialEmployeeController.updateNote
 );
 
+router.get("/:id", idValidation, materialEmployeeController.getByID);
+
+router.get(
+  "/material/:mid/employee/:eid",
+  materialEmployeeController.getByMaterialIDAndEmployeeID
+);
+
 module.exports = router;

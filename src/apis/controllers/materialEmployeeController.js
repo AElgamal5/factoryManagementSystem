@@ -19,6 +19,7 @@ const assign = async (req, res) => {
     model: modelID,
     quantity,
     operation,
+    note,
   } = req.body;
 
   let statusCode = 200;
@@ -170,6 +171,11 @@ const assign = async (req, res) => {
     //update the custody available
     material.available -= +quantity;
 
+    //update note if exist
+    if (note) {
+      materialEmployee.note = note;
+    }
+
     //save docs
     material.save();
     materialEmployee.save();
@@ -193,6 +199,7 @@ const back = async (req, res) => {
     model: modelID,
     quantity,
     operation,
+    note,
   } = req.body;
 
   try {
@@ -358,6 +365,11 @@ const back = async (req, res) => {
     //update the custody available
     material.available += +quantity;
 
+    //update note if exist
+    if (note) {
+      materialEmployee.note = note;
+    }
+
     //save docs
     material.save();
     materialEmployee.save();
@@ -455,10 +467,61 @@ const updateNote = async (req, res) => {
   }
 };
 
+/*
+ * method: GET
+ * path: /api/materialEmployee/:id
+ */
+const getByID = async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const doc = await MaterialEmployee.findById(id);
+
+    if (!doc) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "No doc with this id", "id", "header"));
+    }
+
+    res.status(200).json({ data: doc });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "getByID".bgYellow);
+    console.log(error);
+  }
+};
+
+/*
+ * method: GET
+ * path: /api/materialEmployee/material/mid/employee/eid
+ */
+const getByMaterialIDAndEmployeeID = async (req, res) => {
+  const { mid, eid } = req.params;
+
+  try {
+    const doc = await MaterialEmployee.findOne({
+      material: mid,
+      employee: eid,
+    });
+
+    if (!doc) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "No doc with this id", "id", "header"));
+    }
+
+    res.status(200).json({ data: doc });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "getByMaterialIDAndEmployeeID".bgYellow);
+    console.log(error);
+  }
+};
+
 module.exports = {
   assign,
   back,
   allMaterialsForEmployee,
   allEmployeesForMaterial,
   updateNote,
+  getByID,
+  getByMaterialIDAndEmployeeID,
 };

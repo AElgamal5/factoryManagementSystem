@@ -11,6 +11,7 @@ const assign = async (req, res) => {
     employee: employeeID,
     quantity,
     operation,
+    note,
   } = req.body;
 
   try {
@@ -163,6 +164,11 @@ const assign = async (req, res) => {
       });
     }
 
+    //update note if exist
+    if (note) {
+      custodyEmployee.note = note;
+    }
+
     //save the updated/created documents
     await custodyEmployee.save();
     await custody.save();
@@ -185,6 +191,7 @@ const back = async (req, res) => {
     employee: employeeID,
     quantity,
     operation,
+    note,
   } = req.body;
 
   try {
@@ -344,6 +351,11 @@ const back = async (req, res) => {
       custody.currentEmployees.pop(custody.currentEmployees[employeeIndex]._id);
     }
 
+    //update note if exist
+    if (note) {
+      custodyEmployee.note = note;
+    }
+
     //save the documents
     await custodyEmployee.save();
     await employee.save();
@@ -442,10 +454,61 @@ const updateNote = async (req, res) => {
   }
 };
 
+/*
+ * method: GET
+ * path: /api/materialEmployee/:id
+ */
+const getByID = async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const doc = await CustodyEmployee.findById(id);
+
+    if (!doc) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "No doc with this id", "id", "header"));
+    }
+
+    res.status(200).json({ data: doc });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "getByID".bgYellow);
+    console.log(error);
+  }
+};
+
+/*
+ * method: GET
+ * path: /api/materialEmployee/custody/:cid/employee/:eid
+ */
+const getByCustodyIDAndEmployeeID = async (req, res) => {
+  const { cid, eid } = req.params;
+
+  try {
+    const doc = await CustodyEmployee.findOne({
+      custody: cid,
+      employee: eid,
+    });
+
+    if (!doc) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "No doc with this id", "id", "header"));
+    }
+
+    res.status(200).json({ data: doc });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "getByMaterialIDAndEmployeeID".bgYellow);
+    console.log(error);
+  }
+};
+
 module.exports = {
   assign,
   back,
   allCustodiesForEmployee,
   allEmployeesForCustody,
   updateNote,
+  getByID,
+  getByCustodyIDAndEmployeeID,
 };
