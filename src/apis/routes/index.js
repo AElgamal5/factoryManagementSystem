@@ -10,4 +10,5 @@ module.exports = {
   color: require("./color"),
   size: require("./size"),
   model: require("./model"),
+  stage: require("./stage"),
 };

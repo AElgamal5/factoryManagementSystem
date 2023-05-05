@@ -1,6 +1,5 @@
 const { Model } = require("../models");
-const {} = require("../utils");
-const errorFormat = require("../utils/errorFormat");
+const { errorFormat } = require("../utils");
 
 /*
  * method: POST

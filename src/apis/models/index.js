@@ -16,4 +16,5 @@ module.exports = {
   Role: require("./roleModel"),
   Color: require("./colorModel"),
   Size: require("./sizeModel"),
+  Stage: require("./stageModel"),
 };

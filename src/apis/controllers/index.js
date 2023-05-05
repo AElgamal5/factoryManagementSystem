@@ -10,4 +10,5 @@ module.exports = {
   colorController: require("./colorController"),
   sizeController: require("./sizeController"),
   modelController: require("./modelController"),
+  stageController: require("./stageController"),
 };

@@ -11,4 +11,5 @@ module.exports = {
   roleMiddleware: require("./roleMiddleware"),
   colorMiddleware: require("./colorMiddleware"),
   modelMiddlewares: require("./modelMiddlewares"),
+  stageMiddlewares: require("./stageMiddlewares"),
 };
