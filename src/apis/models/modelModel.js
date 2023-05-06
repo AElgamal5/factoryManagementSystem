@@ -16,7 +16,7 @@ const modelSchema = new Schema(
       },
     ],
 
-    consumption: [
+    consumptions: [
       {
         material: {
           id: { type: mongoose.Types.ObjectId, ref: "Material" },

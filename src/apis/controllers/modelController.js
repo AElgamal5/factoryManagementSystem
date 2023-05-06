@@ -1,5 +1,5 @@
 const { Model, Stage, Material } = require("../models");
-const { errorFormat } = require("../utils");
+const { errorFormat, idCheck } = require("../utils");
 
 /*
  * method: POST
@@ -111,155 +111,155 @@ const updateProfile = async (req, res) => {
  * method: PATCH
  * path: /api/model/colors/add/:id
  */
-const addColors = async (req, res) => {
-  const id = req.params.id;
+// const addColors = async (req, res) => {
+//   const id = req.params.id;
 
-  const colors = req.body.colors;
+//   const colors = req.body.colors;
 
-  try {
-    const model = await Model.findById(id);
+//   try {
+//     const model = await Model.findById(id);
 
-    if (!model) {
-      return res
-        .status(404)
-        .json(errorFormat(id, "No model with this id", "id", "header"));
-    }
+//     if (!model) {
+//       return res
+//         .status(404)
+//         .json(errorFormat(id, "No model with this id", "id", "header"));
+//     }
 
-    for (let i = 0; i < colors.length; i++) {
-      if (!colors[i].name || !colors[i].code) {
-        return res
-          .status(404)
-          .json(
-            errorFormat(
-              colors[i],
-              "there is no name or code",
-              "name || code",
-              "body"
-            )
-          );
-      }
+//     for (let i = 0; i < colors.length; i++) {
+//       if (!colors[i].name || !colors[i].code) {
+//         return res
+//           .status(404)
+//           .json(
+//             errorFormat(
+//               colors[i],
+//               "there is no name or code",
+//               "name || code",
+//               "body"
+//             )
+//           );
+//       }
 
-      model.colors.push({
-        name: colors[i].name,
-        code: colors[i].code,
-      });
-    }
+//       model.colors.push({
+//         name: colors[i].name,
+//         code: colors[i].code,
+//       });
+//     }
 
-    await model.save();
+//     await model.save();
 
-    res.status(200).json({ msg: "Colors added tmam" });
-  } catch (error) {
-    console.log("Error is in: ".bgRed, "addColors".bgYellow);
-    console.log(error);
-  }
-};
+//     res.status(200).json({ msg: "Colors added tmam" });
+//   } catch (error) {
+//     console.log("Error is in: ".bgRed, "addColors".bgYellow);
+//     console.log(error);
+//   }
+// };
 
 /*
  * method: PATCH
  * path: /api/model/sizes/add/:id
  */
-const addSizes = async (req, res) => {
-  const id = req.params.id;
+// const addSizes = async (req, res) => {
+//   const id = req.params.id;
 
-  const sizes = req.body.sizes;
+//   const sizes = req.body.sizes;
 
-  try {
-    const model = await Model.findById(id);
+//   try {
+//     const model = await Model.findById(id);
 
-    if (!model) {
-      return res
-        .status(404)
-        .json(errorFormat(id, "No model with this id", "id", "header"));
-    }
+//     if (!model) {
+//       return res
+//         .status(404)
+//         .json(errorFormat(id, "No model with this id", "id", "header"));
+//     }
 
-    for (let i = 0; i < sizes.length; i++) {
-      if (!sizes[i].name || !sizes[i].code) {
-        return res
-          .status(404)
-          .json(
-            errorFormat(
-              sizes[i],
-              "there is no name or code",
-              "name || code",
-              "body"
-            )
-          );
-      }
+//     for (let i = 0; i < sizes.length; i++) {
+//       if (!sizes[i].name || !sizes[i].code) {
+//         return res
+//           .status(404)
+//           .json(
+//             errorFormat(
+//               sizes[i],
+//               "there is no name or code",
+//               "name || code",
+//               "body"
+//             )
+//           );
+//       }
 
-      model.sizes.push({
-        name: sizes[i].name,
-        code: sizes[i].code,
-      });
-    }
+//       model.sizes.push({
+//         name: sizes[i].name,
+//         code: sizes[i].code,
+//       });
+//     }
 
-    await model.save();
+//     await model.save();
 
-    res.status(200).json({ msg: "Sizes added tmam" });
-  } catch (error) {
-    console.log("Error is in: ".bgRed, "addSizes".bgYellow);
-    console.log(error);
-  }
-};
+//     res.status(200).json({ msg: "Sizes added tmam" });
+//   } catch (error) {
+//     console.log("Error is in: ".bgRed, "addSizes".bgYellow);
+//     console.log(error);
+//   }
+// };
 
 /*
  * method: PATCH
  * path: /api/model/colors/remove/:id
  */
-const removeColors = async (req, res) => {
-  const id = req.params.id;
-  const colors = req.body.colors;
+// const removeColors = async (req, res) => {
+//   const id = req.params.id;
+//   const colors = req.body.colors;
 
-  try {
-    const model = await Model.findById(id);
+//   try {
+//     const model = await Model.findById(id);
 
-    if (!model) {
-      return res
-        .status(404)
-        .json(errorFormat(id, "No model with this id", "id", "header"));
-    }
+//     if (!model) {
+//       return res
+//         .status(404)
+//         .json(errorFormat(id, "No model with this id", "id", "header"));
+//     }
 
-    for (let i = 0; i < colors.length; i++) {
-      model.colors.pull(colors[i]);
-    }
+//     for (let i = 0; i < colors.length; i++) {
+//       model.colors.pull(colors[i]);
+//     }
 
-    await model.save();
+//     await model.save();
 
-    res.status(200).json({ msg: "Colors removed tmam" });
-  } catch (error) {
-    console.log("Error is in: ".bgRed, "removeColors".bgYellow);
-    console.log(error);
-  }
-};
+//     res.status(200).json({ msg: "Colors removed tmam" });
+//   } catch (error) {
+//     console.log("Error is in: ".bgRed, "removeColors".bgYellow);
+//     console.log(error);
+//   }
+// };
 
 /*
  * method: PATCH
  * path: /api/model/sizes/remove/:id
  */
-const removeSizes = async (req, res) => {
-  const id = req.params.id;
-  const sizes = req.body.sizes;
+// const removeSizes = async (req, res) => {
+//   const id = req.params.id;
+//   const sizes = req.body.sizes;
 
-  try {
-    const model = await Model.findById(id);
+//   try {
+//     const model = await Model.findById(id);
 
-    if (!model) {
-      return res
-        .status(404)
-        .json(errorFormat(id, "No model with this id", "id", "header"));
-    }
+//     if (!model) {
+//       return res
+//         .status(404)
+//         .json(errorFormat(id, "No model with this id", "id", "header"));
+//     }
 
-    for (let i = 0; i < sizes.length; i++) {
-      model.sizes.pull(sizes[i]);
-    }
+//     for (let i = 0; i < sizes.length; i++) {
+//       model.sizes.pull(sizes[i]);
+//     }
 
-    await model.save();
+//     await model.save();
 
-    res.status(200).json({ msg: "Sizes removed tmam" });
-  } catch (error) {
-    console.log("Error is in: ".bgRed, "removeSizes".bgYellow);
-    console.log(error);
-  }
-};
+//     res.status(200).json({ msg: "Sizes removed tmam" });
+//   } catch (error) {
+//     console.log("Error is in: ".bgRed, "removeSizes".bgYellow);
+//     console.log(error);
+//   }
+// };
 
 /*
  * method: PATCH
@@ -280,18 +280,19 @@ const addStages = async (req, res) => {
     }
 
     for (let i = 0; i < stages.length; i++) {
-      if (!stages[i].id || !stages[i].priority || !stages[i].machineType) {
-        return res
-          .status(404)
-          .json(
-            errorFormat(
-              stages[i],
-              "there is no id , priority or machineType",
-              "id || priority || machineType",
-              "body"
-            )
-          );
-      }
+      //covered in middleware
+      // if (!stages[i].id || !stages[i].priority || !stages[i].machineType) {
+      //   return res
+      //     .status(404)
+      //     .json(
+      //       errorFormat(
+      //         stages[i],
+      //         "there is no id , priority or machineType",
+      //         "id || priority || machineType",
+      //         "body"
+      //       )
+      //     );
+      // }
 
       let stage = await Stage.findById(stages[i].id);
       if (!stage) {
@@ -335,6 +336,14 @@ const removeStages = async (req, res) => {
     }
 
     for (let i = 0; i < stages.length; i++) {
+      if (!idCheck(stages[i])) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(stages[i], "Not invalid array id", "stages[i]", "body")
+          );
+      }
+
       model.stages.pull(stages[i]);
     }
 
@@ -351,83 +360,180 @@ const removeStages = async (req, res) => {
  * method: PATCH
  * path: /api/model/materials/add/:id
  */
-const addMaterials = async (req, res) => {
+// const addMaterials = async (req, res) => {
+//   const id = req.params.id;
+
+//   const materials = req.body.materials;
+
+//   try {
+//     const model = await Model.findById(id);
+
+//     if (!model) {
+//       return res
+//         .status(404)
+//         .json(errorFormat(id, "No model with this id", "id", "header"));
+//     }
+
+//     for (let i = 0; i < materials.length; i++) {
+//       if (!materials[i].id || !materials[i].quantity) {
+//         return res
+//           .status(404)
+//           .json(
+//             errorFormat(
+//               materials[i],
+//               "there is no id or quantity",
+//               "id || quantity ",
+//               "body"
+//             )
+//           );
+//       }
+
+//       let material = await Material.findById(materials[i].id);
+//       if (!material) {
+//         return res
+//           .status(404)
+//           .json(errorFormat(id, "No material with this id", "id", "header"));
+//       }
+
+//       model.materials.push({
+//         id: materials[i].id,
+//         quantity: materials[i].quantity,
+//       });
+//     }
+
+//     await model.save();
+
+//     res.status(200).json({ msg: "Materials added tmam" });
+//   } catch (error) {
+//     console.log("Error is in: ".bgRed, "addStages".bgYellow);
+//     console.log(error);
+//   }
+// };
+
+/*
+ * method: PATCH
+ * path: /api/model/materials/remove/:id
+ */
+// const removeMaterials = async (req, res) => {
+//   const id = req.params.id;
+
+//   const materials = req.body.materials;
+
+//   try {
+//     const model = await Model.findById(id);
+
+//     if (!model) {
+//       return res
+//         .status(404)
+//         .json(errorFormat(id, "No model with this id", "id", "header"));
+//     }
+
+//     for (let i = 0; i < materials.length; i++) {
+//       model.materials.pull(materials[i]);
+//     }
+
+//     await model.save();
+
+//     res.status(200).json({ msg: "Materials removed tmam" });
+//   } catch (error) {
+//     console.log("Error is in: ".bgRed, "removeMaterials".bgYellow);
+//     console.log(error);
+//   }
+// };
+
+/*
+ * method: PATCH
+ * path: /api/model/consumptions/add/:id
+ */
+const addConsumptions = async (req, res) => {
   const id = req.params.id;
-
-  const materials = req.body.materials;
-
+  const consumptions = req.body.consumptions;
   try {
     const model = await Model.findById(id);
-
     if (!model) {
       return res
         .status(404)
         .json(errorFormat(id, "No model with this id", "id", "header"));
     }
 
-    for (let i = 0; i < materials.length; i++) {
-      if (!materials[i].id || !materials[i].quantity) {
+    for (let i = 0; i < consumptions.length; i++) {
+      //check validity and existence of material
+      if (!idCheck(consumptions[i].material.id)) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              consumptions[i].material.id,
+              "No valid material id",
+              "consumptions[i].material.id",
+              "body"
+            )
+          );
+      }
+      const material = await Material.findById(consumptions[i].material.id);
+      if (!material) {
         return res
           .status(404)
           .json(
             errorFormat(
-              materials[i],
-              "there is no id or quantity",
-              "id || quantity ",
+              consumptions[i].material.id,
+              "No material with this id",
+              "consumptions[i].material.id",
               "body"
             )
           );
       }
 
-      let material = await Material.findById(materials[i].id);
-      if (!material) {
-        return res
-          .status(404)
-          .json(errorFormat(id, "No material with this id", "id", "header"));
-      }
-
-      model.materials.push({
-        id: materials[i].id,
-        quantity: materials[i].quantity,
-      });
+      model.consumptions.push(consumptions[i]);
     }
 
     await model.save();
 
-    res.status(200).json({ msg: "Materials added tmam" });
+    res.status(200).json({ msg: "model updated tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "addStages".bgYellow);
+    console.log("Error is in: ".bgRed, "addConsumptions".bgYellow);
     console.log(error);
   }
 };
 
 /*
  * method: PATCH
- * path: /api/model/materials/remove/:id
+ * path: /api/model/consumptions/remove/:id
  */
-const removeMaterials = async (req, res) => {
+const removeConsumptions = async (req, res) => {
   const id = req.params.id;
-
-  const materials = req.body.materials;
-
+  const consumptions = req.body.consumptions;
   try {
     const model = await Model.findById(id);
-
     if (!model) {
       return res
         .status(404)
         .json(errorFormat(id, "No model with this id", "id", "header"));
     }
 
-    for (let i = 0; i < materials.length; i++) {
-      model.materials.pull(materials[i]);
+    for (let i = 0; i < consumptions.length; i++) {
+      //check validity and existence of material
+      if (!idCheck(consumptions[i])) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              consumptions[i],
+              "No valid material id",
+              "consumptions[i]",
+              "body"
+            )
+          );
+      }
+
+      model.consumptions.pull(consumptions[i]);
     }
 
     await model.save();
 
-    res.status(200).json({ msg: "Materials removed tmam" });
+    res.status(200).json({ msg: "model updated tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "removeMaterials".bgYellow);
+    console.log("Error is in: ".bgRed, "removeConsumptions".bgYellow);
     console.log(error);
   }
 };
@@ -438,12 +544,14 @@ module.exports = {
   getAll,
   deleteOne,
   updateProfile,
-  addColors,
-  addSizes,
-  removeColors,
-  removeSizes,
+  // addColors,
+  // addSizes,
+  // removeColors,
+  // removeSizes,
   addStages,
   removeStages,
-  addMaterials,
-  removeMaterials,
+  // addMaterials,
+  // removeMaterials,
+  addConsumptions,
+  removeConsumptions,
 };
