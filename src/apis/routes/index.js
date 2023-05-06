@@ -13,4 +13,5 @@ module.exports = {
   stage: require("./stage"),
   client: require("./client"),
   materialType: require("./materialType"),
+  carton: require("./carton"),
 };
