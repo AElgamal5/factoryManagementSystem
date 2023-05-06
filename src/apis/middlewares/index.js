@@ -12,4 +12,5 @@ module.exports = {
   colorMiddleware: require("./colorMiddleware"),
   modelMiddlewares: require("./modelMiddlewares"),
   stageMiddlewares: require("./stageMiddlewares"),
+  materialTypeMiddleware: require("./materialTypeMiddleware"),
 };

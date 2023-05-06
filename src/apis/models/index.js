@@ -17,4 +17,5 @@ module.exports = {
   Color: require("./colorModel"),
   Size: require("./sizeModel"),
   Stage: require("./stageModel"),
+  MaterialType: require("./materialTypeModel"),
 };

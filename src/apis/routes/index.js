@@ -12,4 +12,5 @@ module.exports = {
   model: require("./model"),
   stage: require("./stage"),
   client: require("./client"),
+  materialType: require("./materialType"),
 };
