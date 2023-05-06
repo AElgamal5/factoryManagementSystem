@@ -11,4 +11,5 @@ module.exports = {
   sizeController: require("./sizeController"),
   modelController: require("./modelController"),
   stageController: require("./stageController"),
+  clientController: require("./clientController"),
 };

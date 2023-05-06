@@ -11,4 +11,5 @@ module.exports = {
   size: require("./size"),
   model: require("./model"),
   stage: require("./stage"),
+  client: require("./client"),
 };

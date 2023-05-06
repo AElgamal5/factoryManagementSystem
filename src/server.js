@@ -32,6 +32,7 @@ const {
   size,
   model,
   stage,
+  client,
 } = require("./apis/routes");
 app.use("/api/employee", employee);
 app.use("/api/supplier", supplier);
@@ -45,6 +46,7 @@ app.use("/api/color", color);
 app.use("/api/size", size);
 app.use("/api/model", model);
 app.use("/api/stage", stage);
+app.use("/api/client", client);
 
 //connect to DB and running the server
 (function start() {
