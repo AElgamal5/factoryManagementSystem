@@ -17,8 +17,6 @@ const orderSchema = new Schema(
 
     shipments: [{ type: mongoose.Types.ObjectId, ref: "Shipment" }],
 
-    totalQuantity: { type: Number },
-
     client: { type: mongoose.Types.ObjectId, ref: "Client" },
 
     totalMaterialsRequired: [
@@ -27,6 +25,8 @@ const orderSchema = new Schema(
         quantity: { type: Number },
       },
     ],
+
+    totalQuantity: { type: Number },
 
     details: { type: String },
 

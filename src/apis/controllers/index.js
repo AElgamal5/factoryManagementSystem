@@ -15,4 +15,5 @@ module.exports = {
   materialTypeController: require("./materialTypeController"),
   cartonController: require("./cartonController"),
   shipmentController: require("./shipmentController"),
+  orderController: require("./orderController"),
 };

@@ -15,4 +15,5 @@ module.exports = {
   materialType: require("./materialType"),
   carton: require("./carton"),
   shipment: require("./shipment"),
+  order: require("./order"),
 };
