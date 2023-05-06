@@ -14,4 +14,5 @@ module.exports = {
   client: require("./client"),
   materialType: require("./materialType"),
   carton: require("./carton"),
+  shipment: require("./shipment"),
 };

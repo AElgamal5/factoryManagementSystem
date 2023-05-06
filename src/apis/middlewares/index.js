@@ -14,4 +14,5 @@ module.exports = {
   stageMiddlewares: require("./stageMiddlewares"),
   materialTypeMiddleware: require("./materialTypeMiddleware"),
   cartonMiddlewares: require("./cartonMiddlewares"),
+  shipmentMiddlewares: require("./shipmentMiddlewares"),
 };

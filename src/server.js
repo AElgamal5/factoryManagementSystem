@@ -35,6 +35,7 @@ const {
   client,
   materialType,
   carton,
+  shipment,
 } = require("./apis/routes");
 app.use("/api/employee", employee);
 app.use("/api/supplier", supplier);
@@ -51,6 +52,7 @@ app.use("/api/stage", stage);
 app.use("/api/client", client);
 app.use("/api/materialType", materialType);
 app.use("/api/carton", carton);
+app.use("/api/shipment", shipment);
 
 //connect to DB and running the server
 (function start() {

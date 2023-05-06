@@ -14,4 +14,5 @@ module.exports = {
   clientController: require("./clientController"),
   materialTypeController: require("./materialTypeController"),
   cartonController: require("./cartonController"),
+  shipmentController: require("./shipmentController"),
 };

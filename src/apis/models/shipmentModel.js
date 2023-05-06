@@ -25,10 +25,10 @@ const shipmentSchema = new Schema(
       ref: "Client",
     },
 
-    model: {
-      type: mongoose.Types.ObjectId,
-      ref: "Model",
-    },
+    // model: {
+    //   type: mongoose.Types.ObjectId,
+    //   ref: "Model",
+    // },
 
     exitPermission: { type: String },
 
