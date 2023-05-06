@@ -6,22 +6,6 @@ const modelSchema = new Schema(
   {
     name: { type: String, required: true },
 
-    colors: [
-      {
-        name: { type: String },
-        code: { type: String },
-      },
-    ],
-
-    sizes: [
-      {
-        name: { type: String },
-        code: { type: String },
-      },
-    ],
-
-    details: { type: String },
-
     image: { type: String },
 
     stages: [
@@ -32,12 +16,26 @@ const modelSchema = new Schema(
       },
     ],
 
-    materials: [
+    consumption: [
       {
-        id: { type: mongoose.Types.ObjectId, ref: "Material" },
-        quantity: { type: Number },
+        material: {
+          id: { type: mongoose.Types.ObjectId, ref: "Material" },
+          quantity: { type: Number },
+        },
+
+        color: {
+          name: { type: String },
+          code: { type: String },
+        },
+
+        size: {
+          name: { type: String },
+          code: { type: String },
+        },
       },
     ],
+
+    details: { type: String },
 
     note: { type: String },
   },

@@ -6,13 +6,11 @@ const orderSchema = new Schema(
   {
     name: { type: String, required: true },
 
-    details: { type: String },
-
     models: [
       {
         id: { type: mongoose.Types.ObjectId, ref: "Model" },
-        color: { type: String },
-        size: { type: String },
+        color: { name: { type: String }, code: { type: String } },
+        size: { name: { type: String }, code: { type: String } },
         quantity: { type: Number },
       },
     ],
@@ -23,12 +21,14 @@ const orderSchema = new Schema(
 
     client: { type: mongoose.Types.ObjectId, ref: "Client" },
 
-    materials: [
+    totalMaterialsRequired: [
       {
         id: { type: mongoose.Types.ObjectId, ref: "Material" },
         quantity: { type: Number },
       },
     ],
+
+    details: { type: String },
 
     note: { type: String },
   },
