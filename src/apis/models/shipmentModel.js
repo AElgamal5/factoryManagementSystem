@@ -20,9 +20,9 @@ const shipmentSchema = new Schema(
       },
     ],
 
-    client: {
+    order: {
       type: mongoose.Types.ObjectId,
-      ref: "Client",
+      ref: "Order",
     },
 
     // model: {
