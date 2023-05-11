@@ -59,12 +59,35 @@ const assign = async (req, res) => {
     }
 
     //check roles
-    if (custody.role.num < employee.role.num) {
+    const custodyRole = await Role.findById(custody.role);
+    if (!custodyRole) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(custody.role, "No custody role", "custody.role", "other")
+        );
+    }
+
+    const employeeRole = await Role.findById(employee.role);
+    if (!employeeRole) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(
+            employee.role,
+            "No employee role",
+            "employee.role",
+            "other"
+          )
+        );
+    }
+
+    if (custodyRole.number < employeeRole.number) {
       return res
         .status(400)
         .json(
           errorFormat(
-            custody.role,
+            custodyRole.number,
             "Custody role is not suitable for this employee",
             "custody.role",
             "other"
@@ -166,8 +189,8 @@ const assign = async (req, res) => {
 
     res.status(201).json({ msg: "Custody assigned tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "assign".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "custodyEmployee.assign".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -229,13 +252,36 @@ const back = async (req, res) => {
     }
 
     //check roles
-    if (custody.role.num < employee.role.num) {
+    const custodyRole = await Role.findById(custody.role);
+    if (!custodyRole) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(custody.role, "No custody role", "custody.role", "other")
+        );
+    }
+
+    const employeeRole = await Role.findById(employee.role);
+    if (!employeeRole) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(
+            employee.role,
+            "No employee role",
+            "employee.role",
+            "other"
+          )
+        );
+    }
+
+    if (custodyRole.number < employeeRole.number) {
       return res
         .status(400)
         .json(
           errorFormat(
-            custody.role,
-            "custody role and employee role does not match",
+            custodyRole.number,
+            "Custody role is not suitable for this employee",
             "custody.role",
             "other"
           )
@@ -343,8 +389,8 @@ const back = async (req, res) => {
 
     res.status(200).json({ msg: "Custody returned tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "back".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "custodyEmployee.back".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -358,28 +404,31 @@ const allCustodiesForEmployee = async (req, res) => {
     const employee = await Employee.findById(employeeID);
     if (!employee) {
       return res
-        .status(400)
+        .status(404)
         .json(
-          errorFormat(employeeID, "No employee with this ID", "id", "header")
+          errorFormat(employeeID, "No employee with this ID", "id", "params")
         );
     }
 
     const custodies = await CustodyEmployee.find({
       employee: employeeID,
     })
-      .populate("custody", ["-createdAt", "-updatedAt", "-__v"])
+      .populate("custody", ["-createdAt", "-updatedAt", "-__v", ,])
       .select(["-__v", "-createdAt", "-updatedAt", "-employee"]);
 
     res.status(200).json({ data: custodies });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "allCustodiesForEmployee".bgYellow);
-    console.log(error);
+    console.log(
+      "Error is in: ".bgRed,
+      "custodyEmployee.allCustodiesForEmployee".bgYellow
+    );
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
 /*
  * method: get
- * path: /api/materialEmployee/custody/:id
+ * path: /api/custodyEmployee/custody/:id
  */
 const allEmployeesForCustody = async (req, res) => {
   const custodyID = req.params.id;
@@ -387,9 +436,9 @@ const allEmployeesForCustody = async (req, res) => {
     const custody = await Custody.findById(custodyID);
     if (!custody) {
       return res
-        .status(400)
+        .status(404)
         .json(
-          errorFormat(custodyID, "No custody with this ID", "id", "header")
+          errorFormat(custodyID, "No custody with this ID", "id", "params")
         );
     }
 
@@ -401,14 +450,17 @@ const allEmployeesForCustody = async (req, res) => {
 
     res.status(200).json({ data: employees });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "allEmployeesForCustody".bgYellow);
-    console.log(error);
+    console.log(
+      "Error is in: ".bgRed,
+      "custodyEmployee.allEmployeesForCustody".bgYellow
+    );
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
 /*
  * method: get
- * path: /api/materialEmployee/note/:id
+ * path: /api/custodyEmployee/note/:id
  */
 const updateNote = async (req, res) => {
   const id = req.params.id;
@@ -418,9 +470,9 @@ const updateNote = async (req, res) => {
     const custodyEmployee = await CustodyEmployee.findById(id);
     if (!custodyEmployee) {
       return res
-        .status(400)
+        .status(404)
         .json(
-          errorFormat(id, "No CustodyEmployee doc with this ID", id, "header")
+          errorFormat(id, "No CustodyEmployee doc with this ID", id, "params")
         );
     }
 
@@ -429,14 +481,14 @@ const updateNote = async (req, res) => {
 
     res.status(200).json({ msg: "note added tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "updateNote".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "custodyEmployee.updateNote".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
 /*
  * method: GET
- * path: /api/materialEmployee/:id
+ * path: /api/custodyEmployee/:id
  */
 const getByID = async (req, res) => {
   const id = req.params.id;
@@ -447,19 +499,19 @@ const getByID = async (req, res) => {
     if (!doc) {
       return res
         .status(404)
-        .json(errorFormat(id, "No doc with this id", "id", "header"));
+        .json(errorFormat(id, "No doc with this id", "id", "params"));
     }
 
     res.status(200).json({ data: doc });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "getByID".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "custodyEmployee.getByID".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
 /*
  * method: GET
- * path: /api/materialEmployee/custody/:cid/employee/:eid
+ * path: /api/custodyEmployee/custody/:cid/employee/:eid
  */
 const getByCustodyIDAndEmployeeID = async (req, res) => {
   const { cid, eid } = req.params;
@@ -473,13 +525,16 @@ const getByCustodyIDAndEmployeeID = async (req, res) => {
     if (!doc) {
       return res
         .status(404)
-        .json(errorFormat(id, "No doc with this id", "id", "header"));
+        .json(errorFormat(id, "No doc with this id", "id", "params"));
     }
 
     res.status(200).json({ data: doc });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "getByMaterialIDAndEmployeeID".bgYellow);
-    console.log(error);
+    console.log(
+      "Error is in: ".bgRed,
+      "custodyEmployee.getByMaterialIDAndEmployeeID".bgYellow
+    );
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
