@@ -35,17 +35,17 @@ const validate = [
     .isLength({ min: 3, max: 20 })
     .withMessage("Operation must contain from 3 to 20 characters"),
 
-  check("order")
-    .optional()
-    .isAlphanumeric()
-    .isLength({ min: 24, max: 24 })
-    .withMessage("Wrong order ID"),
+  // check("order")
+  //   .optional()
+  //   .isAlphanumeric()
+  //   .isLength({ min: 24, max: 24 })
+  //   .withMessage("Wrong order ID"),
 
-  check("model")
-    .optional()
-    .isAlphanumeric()
-    .isLength({ min: 24, max: 24 })
-    .withMessage("Wrong model ID"),
+  // check("model")
+  //   .optional()
+  //   .isAlphanumeric()
+  //   .isLength({ min: 24, max: 24 })
+  //   .withMessage("Wrong model ID"),
 ];
 
 const noteValidate = [

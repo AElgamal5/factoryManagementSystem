@@ -2,8 +2,9 @@ const {
   Employee,
   Material,
   MaterialEmployee,
-  Order,
-  Model,
+  // Order,
+  // Model,
+  Role,
 } = require("../models");
 const { idCheck, errorFormat, currentTime } = require("../utils");
 
@@ -15,8 +16,8 @@ const assign = async (req, res) => {
   const {
     material: materialID,
     employee: employeeID,
-    order: orderID,
-    model: modelID,
+    // order: orderID,
+    // model: modelID,
     quantity,
     operation,
     note,
@@ -44,24 +45,24 @@ const assign = async (req, res) => {
     }
 
     //check orderID validity
-    if (orderID && !idCheck(orderID)) {
-      return res
-        .status(400)
-        .json(errorFormat(orderID, "order id is invalid", "order", "body"));
-    }
+    // if (orderID && !idCheck(orderID)) {
+    //   return res
+    //     .status(400)
+    //     .json(errorFormat(orderID, "order id is invalid", "order", "body"));
+    // }
 
     //check modelID validity
-    if (modelID && !idCheck(modelID)) {
-      return res
-        .status(400)
-        .json(errorFormat(modelID, "model id is invalid", "model", "body"));
-    }
+    // if (modelID && !idCheck(modelID)) {
+    //   return res
+    //     .status(400)
+    //     .json(errorFormat(modelID, "model id is invalid", "model", "body"));
+    // }
 
     //check if material exist
     const material = await Material.findById(materialID);
     if (!material) {
       return res
-        .status(400)
+        .status(404)
         .json(
           errorFormat(
             materialID,
@@ -76,7 +77,7 @@ const assign = async (req, res) => {
     const employee = await Employee.findById(employeeID);
     if (!employee) {
       return res
-        .status(400)
+        .status(404)
         .json(
           errorFormat(
             employeeID,
@@ -88,34 +89,62 @@ const assign = async (req, res) => {
     }
 
     //check if order exist
-    if (orderID) {
-      const order = await Order.findById(orderID);
-      if (!order) {
-        return res
-          .status(400)
-          .json(errorFormat(orderID, "No order with this ID", "order", "body"));
-      }
-    }
+    // if (orderID) {
+    //   const order = await Order.findById(orderID);
+    //   if (!order) {
+    //     return res
+    //       .status(400)
+    //       .json(errorFormat(orderID, "No order with this ID", "order", "body"));
+    //   }
+    // }
 
     //check if model exist
-    if (modelID) {
-      const model = await Model.findById(modelID);
-      if (!model) {
-        return res
-          .status(400)
-          .json(errorFormat(modelID, "No model with this ID", "model", "body"));
-      }
-    }
+    // if (modelID) {
+    //   const model = await Model.findById(modelID);
+    //   if (!model) {
+    //     return res
+    //       .status(400)
+    //       .json(errorFormat(modelID, "No model with this ID", "model", "body"));
+    //   }
+    // }
 
     //check roles
-    if (material.role.num > employee.role.num) {
+    const materialRole = await Role.findById(material.role);
+    if (!materialRole) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(
+            material.role,
+            "No material role",
+            "material.role",
+            "other"
+          )
+        );
+    }
+
+    const employeeRole = await Role.findById(employee.role);
+    if (!employeeRole) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(
+            employee.role,
+            "No employee role",
+            "employee.role",
+            "other"
+          )
+        );
+    }
+
+    if (materialRole.number < employeeRole.number) {
       return res
         .status(400)
         .json(
           errorFormat(
-            material.role.num,
-            "material role is not suitable for this employee",
-            "material.role.num",
+            materialRole.number,
+            "Material role is not suitable for this employee",
+            "material.role",
             "other"
           )
         );
@@ -160,8 +189,8 @@ const assign = async (req, res) => {
       quantity,
       operation: operation || "Take",
       date: new Date(currentTime()),
-      model: modelID,
-      order: orderID,
+      // model: modelID,
+      // order: orderID,
     });
 
     //update total quantity taken and lastDate
@@ -182,8 +211,8 @@ const assign = async (req, res) => {
 
     res.status(statusCode).json({ msg: "material assigned tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "assign".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "materialEmployee.assign".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -195,8 +224,8 @@ const back = async (req, res) => {
   const {
     material: materialID,
     employee: employeeID,
-    order: orderID,
-    model: modelID,
+    // order: orderID,
+    // model: modelID,
     quantity,
     operation,
     note,
@@ -222,24 +251,24 @@ const back = async (req, res) => {
     }
 
     //check orderID validity
-    if (orderID && !idCheck(orderID)) {
-      return res
-        .status(400)
-        .json(errorFormat(orderID, "order id is invalid", "order", "body"));
-    }
+    // if (orderID && !idCheck(orderID)) {
+    //   return res
+    //     .status(400)
+    //     .json(errorFormat(orderID, "order id is invalid", "order", "body"));
+    // }
 
     //check modelID validity
-    if (modelID && !idCheck(modelID)) {
-      return res
-        .status(400)
-        .json(errorFormat(modelID, "model id is invalid", "model", "body"));
-    }
+    // if (modelID && !idCheck(modelID)) {
+    //   return res
+    //     .status(400)
+    //     .json(errorFormat(modelID, "model id is invalid", "model", "body"));
+    // }
 
     //check if material exist
     const material = await Material.findById(materialID);
     if (!material) {
       return res
-        .status(400)
+        .status(404)
         .json(
           errorFormat(
             materialID,
@@ -254,7 +283,7 @@ const back = async (req, res) => {
     const employee = await Employee.findById(employeeID);
     if (!employee) {
       return res
-        .status(400)
+        .status(404)
         .json(
           errorFormat(
             employeeID,
@@ -266,24 +295,24 @@ const back = async (req, res) => {
     }
 
     //check if order exist
-    if (orderID) {
-      const order = await Order.findById(orderID);
-      if (!order) {
-        return res
-          .status(400)
-          .json(errorFormat(orderID, "No order with this ID", "order", "body"));
-      }
-    }
+    // if (orderID) {
+    //   const order = await Order.findById(orderID);
+    //   if (!order) {
+    //     return res
+    //       .status(400)
+    //       .json(errorFormat(orderID, "No order with this ID", "order", "body"));
+    //   }
+    // }
 
     //check if model exist
-    if (modelID) {
-      const model = await Model.findById(modelID);
-      if (!model) {
-        return res
-          .status(400)
-          .json(errorFormat(modelID, "No model with this ID", "model", "body"));
-      }
-    }
+    // if (modelID) {
+    //   const model = await Model.findById(modelID);
+    //   if (!model) {
+    //     return res
+    //       .status(400)
+    //       .json(errorFormat(modelID, "No model with this ID", "model", "body"));
+    //   }
+    // }
 
     //check if document exist
     const materialEmployee = await MaterialEmployee.findOne({
@@ -331,14 +360,42 @@ const back = async (req, res) => {
     }
 
     //check roles
-    if (material.role.num > employee.role.num) {
+    const materialRole = await Role.findById(material.role);
+    if (!materialRole) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(
+            material.role,
+            "No material role",
+            "material.role",
+            "other"
+          )
+        );
+    }
+
+    const employeeRole = await Role.findById(employee.role);
+    if (!employeeRole) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(
+            employee.role,
+            "No employee role",
+            "employee.role",
+            "other"
+          )
+        );
+    }
+
+    if (materialRole.number < employeeRole.number) {
       return res
         .status(400)
         .json(
           errorFormat(
-            material.role.num,
-            "material role is not suitable for this employee",
-            "material.role.num",
+            materialRole.number,
+            "Material role is not suitable for this employee",
+            "material.role",
             "other"
           )
         );
@@ -354,8 +411,8 @@ const back = async (req, res) => {
       quantity,
       operation: operation || "Back",
       date: new Date(currentTime()),
-      model: modelID,
-      order: orderID,
+      // model: modelID,
+      // order: orderID,
     });
 
     //update total quantity taken and lastDate
@@ -376,8 +433,8 @@ const back = async (req, res) => {
 
     res.status(200).json({ msg: "material returned tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "back".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "materialEmployee.back".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -391,9 +448,9 @@ const allMaterialsForEmployee = async (req, res) => {
     const employee = await Employee.findById(employeeID);
     if (!employee) {
       return res
-        .status(400)
+        .status(404)
         .json(
-          errorFormat(employeeID, "No employee with this ID", "id", "header")
+          errorFormat(employeeID, "No employee with this ID", "id", "params")
         );
     }
 
@@ -405,8 +462,11 @@ const allMaterialsForEmployee = async (req, res) => {
 
     res.status(200).json({ data: materials });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "allMaterialsForEmployee".bgYellow);
-    console.log(error);
+    console.log(
+      "Error is in: ".bgRed,
+      "materialEmployee.allMaterialsForEmployee".bgYellow
+    );
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -420,9 +480,9 @@ const allEmployeesForMaterial = async (req, res) => {
     const material = await Material.findById(materialID);
     if (!material) {
       return res
-        .status(400)
+        .status(404)
         .json(
-          errorFormat(materialID, "No material with this ID", "id", "header")
+          errorFormat(materialID, "No material with this ID", "id", "params")
         );
     }
 
@@ -434,8 +494,11 @@ const allEmployeesForMaterial = async (req, res) => {
 
     res.status(200).json({ data: employees });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "allEmployeesForMaterial".bgYellow);
-    console.log(error);
+    console.log(
+      "Error is in: ".bgRed,
+      "materialEmployee.allEmployeesForMaterial".bgYellow
+    );
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -451,9 +514,9 @@ const updateNote = async (req, res) => {
     const materialEmployee = await MaterialEmployee.findById(id);
     if (!materialEmployee) {
       return res
-        .status(400)
+        .status(404)
         .json(
-          errorFormat(id, "No MaterialEmployee doc with this ID", id, "header")
+          errorFormat(id, "No MaterialEmployee doc with this ID", id, "params")
         );
     }
 
@@ -462,8 +525,8 @@ const updateNote = async (req, res) => {
 
     res.status(200).json({ msg: "note added tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "updateNote".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "materialEmployee.updateNote".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -480,13 +543,13 @@ const getByID = async (req, res) => {
     if (!doc) {
       return res
         .status(404)
-        .json(errorFormat(id, "No doc with this id", "id", "header"));
+        .json(errorFormat(id, "No doc with this id", "id", "params"));
     }
 
     res.status(200).json({ data: doc });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "getByID".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "materialEmployee.getByID".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -506,13 +569,16 @@ const getByMaterialIDAndEmployeeID = async (req, res) => {
     if (!doc) {
       return res
         .status(404)
-        .json(errorFormat(id, "No doc with this id", "id", "header"));
+        .json(errorFormat(id, "No doc with this id", "id", "params"));
     }
 
     res.status(200).json({ data: doc });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "getByMaterialIDAndEmployeeID".bgYellow);
-    console.log(error);
+    console.log(
+      "Error is in: ".bgRed,
+      "materialEmployee.getByMaterialIDAndEmployeeID".bgYellow
+    );
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 

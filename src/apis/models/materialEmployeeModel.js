@@ -28,15 +28,15 @@ const materialEmployeeSchema = new Schema(
         date: { type: Date },
         quantity: { type: Number },
         operation: { type: String },
-        order: {
-          type: mongoose.Types.ObjectId,
-          ref: "Order",
-        },
+        // order: {
+        //   type: mongoose.Types.ObjectId,
+        //   ref: "Order",
+        // },
 
-        model: {
-          type: mongoose.Types.ObjectId,
-          ref: "Model",
-        },
+        // model: {
+        //   type: mongoose.Types.ObjectId,
+        //   ref: "Model",
+        // },
       },
     ],
 
