@@ -34,15 +34,15 @@ const materialSchema = new Schema(
     },
 
     type: {
-      type: String,
-      required: true,
+      type: mongoose.Types.ObjectId,
+      ref: "MaterialType",
     },
 
     unit: { type: String, required: true },
 
     role: {
-      title: { type: String, required: true },
-      num: { type: Number, required: true },
+      type: mongoose.Types.ObjectId,
+      ref: "Role",
     },
 
     image: { type: String },

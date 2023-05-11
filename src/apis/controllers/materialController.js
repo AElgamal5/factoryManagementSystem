@@ -1,5 +1,5 @@
-const { Material } = require("../models");
-const { errorFormat } = require("../utils");
+const { Material, Role, MaterialType } = require("../models");
+const { errorFormat, idCheck } = require("../utils");
 
 /*
  * method: POST
@@ -9,24 +9,50 @@ const create = async (req, res) => {
   const {
     name,
     details,
-    type,
+    type: typeID,
     image,
     unit,
-    "role.title": roleTitle,
-    "role.num": roleNum,
+    role: roleID,
     note,
     max,
     min,
   } = req.body;
 
   try {
+    //check role validity & existence
+    if (!idCheck(roleID)) {
+      return res
+        .status(400)
+        .json(errorFormat(roleID, "Role id is invalid", "role", "body"));
+    }
+    const role = await Role.findById(roleID);
+    if (!role) {
+      return res
+        .status(404)
+        .json(errorFormat(roleID, "No role with this id", "role", "body"));
+    }
+
+    //check type validity & existence
+    if (!idCheck(typeID)) {
+      return res
+        .status(400)
+        .json(errorFormat(typeID, "Type id is invalid", "type", "body"));
+    }
+    const type = await MaterialType.findById(typeID);
+    if (!type) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(typeID, "No martial type with this id", "role", "body")
+        );
+    }
+
     const material = await Material.create({
       name,
       details,
       unit,
-      type,
-      "role.title": roleTitle,
-      "role.num": roleNum,
+      type: typeID,
+      role: roleID,
       note,
       max,
       min,
@@ -34,8 +60,8 @@ const create = async (req, res) => {
 
     res.status(201).json({ data: material });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "create".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "material.create".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -45,26 +71,12 @@ const create = async (req, res) => {
  */
 const getAll = async (req, res) => {
   try {
-    const materials = await Material.find(
-      {},
-      {
-        name: 1,
-        quantity: 1,
-        available: 1,
-        max: 1,
-        min: 1,
-        details: 1,
-        unit: 1,
-        note: 1,
-        image: 1,
-        role: "$role.title",
-      }
-    );
+    const materials = await Material.find({}).populate(["role", "type"]);
 
     res.status(200).json({ data: materials });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "getAll".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "material.getAll".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -75,19 +87,19 @@ const getAll = async (req, res) => {
 const getByID = async (req, res) => {
   const id = req.params.id;
   try {
-    const material = await Material.findById(id);
+    const material = await Material.findById(id).populate(["role", "type"]);
 
     //check if exist
     if (!material) {
       return res
-        .status(400)
-        .json(errorFormat(id, "No material with this id", "id", "header"));
+        .status(404)
+        .json(errorFormat(id, "No material with this id", "id", "params"));
     }
 
     res.status(200).json({ data: material });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "getByID".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "material.getByID".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -105,24 +117,54 @@ const update = async (req, res) => {
     details,
     image,
     unit,
-    type,
-    "role.title": roleTitle,
-    "role.num": roleNum,
+    type: typeID,
+    role: roleID,
     note,
     max,
     min,
   } = req.body;
 
   try {
+    //check role validity & existence
+    if (roleID) {
+      if (!idCheck(roleID)) {
+        return res
+          .status(400)
+          .json(errorFormat(roleID, "Role id is invalid", "role", "body"));
+      }
+      const role = await Role.findById(roleID);
+      if (!role) {
+        return res
+          .status(404)
+          .json(errorFormat(roleID, "No role with this id", "role", "body"));
+      }
+    }
+
+    //check type validity & existence
+    if (typeID) {
+      if (!idCheck(typeID)) {
+        return res
+          .status(400)
+          .json(errorFormat(typeID, "Type id is invalid", "type", "body"));
+      }
+      const type = await MaterialType.findById(typeID);
+      if (!type) {
+        return res
+          .status(404)
+          .json(
+            errorFormat(typeID, "No martial type with this id", "role", "body")
+          );
+      }
+    }
+
     const material = await Material.findByIdAndUpdate(id, {
       name,
       quantity,
       available,
       details,
       unit,
-      type,
-      "role.title": roleTitle,
-      "role.num": roleNum,
+      type: typeID,
+      role: roleID,
       note,
       max,
       min,
@@ -131,14 +173,14 @@ const update = async (req, res) => {
     //check if material exist
     if (!material) {
       return res
-        .status(400)
-        .json(errorFormat(id, "No material with this id", "id", "header"));
+        .status(404)
+        .json(errorFormat(id, "No material with this id", "id", "params"));
     }
 
     res.status(200).json({ msg: "material updated tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "update".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "material.update".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -154,14 +196,14 @@ const deleteOne = async (req, res) => {
     //check if exist
     if (!material) {
       return res
-        .status(400)
-        .json(errorFormat(id, "No material with this id", "id", "header"));
+        .status(404)
+        .json(errorFormat(id, "No material with this id", "id", "params"));
     }
 
     res.status(200).json({ msg: "material deleted tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "deleteOne".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "material.deleteOne".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -175,23 +217,41 @@ const getAllTypes = async (req, res) => {
 
     res.status(200).json({ data: types });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "getAllTypes".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "material.getAllTypes".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
 /*
  * method: POST
- * path: /api/material/types/all
+ * path: /api/material/types/:type
  */
 const getByType = async (req, res) => {
-  const type = req.params.type;
+  const typeID = req.params.type;
   try {
-    const materials = await Material.find({ type });
+    //check type validity & existence
+    if (!idCheck(typeID)) {
+      return res
+        .status(400)
+        .json(errorFormat(typeID, "Type id is invalid", "type", "body"));
+    }
+    const type = await MaterialType.findById(typeID);
+    if (!type) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(typeID, "No martial type with this id", "role", "body")
+        );
+    }
+
+    const materials = await Material.find({ type: typeID }).populate([
+      "role",
+      "type",
+    ]);
     res.status(200).json({ data: materials });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "getByType".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "material.getByType".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
