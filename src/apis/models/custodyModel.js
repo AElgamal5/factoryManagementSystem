@@ -29,8 +29,6 @@ const custodySchema = new Schema(
       default: 0,
     },
 
-    details: { type: String },
-
     currentEmployees: [
       {
         id: {
@@ -46,9 +44,11 @@ const custodySchema = new Schema(
     unit: { type: String, required: true },
 
     role: {
-      title: { type: String, required: true },
-      num: { type: Number, required: true },
+      type: mongoose.Types.ObjectId,
+      ref: "Role",
     },
+
+    details: { type: String },
 
     image: { type: String },
 

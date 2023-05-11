@@ -26,7 +26,7 @@ const create = async (req, res) => {
     const role = await Role.findById(roleId);
     if (!role) {
       return res
-        .status(400)
+        .status(404)
         .json(errorFormat(roleId, "No role with this id", "role", "body"));
     }
 
@@ -76,7 +76,7 @@ const getByID = async (req, res) => {
 
     if (!employee) {
       return res
-        .status(400)
+        .status(404)
         .json(errorFormat(id, "No Employee with this id", "id", "params"));
     }
 
@@ -114,7 +114,7 @@ const getByCode = async (req, res) => {
 
     if (!employee) {
       return res
-        .status(400)
+        .status(404)
         .json(errorFormat(code, "No Employee with this code", "code", "body"));
     }
 
@@ -140,7 +140,7 @@ const searchByName = async (req, res) => {
 
     if (!employees || employees.length === 0) {
       return res
-        .status(400)
+        .status(404)
         .json(errorFormat(name, "No Employees with this name", "name", "body"));
     }
     res.status(200).json({ data: employees });
@@ -161,7 +161,7 @@ const updateProfile = async (req, res) => {
     const employee = await Employee.findById(id);
     if (!employee) {
       return res
-        .status(400)
+        .status(404)
         .json(errorFormat(id, "No Employee with this id", "id", "params"));
     }
 
@@ -186,7 +186,7 @@ const updateProfile = async (req, res) => {
       const role = await Role.findById(roleId);
       if (!role) {
         return res
-          .status(400)
+          .status(404)
           .json(errorFormat(roleId, "No role with this id", "role", "body"));
       }
     }
@@ -241,7 +241,7 @@ const deleteOne = async (req, res) => {
 
     if (!employee) {
       return res
-        .status(400)
+        .status(404)
         .json(errorFormat(id, "No Employee with this id", "id", "params"));
     }
 

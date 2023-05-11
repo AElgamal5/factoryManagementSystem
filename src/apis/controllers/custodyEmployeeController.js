@@ -1,4 +1,4 @@
-const { CustodyEmployee, Custody, Employee } = require("../models");
+const { CustodyEmployee, Custody, Employee, Role } = require("../models");
 const { errorFormat, idCheck, currentTime } = require("../utils");
 
 /*
@@ -20,7 +20,7 @@ const assign = async (req, res) => {
       return res
         .status(400)
         .json(
-          errorFormat(custodyID, "custody.id is invalid", "custody.id", "body")
+          errorFormat(custodyID, "Custody id is invalid", "custody", "body")
         );
     }
 
@@ -29,12 +29,7 @@ const assign = async (req, res) => {
       return res
         .status(400)
         .json(
-          errorFormat(
-            employeeID,
-            "employee.id is invalid",
-            "employee.id",
-            "body"
-          )
+          errorFormat(employeeID, "Employee id is invalid", "employee", "body")
         );
     }
 
@@ -42,14 +37,9 @@ const assign = async (req, res) => {
     const custody = await Custody.findById(custodyID);
     if (!custody) {
       return res
-        .status(400)
+        .status(404)
         .json(
-          errorFormat(
-            custodyID,
-            "No custody with this ID",
-            "custody.id",
-            "body"
-          )
+          errorFormat(custodyID, "No custody with this ID", "custody", "body")
         );
     }
 
@@ -57,19 +47,19 @@ const assign = async (req, res) => {
     const employee = await Employee.findById(employeeID);
     if (!employee) {
       return res
-        .status(400)
+        .status(404)
         .json(
           errorFormat(
             employeeID,
             "No employee with this ID",
-            "employee.id",
+            "employee",
             "body"
           )
         );
     }
 
     //check roles
-    if (custody.role.num > employee.role.num) {
+    if (custody.role.num < employee.role.num) {
       return res
         .status(400)
         .json(
@@ -200,7 +190,7 @@ const back = async (req, res) => {
       return res
         .status(400)
         .json(
-          errorFormat(custodyID, "custody.id is invalid", "custody.id", "body")
+          errorFormat(custodyID, "Custody id is invalid", "custody", "body")
         );
     }
 
@@ -209,12 +199,7 @@ const back = async (req, res) => {
       return res
         .status(400)
         .json(
-          errorFormat(
-            employeeID,
-            "employee.id is invalid",
-            "employee.id",
-            "body"
-          )
+          errorFormat(employeeID, "Employee id is invalid", "employee", "body")
         );
     }
 
@@ -222,14 +207,9 @@ const back = async (req, res) => {
     const custody = await Custody.findById(custodyID);
     if (!custody) {
       return res
-        .status(400)
+        .status(404)
         .json(
-          errorFormat(
-            custodyID,
-            "No custody with this ID",
-            "custody.id",
-            "body"
-          )
+          errorFormat(custodyID, "No custody with this ID", "custody", "body")
         );
     }
 
@@ -237,19 +217,19 @@ const back = async (req, res) => {
     const employee = await Employee.findById(employeeID);
     if (!employee) {
       return res
-        .status(400)
+        .status(404)
         .json(
           errorFormat(
             employeeID,
             "No employee with this ID",
-            "employee.id",
+            "employee",
             "body"
           )
         );
     }
 
     //check roles
-    if (custody.role.num > employee.role.num) {
+    if (custody.role.num < employee.role.num) {
       return res
         .status(400)
         .json(
@@ -271,7 +251,7 @@ const back = async (req, res) => {
     //if not exist error
     if (!custodyEmployee) {
       return res
-        .status(400)
+        .status(404)
         .json(
           errorFormat(
             custodyID,

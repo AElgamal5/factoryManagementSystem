@@ -25,22 +25,12 @@ const createValidate = [
     })
     .withMessage("Unit length should be 1 to 20 characters"),
 
-  check("role.title")
+  check("role")
     .notEmpty()
-    .withMessage("Role's title is required")
-    .isString()
-    .withMessage("Role's title must be a String")
-    .isLength({
-      min: 3,
-      max: 200,
-    })
-    .withMessage("Role's title length should be 3 to 200 characters"),
-
-  check("role.num")
-    .notEmpty()
-    .withMessage("Role's num is required")
-    .isNumeric()
-    .withMessage("Role's num must be a number"),
+    .withMessage("Role id is required")
+    .isAlphanumeric()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Role id must be 24 characters"),
 
   check("details")
     .optional()
@@ -92,24 +82,6 @@ const updateValidate = [
     })
     .withMessage("Name length should be 3 to 200 characters"),
 
-  check("quantity")
-    .optional()
-    .isNumeric()
-    .withMessage("Quantity must contain numbers only")
-    .isFloat({ min: 0.1 })
-    .withMessage("Quantity must be greater than or equal 0.1")
-    .isFloat({ max: maxNo })
-    .withMessage("Quantity value is too large"),
-
-  check("available")
-    .optional()
-    .isNumeric()
-    .withMessage("Available must contain numbers only")
-    .isFloat({ min: 0.1 })
-    .withMessage("Available must be greater than or equal 0.1")
-    .isFloat({ max: maxNo })
-    .withMessage("Available value is too large"),
-
   check("unit")
     .optional()
     .isString()
@@ -120,20 +92,11 @@ const updateValidate = [
     })
     .withMessage("Unit length should be 1 to 20 characters"),
 
-  check("role.title")
+  check("role")
     .optional()
-    .isString()
-    .withMessage("Role's title must be a String")
-    .isLength({
-      min: 3,
-      max: 200,
-    })
-    .withMessage("Role's title length should be 3 to 200 characters"),
-
-  check("role.num")
-    .optional()
-    .isNumeric()
-    .withMessage("Role's num must be a number"),
+    .isAlphanumeric()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Role id must be 24 characters"),
 
   check("details")
     .optional()
