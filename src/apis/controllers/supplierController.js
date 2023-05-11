@@ -9,6 +9,15 @@ const create = async (req, res) => {
   const { name, phoneNo, address, state, note } = req.body;
 
   try {
+    const exist = await Supplier.findOne({ phoneNo });
+    if (exist) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(phoneNo, "This phoneNo is used before", "phoneNo", "body")
+        );
+    }
+
     const supplier = await Supplier.create({
       name,
       phoneNo,
@@ -18,8 +27,8 @@ const create = async (req, res) => {
     });
     res.status(201).json({ data: supplier });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "create".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "supplier.create".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -34,13 +43,14 @@ const getByID = async (req, res) => {
     const supplier = await Supplier.findById(id);
     if (!supplier) {
       return res
-        .status(400)
-        .json(errorFormat(id, "No supplier with this id", "id", "header"));
+        .status(404)
+        .json(errorFormat(id, "No supplier with this id", "id", "params"));
     }
+
     res.status(200).json({ data: supplier });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "getByID".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "supplier.getByID".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -51,10 +61,11 @@ const getByID = async (req, res) => {
 const getAll = async (req, res) => {
   try {
     const suppliers = await Supplier.find();
+
     res.status(200).json({ data: suppliers });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "getAll".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "supplier.getAll".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -65,12 +76,30 @@ const getAll = async (req, res) => {
 const update = async (req, res) => {
   const id = req.params.id;
   const { name, phoneNo, address, state, note } = req.body;
+
   try {
     const supplier = await Supplier.findById(id);
+
     if (!supplier) {
       return res
-        .status(400)
-        .json(errorFormat(id, "No supplier with this id", "id", "header"));
+        .status(404)
+        .json(errorFormat(id, "No supplier with this id", "id", "params"));
+    }
+
+    if (phoneNo) {
+      const exist = await Supplier.findOne({ phoneNo });
+      if (exist._id.toString() !== id) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              phoneNo,
+              "This phoneNo is used before",
+              "phoneNo",
+              "body"
+            )
+          );
+      }
     }
 
     //update the supplier
@@ -84,8 +113,8 @@ const update = async (req, res) => {
 
     res.status(200).json({ msg: "Supplier is updated tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "update".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "supplier.update".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -100,13 +129,13 @@ const deleteOne = async (req, res) => {
     if (!supplier) {
       return res
         .status(400)
-        .json(errorFormat(id, "No supplier with this id", "id", "header"));
+        .json(errorFormat(id, "No supplier with this id", "id", "params"));
     }
 
     res.status(200).json({ msg: "Supplier deleted tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "deleteOne".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "supplier.deleteOne".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
