@@ -9,11 +9,12 @@ const employeeSchema = new Schema(
       required: true,
     },
 
-    //0 employee, 1 supervisor
-    role: {
-      title: { type: String, required: true },
-      num: { type: Number, required: true },
-    },
+    // //0 employee, 1 supervisor
+    // role: {
+    //   title: { type: String, required: true },
+    //   num: { type: Number, required: true },
+    // },
+    role: { type: mongoose.Types.ObjectId, ref: "Role", required: true },
 
     code: {
       type: String,
@@ -44,9 +45,9 @@ const employeeSchema = new Schema(
 
     image: { type: String },
 
-    phoneNo: { type: String },
+    phoneNo: { type: String, unique: true },
 
-    NID: { type: String },
+    NID: { type: String, unique: true },
 
     note: { type: String },
   },

@@ -12,46 +12,38 @@ const createValidate = [
     })
     .withMessage("Name length should be 3 to 200 characters"),
 
-  check("code", "Code is required").notEmpty(),
-  check("code", "Code length should be 1 to 20 characters").isLength({
-    min: 1,
-    max: 20,
-  }),
-
-  check("role.title")
+  check("code")
     .notEmpty()
-    .withMessage("Role's title is required")
+    .withMessage("Code is required")
     .isString()
-    .withMessage("Role's title must be a String")
-    .isLength({
-      min: 3,
-      max: 200,
-    })
-    .withMessage("Role's title length should be 3 to 200 characters"),
+    .isLength({ min: 1, max: 20 })
+    .withMessage("Code length must be 1 to 20 characters"),
 
-  check("role.num")
+  check("role")
     .notEmpty()
-    .withMessage("Role's num is required")
-    .isNumeric()
-    .withMessage("Role's num must be a number"),
+    .withMessage("Role id is required")
+    .isAlphanumeric()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Role id must be 24 characters"),
 
   check("phoneNo")
+    .isNumeric()
+    .withMessage("Phone number contain numbers only")
     .isLength({
       min: 11,
       max: 11,
     })
-    .withMessage("Phone number must be 11 numbers")
-    .isNumeric()
-    .withMessage("Phone number contain numbers only"),
+    .withMessage("Phone number must be 11 numbers"),
 
   check("NID")
+    .optional()
+    .isNumeric()
+    .withMessage("National number contain numbers only")
     .isLength({
       min: 14,
       max: 14,
     })
-    .withMessage("National number must be 14 numbers")
-    .isNumeric()
-    .withMessage("National number contain numbers only"),
+    .withMessage("National number must be 14 numbers"),
 
   check("note")
     .optional()
@@ -61,6 +53,28 @@ const createValidate = [
       max: 200,
     })
     .withMessage("Note length should be 3 to 200 characters"),
+];
+
+const codeValidate = [
+  check("code")
+    .notEmpty()
+    .withMessage("Code is required")
+    .isString()
+    .isLength({ min: 1, max: 20 })
+    .withMessage("Code length must be 1 to 20 characters"),
+];
+
+const nameValidate = [
+  check("name")
+    .notEmpty()
+    .withMessage("Name is required")
+    .isString()
+    .withMessage("Name must be a String")
+    .isLength({
+      min: 1,
+      max: 200,
+    })
+    .withMessage("Name length should be 1 to 200 characters"),
 ];
 
 const updateValidate = [
@@ -76,40 +90,35 @@ const updateValidate = [
 
   check("code")
     .optional()
-    .isLength({ min: 1, max: 20 })
-    .withMessage("Code length should be 1 to 20 characters"),
-
-  check("role.title")
-    .optional()
     .isString()
-    .withMessage("Role's title must be a String")
-    .isLength({
-      min: 3,
-      max: 200,
-    })
-    .withMessage("Role's title length should be 3 to 200 characters"),
+    .isLength({ min: 1, max: 20 })
+    .withMessage("Code length must be 1 to 20 characters"),
 
-  check("role.num")
+  check("role")
     .optional()
-    .isNumeric()
-    .withMessage("Role's num must be a number"),
+    .isAlphanumeric()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Role id must be 24 characters"),
 
   check("phoneNo")
     .optional()
-    .isLength({ min: 11, max: 11 })
-    .withMessage("Phone number must be 11 numbers")
     .isNumeric()
-    .withMessage("Phone number contain numbers only"),
+    .withMessage("Phone number contain numbers only")
+    .isLength({
+      min: 11,
+      max: 11,
+    })
+    .withMessage("Phone number must be 11 numbers"),
 
   check("NID")
     .optional()
+    .isNumeric()
+    .withMessage("National number contain numbers only")
     .isLength({
       min: 14,
       max: 14,
     })
-    .withMessage("National number must be 14 numbers")
-    .isNumeric()
-    .withMessage("National number contain numbers only"),
+    .withMessage("National number must be 14 numbers"),
 
   check("note")
     .optional()
@@ -121,4 +130,4 @@ const updateValidate = [
     .withMessage("Note length should be 3 to 200 characters"),
 ];
 
-module.exports = { createValidate, updateValidate };
+module.exports = { createValidate, codeValidate, nameValidate, updateValidate };

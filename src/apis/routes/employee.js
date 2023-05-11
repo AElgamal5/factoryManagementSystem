@@ -20,9 +20,19 @@ router.get("/:id", idValidation, employeeController.getByID);
 
 router.get("/", employeeController.getAll);
 
-router.post("/code", employeeController.getByCode);
+router.post(
+  "/code",
+  employeeMiddlewares.codeValidate,
+  validationResult,
+  employeeController.getByCode
+);
 
-router.post("/name", employeeController.searchByName);
+router.post(
+  "/name",
+  employeeMiddlewares.nameValidate,
+  validationResult,
+  employeeController.searchByName
+);
 
 router.patch(
   "/:id",

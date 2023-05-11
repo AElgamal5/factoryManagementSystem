@@ -1,44 +1,66 @@
-const { Employee } = require("../models");
-const { errorFormat } = require("../utils");
+const { Employee, Role } = require("../models");
+const { errorFormat, idCheck } = require("../utils");
 
 /*
  * method: POST
  * path: /api/employee/
  */
 const create = async (req, res) => {
-  const {
-    name,
-    code,
-    "role.title": roleTitle,
-    "role.num": roleNum,
-    image,
-    phoneNo,
-    NID,
-    note,
-  } = req.body;
+  const { name, code, role: roleId, image, phoneNo, NID, note } = req.body;
 
   try {
     //check if the code exist
-    const exist = await Employee.findOne({ code });
+    let exist = await Employee.findOne({ code });
     if (exist) {
       return res
         .status(400)
         .json(errorFormat(code, "This code is used", "code", "body"));
     }
 
+    //check role validity & existence
+    if (!idCheck(roleId)) {
+      return res
+        .status(400)
+        .json(errorFormat(roleId, "Role id is invalid", "role", "body"));
+    }
+    const role = await Role.findById(roleId);
+    if (!role) {
+      return res
+        .status(400)
+        .json(errorFormat(roleId, "No role with this id", "role", "body"));
+    }
+
+    //check if the phoneNo exist & uniqueness
+    exist = await Employee.findOne({ phoneNo });
+    if (exist) {
+      return res
+        .status(400)
+        .json(errorFormat(phoneNo, "This phoneNo is used", "phoneNo", "body"));
+    }
+
+    //check NID existence & uniqueness if given
+    if (NID) {
+      exist = await Employee.findOne({ NID });
+      if (exist) {
+        return res
+          .status(400)
+          .json(errorFormat(NID, "This NID is used", "NID", "body"));
+      }
+    }
+
     const employee = await Employee.create({
       name,
       code,
-      "role.title": roleTitle,
-      "role.num": roleNum,
+      role: role._id,
       phoneNo,
       NID,
       note,
     });
+
     res.status(201).json({ data: employee });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "create".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "employee.create".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -50,16 +72,18 @@ const getByID = async (req, res) => {
   const id = req.params.id;
 
   try {
-    const employee = await Employee.findById(id);
+    const employee = await Employee.findById(id).populate("role");
+
     if (!employee) {
       return res
         .status(400)
-        .json(errorFormat(id, "No Employee with this id", "id", "header"));
+        .json(errorFormat(id, "No Employee with this id", "id", "params"));
     }
+
     res.status(200).json({ data: employee });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "getByID".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "employee.getByID".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -69,27 +93,12 @@ const getByID = async (req, res) => {
  */
 const getAll = async (req, res) => {
   try {
-    const employees = await Employee.find(
-      {},
-      {
-        _id: 1,
-        role: "$role.title",
-        code: 1,
-        phoneNo: 1,
-        NID: 1,
-        note: 1,
-        currentCustodies: 1,
-        currentStage: 1,
-        name: 1,
-        currentMachine: 1,
-        image: 1,
-      }
-    );
-    // .select(["-role.title", "-role.num"])
+    const employees = await Employee.find({}).populate("role");
+
     res.status(200).json({ data: employees });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "getAll".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "employee.getAll".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -101,21 +110,18 @@ const getByCode = async (req, res) => {
   const code = req.body.code;
 
   try {
-    if (!code) {
-      return res
-        .status(400)
-        .json(errorFormat(code, "Code is required", "code", "body"));
-    }
     const employee = await Employee.findOne({ code });
+
     if (!employee) {
       return res
         .status(400)
         .json(errorFormat(code, "No Employee with this code", "code", "body"));
     }
+
     res.status(200).json({ data: employee });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "getByCode".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "employee.getByCode".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -127,12 +133,6 @@ const searchByName = async (req, res) => {
   const name = req.body.name;
 
   try {
-    if (!name) {
-      return res
-        .status(400)
-        .json(errorFormat(name, "Name is required", "name", "body"));
-    }
-
     //search like and case insensitive
     const employees = await Employee.find({
       name: { $regex: ".*" + name + ".*", $options: "i" },
@@ -145,8 +145,8 @@ const searchByName = async (req, res) => {
     }
     res.status(200).json({ data: employees });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "getByCode".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "employee.getByCode".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -156,20 +156,19 @@ const searchByName = async (req, res) => {
  */
 const updateProfile = async (req, res) => {
   const id = req.params.id;
-  const {
-    name,
-    code,
-    "role.title": roleTitle,
-    "role.num": roleNum,
-    image,
-    phoneNo,
-    NID,
-    note,
-  } = req.body;
+  const { name, code, role: roleId, image, phoneNo, NID, note } = req.body;
   try {
-    //check if the code exist
+    const employee = await Employee.findById(id);
+    if (!employee) {
+      return res
+        .status(400)
+        .json(errorFormat(id, "No Employee with this id", "id", "params"));
+    }
+
+    //code checks
     if (code) {
-      const exist = await Employee.findOne({ code });
+      //code checks
+      let exist = await Employee.findOne({ code });
       if (exist && id !== exist._id.toString()) {
         return res
           .status(400)
@@ -177,12 +176,48 @@ const updateProfile = async (req, res) => {
       }
     }
 
+    //role checks
+    if (roleId) {
+      if (!idCheck(roleId)) {
+        return res
+          .status(400)
+          .json(errorFormat(roleId, "Role id is invalid", "role", "body"));
+      }
+      const role = await Role.findById(roleId);
+      if (!role) {
+        return res
+          .status(400)
+          .json(errorFormat(roleId, "No role with this id", "role", "body"));
+      }
+    }
+
+    //phoneNo checks
+    if (phoneNo) {
+      exist = await Employee.findOne({ phoneNo });
+      if (exist && id !== exist._id.toString()) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(phoneNo, "This phoneNo is used", "phoneNo", "body")
+          );
+      }
+    }
+
+    //NID checks
+    if (NID) {
+      exist = await Employee.findOne({ NID });
+      if (exist && id !== exist._id.toString()) {
+        return res
+          .status(400)
+          .json(errorFormat(NID, "This NID is used", "NID", "body"));
+      }
+    }
+
     //update the employee
     await Employee.findByIdAndUpdate(id, {
       name,
       code,
-      "role.title": roleTitle,
-      "role.num": roleNum,
+      role: roleId,
       phoneNo,
       NID,
       note,
@@ -190,8 +225,8 @@ const updateProfile = async (req, res) => {
 
     res.status(200).json({ msg: "Employee is updated tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "updateProfile".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "employee.updateProfile".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -207,7 +242,7 @@ const deleteOne = async (req, res) => {
     if (!employee) {
       return res
         .status(400)
-        .json(errorFormat(id, "No Employee with this id", "id", "header"));
+        .json(errorFormat(id, "No Employee with this id", "id", "params"));
     }
 
     //delete all custodyEmployee with this id
@@ -221,8 +256,8 @@ const deleteOne = async (req, res) => {
 
     res.status(200).json({ msg: "Employee deleted tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "deleteOne".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "employee.deleteOne".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
