@@ -26,7 +26,9 @@ const orderSchema = new Schema(
       },
     ],
 
-    totalQuantity: { type: Number },
+    totalQuantity: { type: Number, default: 0 },
+
+    image: { type: String },
 
     details: { type: String },
 
