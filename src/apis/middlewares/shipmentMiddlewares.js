@@ -12,12 +12,12 @@ const createValidate = [
     })
     .withMessage("Shipment's name length should be 1 to 200 characters"),
 
-  check("client")
+  check("order")
     .notEmpty()
-    .withMessage("Client id is required")
+    .withMessage("Order id is required")
     .isAlphanumeric()
     .isLength({ min: 24, max: 24 })
-    .withMessage("Wrong client ID"),
+    .withMessage("Wrong order ID"),
 
   check("details")
     .optional()
@@ -70,11 +70,10 @@ const updateValidate = [
     })
     .withMessage("Shipment's name length should be 1 to 200 characters"),
 
-  check("client")
+  check("order")
     .optional()
-    .isAlphanumeric()
     .isLength({ min: 24, max: 24 })
-    .withMessage("Wrong client ID"),
+    .withMessage("Wrong order ID"),
 
   check("details")
     .optional()

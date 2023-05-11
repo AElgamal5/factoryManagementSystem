@@ -1,4 +1,4 @@
-const { Shipment, Client, Carton } = require("../models");
+const { Shipment, Order, Carton } = require("../models");
 const { errorFormat, idCheck, currentTime } = require("../utils");
 
 /*
@@ -6,27 +6,25 @@ const { errorFormat, idCheck, currentTime } = require("../utils");
  * path: /api/shipment/
  */
 const create = async (req, res) => {
-  const { name, client: clientID, details, note } = req.body;
+  const { name, order: orderID, details, note } = req.body;
 
   try {
-    //check validity and existence of clientID
-    if (!idCheck(clientID)) {
+    //check validity and existence of order
+    if (!idCheck(orderID)) {
       return res
         .status(400)
-        .json(errorFormat(clientID, "client id is invalid", "client", "body"));
+        .json(errorFormat(orderID, "Order id is invalid", "order", "body"));
     }
-    const client = await Client.findById(clientID);
-    if (!client) {
+    const order = await Order.findById(orderID);
+    if (!order) {
       return res
         .status(404)
-        .json(
-          errorFormat(clientID, "No client with this id", "client", "body")
-        );
+        .json(errorFormat(orderID, "No order with this id", "order", "body"));
     }
 
     const shipment = await Shipment.create({
       name,
-      client: clientID,
+      order: orderID,
       details,
       note,
     });
@@ -36,6 +34,9 @@ const create = async (req, res) => {
       date: new Date(currentTime()),
     });
 
+    order.shipments.push(shipment._id);
+
+    await order.save();
     await shipment.save();
 
     res.status(201).json({ data: shipment });
@@ -280,31 +281,27 @@ const ship = async (req, res) => {
  */
 const update = async (req, res) => {
   const id = req.params.id;
-  const { name, client: clientID, details, note } = req.body;
+  const { name, order: orderID, details, note } = req.body;
 
   try {
-    if (clientID) {
-      //check validity and existence of clientID
-      if (!idCheck(clientID)) {
+    if (orderID) {
+      //check validity and existence of order
+      if (!idCheck(orderID)) {
         return res
           .status(400)
-          .json(
-            errorFormat(clientID, "client id is invalid", "client", "body")
-          );
+          .json(errorFormat(orderID, "Order id is invalid", "order", "body"));
       }
-      const client = await Client.findById(clientID);
-      if (!client) {
+      const order = await Order.findById(orderID);
+      if (!order) {
         return res
           .status(404)
-          .json(
-            errorFormat(clientID, "No client with this id", "client", "body")
-          );
+          .json(errorFormat(orderID, "No order with this id", "order", "body"));
       }
     }
 
     const shipment = await Shipment.findByIdAndUpdate(id, {
       name,
-      client: clientID,
+      order: orderID,
       details,
       note,
     });
