@@ -1,4 +1,4 @@
-const { Model, Stage, Material } = require("../models");
+const { Model, Stage, Material, Color, Size } = require("../models");
 const { errorFormat, idCheck } = require("../utils");
 
 /*
@@ -13,8 +13,8 @@ const create = async (req, res) => {
 
     res.status(201).json({ data: model });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "create".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "model.create".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -31,13 +31,13 @@ const getByID = async (req, res) => {
     if (!model) {
       return res
         .status(404)
-        .json(errorFormat(id, "No model with this id", "id", "header"));
+        .json(errorFormat(id, "No model with this id", "id", "params"));
     }
 
     res.status(200).json({ data: model });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "getByID".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "model.getByID".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -51,8 +51,8 @@ const getAll = async (req, res) => {
 
     res.status(200).json({ data: models });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "getAll".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "model.getAll".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -69,13 +69,13 @@ const deleteOne = async (req, res) => {
     if (!model) {
       return res
         .status(404)
-        .json(errorFormat(id, "No model with this id", "id", "header"));
+        .json(errorFormat(id, "No model with this id", "id", "params"));
     }
 
     res.status(200).json({ msg: "Model deleted tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "deleteOne".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "model.deleteOne".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -97,13 +97,13 @@ const updateProfile = async (req, res) => {
     if (!model) {
       return res
         .status(404)
-        .json(errorFormat(id, "No model with this id", "id", "header"));
+        .json(errorFormat(id, "No model with this id", "id", "params"));
     }
 
     res.status(200).json({ msg: "Model profile updated tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "updateProfile".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "model.updateProfile".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -149,8 +149,8 @@ const updateProfile = async (req, res) => {
 
 //     res.status(200).json({ msg: "Colors added tmam" });
 //   } catch (error) {
-//     console.log("Error is in: ".bgRed, "addColors".bgYellow);
-//     console.log(error);
+//     console.log("Error is in: ".bgRed, "model.addColors".bgYellow);
+//     !+process.env.PRODUCTION && console.log(error);
 //   }
 // };
 
@@ -196,8 +196,8 @@ const updateProfile = async (req, res) => {
 
 //     res.status(200).json({ msg: "Sizes added tmam" });
 //   } catch (error) {
-//     console.log("Error is in: ".bgRed, "addSizes".bgYellow);
-//     console.log(error);
+//     console.log("Error is in: ".bgRed, "model.addSizes".bgYellow);
+//     !+process.env.PRODUCTION && console.log(error);
 //   }
 // };
 
@@ -226,8 +226,8 @@ const updateProfile = async (req, res) => {
 
 //     res.status(200).json({ msg: "Colors removed tmam" });
 //   } catch (error) {
-//     console.log("Error is in: ".bgRed, "removeColors".bgYellow);
-//     console.log(error);
+//     console.log("Error is in: ".bgRed, "model.removeColors".bgYellow);
+//     !+process.env.PRODUCTION && console.log(error);
 //   }
 // };
 
@@ -256,8 +256,8 @@ const updateProfile = async (req, res) => {
 
 //     res.status(200).json({ msg: "Sizes removed tmam" });
 //   } catch (error) {
-//     console.log("Error is in: ".bgRed, "removeSizes".bgYellow);
-//     console.log(error);
+//     console.log("Error is in: ".bgRed, "model.removeSizes".bgYellow);
+//     !+process.env.PRODUCTION && console.log(error);
 //   }
 // };
 
@@ -276,7 +276,7 @@ const addStages = async (req, res) => {
     if (!model) {
       return res
         .status(404)
-        .json(errorFormat(id, "No model with this id", "id", "header"));
+        .json(errorFormat(id, "No model with this id", "id", "params"));
     }
 
     for (let i = 0; i < stages.length; i++) {
@@ -298,7 +298,7 @@ const addStages = async (req, res) => {
       if (!stage) {
         return res
           .status(404)
-          .json(errorFormat(id, "No stage with this id", "id", "header"));
+          .json(errorFormat(id, "No stage with this id", "id", "body"));
       }
 
       model.stages.push({
@@ -312,8 +312,8 @@ const addStages = async (req, res) => {
 
     res.status(200).json({ msg: "Stages added tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "addStages".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "model.addStages".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -332,7 +332,7 @@ const removeStages = async (req, res) => {
     if (!model) {
       return res
         .status(404)
-        .json(errorFormat(id, "No model with this id", "id", "header"));
+        .json(errorFormat(id, "No model with this id", "id", "params"));
     }
 
     for (let i = 0; i < stages.length; i++) {
@@ -351,8 +351,8 @@ const removeStages = async (req, res) => {
 
     res.status(200).json({ msg: "Stages removed tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "removeStages".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "model.removeStages".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -405,8 +405,8 @@ const removeStages = async (req, res) => {
 
 //     res.status(200).json({ msg: "Materials added tmam" });
 //   } catch (error) {
-//     console.log("Error is in: ".bgRed, "addStages".bgYellow);
-//     console.log(error);
+//     console.log("Error is in: ".bgRed, "model.addStages".bgYellow);
+//     !+process.env.PRODUCTION && console.log(error);
 //   }
 // };
 
@@ -436,8 +436,8 @@ const removeStages = async (req, res) => {
 
 //     res.status(200).json({ msg: "Materials removed tmam" });
 //   } catch (error) {
-//     console.log("Error is in: ".bgRed, "removeMaterials".bgYellow);
-//     console.log(error);
+//     console.log("Error is in: ".bgRed, "model.removeMaterials".bgYellow);
+//     !+process.env.PRODUCTION && console.log(error);
 //   }
 // };
 
@@ -448,40 +448,76 @@ const removeStages = async (req, res) => {
 const addConsumptions = async (req, res) => {
   const id = req.params.id;
   const consumptions = req.body.consumptions;
+
   try {
     const model = await Model.findById(id);
     if (!model) {
       return res
         .status(404)
-        .json(errorFormat(id, "No model with this id", "id", "header"));
+        .json(errorFormat(id, "No model with this id", "id", "params"));
     }
 
     for (let i = 0; i < consumptions.length; i++) {
-      //check validity and existence of material
-      if (!idCheck(consumptions[i].material.id)) {
-        return res
-          .status(400)
-          .json(
-            errorFormat(
-              consumptions[i].material.id,
-              "No valid material id",
-              "consumptions[i].material.id",
-              "body"
-            )
-          );
-      }
-      const material = await Material.findById(consumptions[i].material.id);
-      if (!material) {
+      //color checks
+      const color = await Color.findById(consumptions[i].color);
+      if (!color) {
         return res
           .status(404)
           .json(
             errorFormat(
-              consumptions[i].material.id,
-              "No material with this id",
-              "consumptions[i].material.id",
+              consumptions[i].color,
+              "No color with this id",
+              `consumptions[${i}].color`,
               "body"
             )
           );
+      }
+
+      //size checks
+      const size = await Size.findById(consumptions[i].size);
+      if (!size) {
+        return res
+          .status(404)
+          .json(
+            errorFormat(
+              consumptions[i].size,
+              "No size with this id",
+              `consumptions[${i}].size`,
+              "body"
+            )
+          );
+      }
+
+      //check validity and existence of material
+      for (let j = 0; j < consumptions[i].materials.length; j++) {
+        if (!idCheck(consumptions[i].materials[j].id)) {
+          return res
+            .status(400)
+            .json(
+              errorFormat(
+                consumptions[i].materials[j].id,
+                "No valid material id",
+                `consumptions[${i}].materials[${j}].id`,
+                "body"
+              )
+            );
+        }
+
+        const material = await Material.findById(
+          consumptions[i].materials[j].id
+        );
+        if (!material) {
+          return res
+            .status(404)
+            .json(
+              errorFormat(
+                consumptions[i].materials[j].id,
+                "No material with this id",
+                `consumptions[${i}].materials[${j}].id`,
+                "body"
+              )
+            );
+        }
       }
 
       model.consumptions.push(consumptions[i]);
@@ -491,8 +527,8 @@ const addConsumptions = async (req, res) => {
 
     res.status(200).json({ msg: "model updated tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "addConsumptions".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "model.addConsumptions".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -508,11 +544,10 @@ const removeConsumptions = async (req, res) => {
     if (!model) {
       return res
         .status(404)
-        .json(errorFormat(id, "No model with this id", "id", "header"));
+        .json(errorFormat(id, "No model with this id", "id", "params"));
     }
 
     for (let i = 0; i < consumptions.length; i++) {
-      //check validity and existence of material
       if (!idCheck(consumptions[i])) {
         return res
           .status(400)
@@ -520,7 +555,7 @@ const removeConsumptions = async (req, res) => {
             errorFormat(
               consumptions[i],
               "No valid material id",
-              "consumptions[i]",
+              `consumptions[${i}]`,
               "body"
             )
           );
@@ -533,8 +568,8 @@ const removeConsumptions = async (req, res) => {
 
     res.status(200).json({ msg: "model updated tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "removeConsumptions".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "model.removeConsumptions".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 

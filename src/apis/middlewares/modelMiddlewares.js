@@ -110,14 +110,20 @@ const addConsumptionsValidation = [
     .isArray({ min: 1, max: 1000 })
     .withMessage("Model's consumptions must be array with length 1 to 1000"),
 
-  check("consumptions.*.material.id")
+  check("consumptions.*.materials")
+    .notEmpty()
+    .withMessage("Materials array is required")
+    .isArray({ min: 1, max: 1000 })
+    .withMessage("Materials array must be array with length 1 to 1000"),
+
+  check("consumptions.*.materials.*.id")
     .notEmpty()
     .withMessage("material's id is required")
     .isAlphanumeric()
     .isLength({ min: 24, max: 24 })
     .withMessage("Wrong material id"),
 
-  check("consumptions.*.material.quantity")
+  check("consumptions.*.material.*.quantity")
     .notEmpty()
     .withMessage("material's quantity is required")
     .isFloat({ min: 0.1 })
@@ -125,33 +131,19 @@ const addConsumptionsValidation = [
     .isFloat({ max: maxNo })
     .withMessage(`material's quantity maximum is ${maxNo}`),
 
-  check("consumptions.*.color.name")
+  check("consumptions.*.color")
     .notEmpty()
-    .withMessage("Color's name is required")
-    .isString()
-    .isLength({ min: 1, max: 200 })
-    .withMessage("Color's name must be in range from 1 to 200"),
+    .withMessage("Color id is required")
+    .isAlphanumeric()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Wrong color id"),
 
-  check("consumptions.*.color.code")
+  check("consumptions.*.size")
     .notEmpty()
-    .withMessage("Color's code is required")
-    .isString()
-    .isLength({ min: 1, max: 200 })
-    .withMessage("Color's code must be in range from 1 to 200"),
-
-  check("consumptions.*.size.name")
-    .notEmpty()
-    .withMessage("Size's name is required")
-    .isString()
-    .isLength({ min: 1, max: 200 })
-    .withMessage("Size's name must be in range from 1 to 200"),
-
-  check("consumptions.*.size.code")
-    .notEmpty()
-    .withMessage("Size's code is required")
-    .isString()
-    .isLength({ min: 1, max: 200 })
-    .withMessage("Size's code must be in range from 1 to 200"),
+    .withMessage("Size id is required")
+    .isAlphanumeric()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Wrong size id"),
 ];
 
 const removeConsumptionsValidation = [
