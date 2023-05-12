@@ -27,8 +27,8 @@ const create = async (req, res) => {
 
     res.status(201).json({ data: buyRequest });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "create".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "buyRequest.create".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -39,10 +39,11 @@ const create = async (req, res) => {
 const getAll = async (req, res) => {
   try {
     const buyRequests = await BuyRequest.find();
-    res.status(201).json({ data: buyRequests });
+
+    res.status(200).json({ data: buyRequests });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "getAll".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "buyRequest.getAll".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -57,14 +58,14 @@ const getByID = async (req, res) => {
     //check if exist
     if (!buyRequest) {
       return res
-        .status(400)
-        .json(errorFormat(id, "No buy request with this id", "id", "header"));
+        .status(404)
+        .json(errorFormat(id, "No buy request with this id", "id", "params"));
     }
 
     res.status(200).json({ data: buyRequest });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "getByID".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "buyRequest.getByID".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -79,14 +80,14 @@ const deleteOne = async (req, res) => {
     //check if exist
     if (!buyRequest) {
       return res
-        .status(400)
-        .json(errorFormat(id, "No buy request with this id", "id", "header"));
+        .status(404)
+        .json(errorFormat(id, "No buy request with this id", "id", "params"));
     }
 
     res.status(200).json({ msg: "Buy request deleted tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "deleteOne".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "buyRequest.deleteOne".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -109,14 +110,14 @@ const updateProfile = async (req, res) => {
     //check if exist
     if (!buyRequest) {
       return res
-        .status(400)
-        .json(errorFormat(id, "No buy request with this id", "id", "header"));
+        .status(404)
+        .json(errorFormat(id, "No buy request with this id", "id", "params"));
     }
 
     res.status(200).json({ msg: "Buy request updated tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "updateProfile".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "buyRequest.updateProfile".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -133,8 +134,8 @@ const addMaterials = async (req, res) => {
     //check if exist
     if (!buyRequest) {
       return res
-        .status(400)
-        .json(errorFormat(id, "No buy request with this id", "id", "header"));
+        .status(404)
+        .json(errorFormat(id, "No buy request with this id", "id", "params"));
     }
 
     for (let i = 0; i < materials.length; i++) {
@@ -161,7 +162,7 @@ const addMaterials = async (req, res) => {
       let supplier = await Supplier.findById(supplierID);
       if (!supplier) {
         return res
-          .status(400)
+          .status(404)
           .json(
             errorFormat(
               supplierID,
@@ -174,7 +175,7 @@ const addMaterials = async (req, res) => {
       let material = await Material.findById(materialID);
       if (!material) {
         return res
-          .status(400)
+          .status(404)
           .json(
             errorFormat(
               materialID,
@@ -201,6 +202,7 @@ const addMaterials = async (req, res) => {
             )
           );
       }
+
       if (typeof materials[i].price !== "number" || materials[i].price <= 0) {
         return res
           .status(400)
@@ -230,8 +232,8 @@ const addMaterials = async (req, res) => {
     await buyRequest.save();
     res.status(200).json({ msg: "materials added tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "addMaterials".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "buyRequest.addMaterials".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -248,8 +250,8 @@ const addCustodies = async (req, res) => {
     //check if exist
     if (!buyRequest) {
       return res
-        .status(400)
-        .json(errorFormat(id, "No buy request with this id", "id", "header"));
+        .status(404)
+        .json(errorFormat(id, "No buy request with this id", "id", "params"));
     }
 
     for (let i = 0; i < custodies.length; i++) {
@@ -276,7 +278,7 @@ const addCustodies = async (req, res) => {
       let supplier = await Supplier.findById(supplierID);
       if (!supplier) {
         return res
-          .status(400)
+          .status(404)
           .json(
             errorFormat(
               supplierID,
@@ -289,7 +291,7 @@ const addCustodies = async (req, res) => {
       let custody = await Custody.findById(custodyID);
       if (!custody) {
         return res
-          .status(400)
+          .status(404)
           .json(
             errorFormat(custodyID, "No custody with this ID", "custody", "body")
           );
@@ -340,8 +342,8 @@ const addCustodies = async (req, res) => {
     await buyRequest.save();
     res.status(200).json({ msg: "custodies added tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "addCustodies".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "buyRequest.addCustodies".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -358,8 +360,8 @@ const removeMaterials = async (req, res) => {
     //check if exist
     if (!buyRequest) {
       return res
-        .status(400)
-        .json(errorFormat(id, "No buy request with this id", "id", "header"));
+        .status(404)
+        .json(errorFormat(id, "No buy request with this id", "id", "params"));
     }
 
     for (let i = 0; i < materials.length; i++) {
@@ -376,8 +378,8 @@ const removeMaterials = async (req, res) => {
 
     res.status(200).json({ msg: "materials removed tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "removeMaterials".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "buyRequest.removeMaterials".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -394,8 +396,8 @@ const removeCustodies = async (req, res) => {
     //check if exist
     if (!buyRequest) {
       return res
-        .status(400)
-        .json(errorFormat(id, "No buy request with this id", "id", "header"));
+        .status(404)
+        .json(errorFormat(id, "No buy request with this id", "id", "params"));
     }
 
     for (let i = 0; i < custodies.length; i++) {
@@ -412,8 +414,8 @@ const removeCustodies = async (req, res) => {
 
     res.status(200).json({ msg: "custodies removed tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "removeCustodies".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "buyRequest.removeCustodies".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -430,8 +432,29 @@ const approve = async (req, res) => {
     //check if exist
     if (!buyRequest) {
       return res
+        .status(404)
+        .json(errorFormat(id, "No buy request with this id", "id", "params"));
+    }
+    let approved = false;
+
+    for (let i = 0; i < buyRequest.history.length; i++) {
+      if (buyRequest.history[i].state === "Approved") {
+        approved = true;
+        break;
+      }
+    }
+
+    if (approved) {
+      return res
         .status(400)
-        .json(errorFormat(id, "No buy request with this id", "id", "header"));
+        .json(
+          errorFormat(
+            "Approved",
+            "This buyRequest is already approved",
+            "buyRequest.history[i].state",
+            "others"
+          )
+        );
     }
 
     buyRequest.history.push({
@@ -443,8 +466,8 @@ const approve = async (req, res) => {
 
     res.status(200).json({ msg: "Buy request approved tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "approve".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "buyRequest.approve".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -461,8 +484,8 @@ const delivered = async (req, res) => {
     //check existence
     if (!buyRequest) {
       return res
-        .status(400)
-        .json(errorFormat(id, "No buy request with this id", "id", "header"));
+        .status(404)
+        .json(errorFormat(id, "No buy request with this id", "id", "params"));
     }
 
     //check if Approved || Delivered
@@ -494,6 +517,39 @@ const delivered = async (req, res) => {
 
     //update/create SupplierCustody
     for (let i = 0; i < buyRequest.custodies.length; i++) {
+      //check current element state
+      if (buyRequest.custodies[i].done) {
+        continue;
+      }
+
+      //check price
+      if (!buyRequest.custodies[i].price) {
+        return res
+          .status(404)
+          .json(
+            errorFormat(
+              buyRequest.custodies[i].price,
+              "Material's price is required",
+              `buyRequest.custodies[${i}].price`,
+              "other"
+            )
+          );
+      }
+
+      //check supplier
+      if (!buyRequest.custodies[i].supplier) {
+        return res
+          .status(404)
+          .json(
+            errorFormat(
+              buyRequest.custodies[i].supplier,
+              "Material's supplier is required",
+              `buyRequest.custodies[${i}].supplier`,
+              "other"
+            )
+          );
+      }
+
       let supplierCustody = await SupplierCustody.findOne({
         supplier: buyRequest.custodies[i].supplier,
         custody: buyRequest.custodies[i].id,
@@ -519,7 +575,7 @@ const delivered = async (req, res) => {
       const custody = await Custody.findById(buyRequest.custodies[i].id);
       if (!custody) {
         return res
-          .status(400)
+          .status(404)
           .json(
             errorFormat(
               buyRequest.custodies[i].id,
@@ -532,6 +588,9 @@ const delivered = async (req, res) => {
 
       custody.quantity += buyRequest.custodies[i].quantity;
       custody.available += buyRequest.custodies[i].quantity;
+
+      //update state of current element
+      buyRequest.custodies[i].done = true;
 
       await custody.save();
     }
@@ -567,7 +626,7 @@ const delivered = async (req, res) => {
       const material = await Material.findById(buyRequest.materials[i].id);
       if (!material) {
         return res
-          .status(400)
+          .status(404)
           .json(
             errorFormat(
               buyRequest.materials[i].id,
@@ -591,8 +650,160 @@ const delivered = async (req, res) => {
 
     res.status(200).json({ msg: "Buy request delivered tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "delivered".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "buyRequest.delivered".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
+  }
+};
+
+/*
+ * method: PATCH
+ * path: /api/buyRequest/materials/update/:id
+ */
+const updateMaterials = async (req, res) => {
+  const id = req.params.id;
+
+  const materials = req.body.materials;
+
+  try {
+    const buyRequest = await BuyRequest.findById(id);
+
+    //check existence
+    if (!buyRequest) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "No buy request with this id", "id", "params"));
+    }
+
+    //empty materials array
+    buyRequest.materials = [];
+
+    for (let i = 0; i < materials.length; i++) {
+      const material = await Material.findById(materials[i].material);
+      if (!material) {
+        return res
+          .status(404)
+          .json(
+            errorFormat(
+              materials[i].material,
+              "No material with this id",
+              `materials[${i}].material`,
+              "body"
+            )
+          );
+      }
+
+      let supplier;
+      if (materials[i].supplier) {
+        supplier = await Supplier.findById(materials[i].supplier);
+        if (!supplier) {
+          return res
+            .status(404)
+            .json(
+              errorFormat(
+                materials[i].supplier,
+                "No supplier with this id",
+                "materials[i].supplier",
+                "body"
+              )
+            );
+        }
+      }
+
+      buyRequest.materials.push({
+        id: material._id,
+        quantity: materials[i].quantity,
+        supplier: supplier ? supplier._id : null,
+        price: materials[i].price || null,
+      });
+    }
+
+    buyRequest.history.push({
+      state: "Materials updated",
+      date: new Date(currentTime()),
+    });
+
+    await buyRequest.save();
+
+    res.status(200).json({ msg: "Buy request materials updated tmam" });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "buyRequest.updateMaterials".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
+  }
+};
+
+/*
+ * method: PATCH
+ * path: /api/buyRequest/custody/update/:id
+ */
+const updateCustodies = async (req, res) => {
+  const id = req.params.id;
+
+  const custodies = req.body.custodies;
+
+  try {
+    const buyRequest = await BuyRequest.findById(id);
+
+    //check existence
+    if (!buyRequest) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "No buy request with this id", "id", "params"));
+    }
+
+    //empty custodies array
+    buyRequest.custodies = [];
+
+    for (let i = 0; i < custodies.length; i++) {
+      const custody = await Custody.findById(custodies[i].custody);
+      if (!custody) {
+        return res
+          .status(404)
+          .json(
+            errorFormat(
+              custodies[i].custody,
+              "No custody with this id",
+              `custodies[${i}].custody`,
+              "body"
+            )
+          );
+      }
+
+      let supplier;
+      if (custodies[i].supplier) {
+        supplier = await Supplier.findById(custodies[i].supplier);
+        if (!supplier) {
+          return res
+            .status(404)
+            .json(
+              errorFormat(
+                custodies[i].supplier,
+                "No supplier with this id",
+                `custodies[${i}].supplier`,
+                "body"
+              )
+            );
+        }
+      }
+
+      buyRequest.custodies.push({
+        id: custody._id,
+        quantity: custodies[i].quantity,
+        supplier: supplier ? supplier._id : null,
+        price: custodies[i].price || null,
+      });
+    }
+
+    buyRequest.history.push({
+      state: "Custodies updated",
+      date: new Date(currentTime()),
+    });
+
+    await buyRequest.save();
+
+    res.status(200).json({ msg: "Buy request custodies updated tmam" });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "buyRequest.updateCustodies".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -608,4 +819,6 @@ module.exports = {
   removeCustodies,
   approve,
   delivered,
+  updateMaterials,
+  updateCustodies,
 };

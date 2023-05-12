@@ -52,4 +52,20 @@ router.patch("/approve/:id", idValidation, buyRequestController.approve);
 
 router.patch("/delivered/:id", idValidation, buyRequestController.delivered);
 
+router.patch(
+  "/materials/update/:id",
+  idValidation,
+  buyRequestMiddlewares.materialValidate,
+  validationResult,
+  buyRequestController.updateMaterials
+);
+
+router.patch(
+  "/custodies/update/:id",
+  idValidation,
+  buyRequestMiddlewares.custodyValidate,
+  validationResult,
+  buyRequestController.updateCustodies
+);
+
 module.exports = router;

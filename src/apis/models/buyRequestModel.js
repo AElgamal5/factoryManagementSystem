@@ -19,8 +19,8 @@ const buyRequestSchema = new Schema(
     materials: [
       {
         id: { type: mongoose.Types.ObjectId, ref: "Material" },
-        supplier: { type: mongoose.Types.ObjectId, ref: "Supplier" },
         quantity: { type: Number },
+        supplier: { type: mongoose.Types.ObjectId, ref: "Supplier" },
         price: { type: Number },
         done: { type: Boolean, default: false },
       },
@@ -29,8 +29,8 @@ const buyRequestSchema = new Schema(
     custodies: [
       {
         id: { type: mongoose.Types.ObjectId, ref: "Custody" },
-        supplier: { type: mongoose.Types.ObjectId, ref: "Supplier" },
         quantity: { type: Number },
+        supplier: { type: mongoose.Types.ObjectId, ref: "Supplier" },
         price: { type: Number },
         done: { type: Boolean, default: false },
       },
