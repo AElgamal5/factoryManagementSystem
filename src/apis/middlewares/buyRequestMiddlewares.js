@@ -67,8 +67,10 @@ const materialValidate = [
   check("materials")
     .notEmpty()
     .withMessage("Buy Request's materials array is required")
-    .isArray({ min: 1, max: 1000 })
-    .withMessage("Buy Request's materials must be array with length 1 to 1000"),
+    .isArray({ max: 1000 })
+    .withMessage(
+      "Buy Request's materials must be array with length less than 1000"
+    ),
 
   check("materials.*.material")
     .notEmpty()
@@ -107,8 +109,10 @@ const custodyValidate = [
   check("custodies")
     .notEmpty()
     .withMessage("Buy Request's custodies is required")
-    .isArray({ min: 1, max: 1000 })
-    .withMessage("Buy Request's custodies must be array with length 1 to 1000"),
+    .isArray({ max: 1000 })
+    .withMessage(
+      "Buy Request's materials must be array with length less than 1000"
+    ),
 
   check("custodies.*.custody")
     .notEmpty()
