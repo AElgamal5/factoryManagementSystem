@@ -1,4 +1,3 @@
-const { check } = require("express-validator");
 const { Order, Client, Color, Size, Model } = require("../models");
 const { errorFormat, idCheck } = require("../utils");
 
@@ -198,6 +197,7 @@ const updateModels = async (req, res) => {
         "consumptions.size": models[i].size,
       });
 
+      order.totalQuantity = 0;
       order.totalQuantity += +models[i].quantity;
       order.models.push({
         id: models[i].id,

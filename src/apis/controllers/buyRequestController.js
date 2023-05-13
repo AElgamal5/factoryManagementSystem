@@ -54,7 +54,12 @@ const getAll = async (req, res) => {
 const getByID = async (req, res) => {
   const id = req.params.id;
   try {
-    const buyRequest = await BuyRequest.findById(id);
+    const buyRequest = await BuyRequest.findById(id, {})
+      .populate("materials.id", "_id name")
+      .populate("materials.supplier", "_id name")
+      .populate("custodies.id", "_id name")
+      .populate("custodies.supplier", "_id name");
+
     //check if exist
     if (!buyRequest) {
       return res
