@@ -41,8 +41,8 @@ const create = async (req, res) => {
 
     res.status(201).json({ data: shipment });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "create".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "shipment.create".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -63,9 +63,22 @@ const addCartons = async (req, res) => {
         .json(errorFormat(id, "No shipment with this id", "id", "params"));
     }
 
+    //data checks
     for (let i = 0; i < cartons.length; i++) {
+      //cartons checks
+      if (!idCheck(cartons[i].id)) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              cartons[i].id,
+              "Not valid carton id",
+              `cartons[${i}].id`,
+              "body"
+            )
+          );
+      }
       const carton = await Carton.findById(cartons[i].id);
-
       if (!carton) {
         return res
           .status(404)
@@ -73,8 +86,8 @@ const addCartons = async (req, res) => {
             errorFormat(
               cartons[i].id,
               "No carton with this id",
-              "cartons[i].id",
-              "params"
+              `cartons[${i}].id`,
+              "body"
             )
           );
       }
@@ -87,11 +100,17 @@ const addCartons = async (req, res) => {
             errorFormat(
               cartons[i].quantity,
               "Carton's quantity less than given quantity",
-              "cartons[i].quantity",
+              `cartons[${i}].quantity`,
               "body"
             )
           );
       }
+    }
+
+    //updating docs
+    for (let i = 0; i < cartons.length; i++) {
+      const carton = await Carton.findById(cartons[i].id);
+
       carton.quantity -= +cartons[i].quantity;
 
       await carton.save();
@@ -110,10 +129,10 @@ const addCartons = async (req, res) => {
 
     await shipment.save();
 
-    res.status(200).json({ msg: "Cartons added tmam" });
+    res.status(200).json({ msg: "Cartons added to shipment tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "addCartons".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "shipment.addCartons".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -146,14 +165,13 @@ const removeCartons = async (req, res) => {
           .json(
             errorFormat(
               cartons[i],
-              "No carton with this _id",
-              "cartons[i]",
+              "No carton with this id",
+              `cartons[${i}]`,
               "body"
             )
           );
       }
 
-      //get carton , update quantity and save doc
       const carton = await Carton.findById(shipment.cartons[index].id);
       if (!carton) {
         return res
@@ -162,11 +180,21 @@ const removeCartons = async (req, res) => {
             errorFormat(
               cartons[i].id,
               "No carton with this id",
-              "cartons[i].id",
+              `cartons[${i}]`,
               "params"
             )
           );
       }
+    }
+
+    for (let i = 0; i < cartons.length; i++) {
+      const index = shipment.cartons.findIndex((carton) => {
+        return carton._id.toString() === cartons[i];
+      });
+
+      //get carton , update quantity and save doc
+      const carton = await Carton.findById(shipment.cartons[index].id);
+
       carton.quantity += shipment.cartons[index].quantity;
       await carton.save();
 
@@ -183,8 +211,8 @@ const removeCartons = async (req, res) => {
 
     res.status(200).json({ msg: "Cartons removed tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "removeCartons".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "shipment.removeCartons".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -216,6 +244,18 @@ const approve = async (req, res) => {
             )
           );
       }
+      if (shipment.history[i].state === "Shipped") {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              shipment.history[i].state,
+              "This shipment is already Shipped",
+              "shipment.history[i].state",
+              "others"
+            )
+          );
+      }
     }
 
     //approve & save it
@@ -227,8 +267,8 @@ const approve = async (req, res) => {
 
     res.status(200).json({ msg: "Shipment approved tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "approve".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "shipment.approve".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -246,6 +286,8 @@ const ship = async (req, res) => {
         .json(errorFormat(id, "No shipment with this id", "id", "params"));
     }
 
+    let approved = false;
+
     for (let i = 0; i < shipment.history.length; i++) {
       if (shipment.history[i].state === "Shipped") {
         return res
@@ -259,6 +301,15 @@ const ship = async (req, res) => {
             )
           );
       }
+      if (shipment.history[i].state === "Approved") {
+        approved = true;
+      }
+    }
+
+    if (!approved) {
+      return res
+        .status(400)
+        .json(errorFormat(id, "This shipment is not approved", "id", "others"));
     }
 
     //ship & save it
@@ -270,8 +321,8 @@ const ship = async (req, res) => {
 
     res.status(200).json({ msg: "Shipment shipped tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "ship".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "shipment.ship".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -284,6 +335,13 @@ const update = async (req, res) => {
   const { name, order: orderID, details, note } = req.body;
 
   try {
+    const shipment = await Shipment.findById(id);
+    if (!shipment) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "No shipment with this id", "id", "params"));
+    }
+
     if (orderID) {
       //check validity and existence of order
       if (!idCheck(orderID)) {
@@ -297,19 +355,21 @@ const update = async (req, res) => {
           .status(404)
           .json(errorFormat(orderID, "No order with this id", "order", "body"));
       }
+
+      order.shipments.push(shipment._id);
+      await order.save();
+
+      await Order.findByIdAndUpdate(shipment.order, {
+        $pull: { shipments: shipment._id },
+      });
     }
 
-    const shipment = await Shipment.findByIdAndUpdate(id, {
+    await Shipment.findByIdAndUpdate(id, {
       name,
       order: orderID,
       details,
       note,
     });
-    if (!shipment) {
-      return res
-        .status(404)
-        .json(errorFormat(id, "No shipment with this id", "id", "params"));
-    }
 
     shipment.history.push({
       state: "Update profile",
@@ -320,8 +380,8 @@ const update = async (req, res) => {
 
     res.status(200).json({ msg: "shipment profile updated tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "update".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "shipment.update".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -335,8 +395,8 @@ const getAll = async (req, res) => {
 
     res.status(200).json({ data: shipments });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "getAll".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "shipment.getAll".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -356,8 +416,8 @@ const getByID = async (req, res) => {
 
     res.status(200).json({ data: shipment });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "getByID".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "shipment.getByID".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -368,17 +428,27 @@ const getByID = async (req, res) => {
 const deleteOne = async (req, res) => {
   const id = req.params.id;
   try {
-    const shipment = await Shipment.findByIdAndDelete(id);
+    const shipment = await Shipment.findById(id);
     if (!shipment) {
       return res
         .status(404)
         .json(errorFormat(id, "No shipment with this id", "id", "params"));
     }
 
+    // if (shipment.history.findIndex((his) => his.state === "Shipped") !== -1){
+    //   return res.status(400).json(errorFormat("Shipped", "Can not delete Shipped"))
+    // }
+
+    const order = await Order.findById(shipment.order);
+    order.shipments.pull(shipment._id);
+    await order.save();
+
+    await Shipment.findByIdAndDelete(id);
+
     res.status(200).json({ msg: "Shipment deleted tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "deleteOne".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "shipment.deleteOne".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 

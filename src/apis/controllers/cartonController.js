@@ -97,6 +97,10 @@ const update = async (req, res) => {
           .status(404)
           .json(errorFormat(modelID, "No model with this id", "model", "body"));
       }
+      //empty styles when changing model due to combination of size and color
+      await Carton.findByIdAndUpdate(id, {
+        styles: [],
+      });
     }
 
     const carton = await Carton.findByIdAndUpdate(id, {

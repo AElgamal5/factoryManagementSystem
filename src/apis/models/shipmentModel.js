@@ -23,12 +23,8 @@ const shipmentSchema = new Schema(
     order: {
       type: mongoose.Types.ObjectId,
       ref: "Order",
+      required: true,
     },
-
-    // model: {
-    //   type: mongoose.Types.ObjectId,
-    //   ref: "Model",
-    // },
 
     exitPermission: { type: String },
 
