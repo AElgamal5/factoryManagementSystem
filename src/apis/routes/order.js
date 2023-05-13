@@ -36,4 +36,6 @@ router.patch(
   orderController.updateModels
 );
 
+router.delete("/:id", idValidation, orderController.deleteOne);
+
 module.exports = router;

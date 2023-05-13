@@ -9,8 +9,8 @@ const orderSchema = new Schema(
     models: [
       {
         id: { type: mongoose.Types.ObjectId, ref: "Model" },
-        color: { name: { type: String }, code: { type: String } },
-        size: { name: { type: String }, code: { type: String } },
+        color: { type: mongoose.Types.ObjectId, ref: "Color" },
+        size: { type: mongoose.Types.ObjectId, ref: "Size" },
         quantity: { type: Number },
       },
     ],

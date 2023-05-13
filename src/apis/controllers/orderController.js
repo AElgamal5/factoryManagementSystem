@@ -1,3 +1,4 @@
+const { check } = require("express-validator");
 const { Order, Client, Color, Size, Model } = require("../models");
 const { errorFormat, idCheck } = require("../utils");
 
@@ -18,7 +19,7 @@ const create = async (req, res) => {
     const client = await Client.findById(clientID);
     if (!client) {
       return res
-        .status(400)
+        .status(404)
         .json(
           errorFormat(clientID, "No client with this id", "client", "body")
         );
@@ -28,8 +29,8 @@ const create = async (req, res) => {
 
     res.status(201).json({ data: order });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "create".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "order.create".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -43,8 +44,8 @@ const getAll = async (req, res) => {
 
     res.status(200).json({ data: orders });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "getAll".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "order.getAll".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -65,8 +66,8 @@ const getByID = async (req, res) => {
 
     res.status(200).json({ data: order });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "getByID".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "order.getByID".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -89,7 +90,7 @@ const update = async (req, res) => {
       const client = await Client.findById(clientID);
       if (!client) {
         return res
-          .status(400)
+          .status(404)
           .json(
             errorFormat(clientID, "No client with this id", "client", "body")
           );
@@ -102,6 +103,7 @@ const update = async (req, res) => {
       details,
       note,
     });
+
     if (!order) {
       return res
         .status(404)
@@ -110,8 +112,8 @@ const update = async (req, res) => {
 
     res.status(200).json({ msg: "order updated tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "update".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "order.update".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -132,25 +134,143 @@ const updateModels = async (req, res) => {
     }
 
     for (let i = 0; i < models.length; i++) {
-      const model = await Model.findById(models[i].id);
+      if (!idCheck(models[i].id)) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              models[i].id,
+              "Not valid model id",
+              `models[${i}].id`,
+              "body"
+            )
+          );
+      }
+      if (!idCheck(models[i].color)) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              models[i].color,
+              "Not valid model color",
+              `models[${i}].color`,
+              "body"
+            )
+          );
+      }
+      if (!idCheck(models[i].size)) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              models[i].size,
+              "Not valid model size",
+              `models[${i}].size`,
+              "body"
+            )
+          );
+      }
+
+      const model = await Model.findOne({
+        _id: models[i].id,
+        "consumptions.color": models[i].color,
+        "consumptions.size": models[i].size,
+      });
+
       if (!model) {
         return res
           .status(404)
           .json(
             errorFormat(
               models[i].id,
-              "no model with this id",
-              "models[i].id",
+              "no model with this data : id || color || size",
+              `models[${i}].id`,
               "body"
             )
           );
       }
     }
-    return res.send("tmam");
+
+    for (let i = 0; i < models.length; i++) {
+      const model = await Model.findOne({
+        _id: models[i].id,
+        "consumptions.color": models[i].color,
+        "consumptions.size": models[i].size,
+      });
+
+      order.totalQuantity += +models[i].quantity;
+      order.models.push({
+        id: models[i].id,
+        color: models[i].color,
+        size: models[i].size,
+        quantity: models[i].quantity,
+      });
+      await order.save();
+
+      const index = model.consumptions.findIndex(
+        (con) =>
+          con.color.toString() === models[i].color &&
+          con.size.toString() === models[i].size
+      );
+
+      console.log(model.consumptions[index].materials);
+
+      for (let j = 0; j < model.consumptions[index].materials.length; j++) {
+        const exist = await Order.findOneAndUpdate(
+          {
+            _id: order._id,
+            "totalMaterialsRequired.id":
+              model.consumptions[index].materials[j].id,
+          },
+          {
+            $inc: {
+              "totalMaterialsRequired.$.quantity":
+                +model.consumptions[index].materials[j].quantity *
+                +models[i].quantity,
+            },
+          }
+        );
+
+        if (!exist) {
+          order.totalMaterialsRequired.push({
+            id: model.consumptions[index].materials[j].id,
+            quantity:
+              +model.consumptions[index].materials[j].quantity *
+              +models[i].quantity,
+          });
+          await order.save();
+        }
+      }
+    }
+
+    res.status(200).json({ msg: "Models added to order tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "update".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "order.updateModels".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
-module.exports = { create, getAll, getByID, update, updateModels };
+/*
+ * method: DELETE
+ * path: /api/order/:id
+ */
+const deleteOne = async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const order = await Order.findByIdAndDelete(id);
+
+    if (!order) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "no order with this id", "id", "params"));
+    }
+
+    res.status(200).json({ msg: "Order deleted tmam" });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "order.deleteOne".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
+  }
+};
+
+module.exports = { create, getAll, getByID, update, updateModels, deleteOne };
