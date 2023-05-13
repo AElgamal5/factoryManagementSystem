@@ -19,26 +19,14 @@ const cartonSchema = new Schema(
       ref: "Model",
     },
 
+    styles: [
+      {
+        color: { type: mongoose.Types.ObjectId, ref: "Color" },
+        size: { type: mongoose.Types.ObjectId, ref: "Size" },
+      },
+    ],
+
     details: { type: String },
-
-    shipment: {
-      type: mongoose.Types.ObjectId,
-      ref: "Shipment",
-    },
-
-    colors: [
-      {
-        name: { type: String },
-        code: { type: String },
-      },
-    ],
-
-    sizes: [
-      {
-        name: { type: String },
-        code: { type: String },
-      },
-    ],
 
     note: { type: String },
   },

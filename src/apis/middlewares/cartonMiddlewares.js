@@ -31,13 +31,6 @@ const createValidate = [
     .isLength({ min: 24, max: 24 })
     .withMessage("Wrong model ID"),
 
-  check("shipment")
-    .notEmpty()
-    .withMessage("Shipment id is required")
-    .isAlphanumeric()
-    .isLength({ min: 24, max: 24 })
-    .withMessage("Wrong shipment ID"),
-
   check("details")
     .optional()
     .isString()
@@ -55,24 +48,6 @@ const createValidate = [
       max: 200,
     })
     .withMessage("Note length should be 3 to 200 characters"),
-
-  check("colors")
-    .notEmpty()
-    .withMessage("Carton's colors is required")
-    .isArray()
-    .withMessage("Carton's colors must be an array"),
-
-  check("colors.*.name").notEmpty().withMessage("colors name is required"),
-  check("colors.*.code").notEmpty().withMessage("colors code is required"),
-
-  check("sizes")
-    .notEmpty()
-    .withMessage("Carton's sizes is required")
-    .isArray()
-    .withMessage("Carton's sizes must be an array"),
-
-  check("sizes.*.name").notEmpty().withMessage("sizes name is required"),
-  check("sizes.*.code").notEmpty().withMessage("sizes code is required"),
 ];
 
 const updateValidate = [
@@ -101,12 +76,6 @@ const updateValidate = [
     .isLength({ min: 24, max: 24 })
     .withMessage("Wrong model ID"),
 
-  check("shipment")
-    .optional()
-    .isAlphanumeric()
-    .isLength({ min: 24, max: 24 })
-    .withMessage("Wrong shipment ID"),
-
   check("details")
     .optional()
     .isString()
@@ -124,22 +93,28 @@ const updateValidate = [
       max: 200,
     })
     .withMessage("Note length should be 3 to 200 characters"),
-
-  check("colors")
-    .optional()
-    .isArray()
-    .withMessage("Carton's colors must be an array"),
-
-  check("colors.*.name").notEmpty().withMessage("colors name is required"),
-  check("colors.*.code").notEmpty().withMessage("colors code is required"),
-
-  check("sizes")
-    .optional()
-    .isArray()
-    .withMessage("Carton's sizes must be an array"),
-
-  check("sizes.*.name").notEmpty().withMessage("sizes name is required"),
-  check("sizes.*.code").notEmpty().withMessage("sizes code is required"),
 ];
 
-module.exports = { createValidate, updateValidate };
+const stylesValidate = [
+  check("styles")
+    .notEmpty()
+    .withMessage("Carton's styles array is required")
+    .isArray({ min: 1, max: 1000 })
+    .withMessage("Carton's styles must be array with length 1 to 1000"),
+
+  check("styles.*.color")
+    .notEmpty()
+    .withMessage("Color's id is required")
+    .isAlphanumeric()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Wrong color id"),
+
+  check("styles.*.size")
+    .notEmpty()
+    .withMessage("Size's id is required")
+    .isAlphanumeric()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Wrong size id"),
+];
+
+module.exports = { createValidate, updateValidate, stylesValidate };

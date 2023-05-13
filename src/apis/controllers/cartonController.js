@@ -1,4 +1,4 @@
-const { Carton, Model, Shipment } = require("../models");
+const { Carton, Model } = require("../models");
 const { errorFormat, idCheck } = require("../utils");
 
 /*
@@ -6,25 +6,15 @@ const { errorFormat, idCheck } = require("../utils");
  * path: /api/carton/
  */
 const create = async (req, res) => {
-  const {
-    name,
-    quantity,
-    model: modelID,
-    shipment: shipmentID,
-    colors,
-    sizes,
-    details,
-    note,
-  } = req.body;
+  const { name, quantity, model: modelID, details, note } = req.body;
 
   try {
-    //check model id & shipment id
+    //check model id
     if (!idCheck(modelID)) {
       return res
         .status(400)
         .json(errorFormat(modelID, "Model id is invalid", "model", "body"));
     }
-
     const model = await Model.findById(modelID);
     if (!model) {
       return res
@@ -32,59 +22,18 @@ const create = async (req, res) => {
         .json(errorFormat(modelID, "No model with this id", "model", "body"));
     }
 
-    if (!idCheck(shipmentID)) {
-      return res
-        .status(400)
-        .json(
-          errorFormat(shipmentID, "shipment id is invalid", "shipment", "body")
-        );
-    }
-
-    //later when finish shipment
-    // const shipment = await Shipment.findById(shipmentID);
-    // if (!shipment) {
-    //   return res
-    //     .status(400)
-    //     .json(
-    //       errorFormat(
-    //         shipmentID,
-    //         "No shipment with this id",
-    //         "shipment",
-    //         "body"
-    //       )
-    //     );
-    // }
-
     const carton = await Carton.create({
       name,
       quantity,
       model: modelID,
-      shipment: shipmentID,
       details,
       note,
     });
 
-    //adding colors
-    for (let i = 0; i < colors.length; i++) {
-      carton.colors.push({
-        name: colors[i].name,
-        code: colors[i].code,
-      });
-    }
-    //adding sizes
-    for (let i = 0; i < sizes.length; i++) {
-      carton.sizes.push({
-        name: sizes[i].name,
-        code: sizes[i].code,
-      });
-    }
-
-    await carton.save();
-
     res.status(201).json({ data: carton });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "create".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "carton.create".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -98,8 +47,8 @@ const getAll = async (req, res) => {
 
     res.status(200).json({ data: cartons });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "getAll".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "carton.getAll".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -121,8 +70,8 @@ const getByID = async (req, res) => {
 
     res.status(200).json({ data: carton });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "getByID".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "carton.getByID".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -132,16 +81,7 @@ const getByID = async (req, res) => {
  */
 const update = async (req, res) => {
   const id = req.params.id;
-  const {
-    name,
-    quantity,
-    model: modelID,
-    shipment: shipmentID,
-    colors,
-    sizes,
-    details,
-    note,
-  } = req.body;
+  const { name, quantity, model: modelID, details, note } = req.body;
 
   try {
     if (modelID) {
@@ -154,48 +94,15 @@ const update = async (req, res) => {
       const model = await Model.findById(modelID);
       if (!model) {
         return res
-          .status(400)
+          .status(404)
           .json(errorFormat(modelID, "No model with this id", "model", "body"));
       }
-    }
-
-    if (shipmentID) {
-      if (!idCheck(shipmentID)) {
-        return res
-          .status(400)
-          .json(
-            errorFormat(
-              shipmentID,
-              "shipment id is invalid",
-              "shipment",
-              "body"
-            )
-          );
-      }
-
-      //later when finish shipment
-      // const shipment = await Shipment.findById(shipmentID);
-      // if (!shipment) {
-      //   return res
-      //     .status(400)
-      //     .json(
-      //       errorFormat(
-      //         shipmentID,
-      //         "No shipment with this id",
-      //         "shipment",
-      //         "body"
-      //       )
-      //     );
-      // }
     }
 
     const carton = await Carton.findByIdAndUpdate(id, {
       name,
       quantity,
       model: modelID,
-      shipment: shipmentID,
-      colors,
-      sizes,
       details,
       note,
     });
@@ -208,8 +115,8 @@ const update = async (req, res) => {
 
     res.status(200).json({ msg: "Carton updated tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "update".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "carton.update".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -231,9 +138,87 @@ const deleteOne = async (req, res) => {
 
     res.status(200).json({ msg: "Carton deleted tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "deleteOne".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "carton.deleteOne".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
-module.exports = { create, getAll, getByID, update, deleteOne };
+/*
+ * method: PATCH
+ * path: /api/carton/updateStyles/:id
+ */
+const updateStyles = async (req, res) => {
+  const id = req.params.id;
+  const styles = req.body.styles;
+
+  try {
+    //carton check
+    const carton = await Carton.findById(id);
+    if (!carton) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "No carton with this id", "id", "params"));
+    }
+
+    for (let i = 0; i < styles.length; i++) {
+      //style checks
+      if (!idCheck(styles[i].color)) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              styles[i].color,
+              "Not valid color id",
+              `styles[${i}].color`,
+              "body"
+            )
+          );
+      }
+      if (!idCheck(styles[i].size)) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              styles[i].size,
+              "Not valid size id",
+              `styles[${i}].size`,
+              "body"
+            )
+          );
+      }
+
+      const exist = await Model.findOne({
+        _id: carton.model,
+        "consumptions.color": styles[i].color,
+        "consumptions.size": styles[i].size,
+      });
+
+      if (!exist) {
+        return res
+          .status(404)
+          .json(
+            errorFormat(
+              carton.model,
+              `there is no ${styles[i].color} & ${styles[i].size} in attached model`,
+              `styles[${i}]`,
+              "body"
+            )
+          );
+      }
+
+      carton.styles.push({
+        color: styles[i].color,
+        size: styles[i].size,
+      });
+    }
+
+    await carton.save();
+
+    res.status(200).json({ msg: "Carton styles updated tmam" });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "carton.updateStyles".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
+  }
+};
+
+module.exports = { create, getAll, getByID, update, deleteOne, updateStyles };

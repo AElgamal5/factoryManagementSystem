@@ -29,4 +29,12 @@ router.patch(
 
 router.delete("/:id", idValidation, cartonController.deleteOne);
 
+router.patch(
+  "/updateStyles/:id",
+  idValidation,
+  cartonMiddlewares.stylesValidate,
+  validationResult,
+  cartonController.updateStyles
+);
+
 module.exports = router;
