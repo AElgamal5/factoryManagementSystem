@@ -1,5 +1,5 @@
-const { Supplier } = require("../models");
-const { errorFormat } = require("../utils");
+const { Supplier, SupplierCustody, SupplierMaterial } = require("../models");
+const { errorFormat, idCheck } = require("../utils");
 
 /*
  * method: POST
@@ -139,4 +139,70 @@ const deleteOne = async (req, res) => {
   }
 };
 
-module.exports = { create, getByID, getAll, update, deleteOne };
+/*
+ * method: GET
+ * path: /api/supplier/custody/:cid
+ */
+const getSuppliersByCustody = async (req, res) => {
+  const cid = req.params.cid;
+
+  try {
+    if (!idCheck(cid)) {
+      return res
+        .status(400)
+        .json(errorFormat(cid, "Not valid custody id", "cid", "params"));
+    }
+
+    const suppliers = await SupplierCustody.find({ custody: cid }).populate(
+      "supplier",
+      "_id name"
+    );
+
+    res.status(200).json({ data: suppliers });
+  } catch (error) {
+    console.log(
+      "Error is in: ".bgRed,
+      "supplier.getSuppliersByCustody".bgYellow
+    );
+    !+process.env.PRODUCTION && console.log(error);
+  }
+};
+
+/*
+ * method: GET
+ * path: /api/supplier/material/:mid
+ */
+const getSuppliersByMaterial = async (req, res) => {
+  const mid = req.params.mid;
+
+  try {
+    if (!idCheck(mid)) {
+      return res
+        .status(400)
+        .json(errorFormat(mid, "Not valid custody id", "mid", "params"));
+    }
+
+    const suppliers = await SupplierMaterial.find({ material: mid }).populate(
+      "supplier",
+      "_id name"
+    );
+
+    res.status(200).json({ data: suppliers });
+  } catch (error) {
+    console.log(
+      "Error is in: ".bgRed,
+      "supplier.getSuppliersByCustody".bgYellow
+    );
+    !+process.env.PRODUCTION && console.log(error);
+  }
+};
+
+module.exports = {
+  create,
+  getByID,
+  getAll,
+  update,
+  deleteOne,
+  getSuppliersByCustody,
+  getSuppliersByMaterial,
+};

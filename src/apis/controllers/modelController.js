@@ -573,6 +573,31 @@ const removeConsumptions = async (req, res) => {
   }
 };
 
+/*
+ * method: GET
+ * path: /api/model/material/:mid
+ */
+const getModelsUsingMaterial = async (req, res) => {
+  const mid = req.params.mid;
+
+  try {
+    if (!idCheck(mid)) {
+      return res
+        .status(400)
+        .json(errorFormat(mid, "Not valid material id", "mid", "params"));
+    }
+
+    const models = await Model.find({
+      "consumptions.materials.id": mid,
+    }).select("_id name");
+
+    res.status(200).json({ data: models });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "model.getModelsUsingMaterial".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
+  }
+};
+
 module.exports = {
   create,
   getByID,
@@ -589,4 +614,5 @@ module.exports = {
   // removeMaterials,
   addConsumptions,
   removeConsumptions,
+  getModelsUsingMaterial,
 };

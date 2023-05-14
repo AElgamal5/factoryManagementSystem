@@ -72,4 +72,6 @@ router.patch(
   modelController.removeConsumptions
 );
 
+router.get("/material/:mid", modelController.getModelsUsingMaterial);
+
 module.exports = router;

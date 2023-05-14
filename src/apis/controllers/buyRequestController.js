@@ -520,7 +520,7 @@ const delivered = async (req, res) => {
       date: new Date(currentTime()),
     });
 
-    //update/create SupplierCustody
+    //update/create SupplierCustody/SupplierMaterial
     for (let i = 0; i < buyRequest.custodies.length; i++) {
       //check current element state
       if (buyRequest.custodies[i].done) {
@@ -570,9 +570,10 @@ const delivered = async (req, res) => {
 
       //update supplierCustody
       supplierCustody.lastQuantity = buyRequest.custodies[i].quantity;
-      supplierCustody.totalQuantity += buyRequest.custodies[i].quantity;
-      supplierCustody.lastPrice = buyRequest.custodies[i].price;
-      supplierCustody.totalCost += buyRequest.custodies[i].price;
+      supplierCustody.totalQuantity += +buyRequest.custodies[i].quantity;
+      supplierCustody.lastPrice = +buyRequest.custodies[i].price;
+      supplierCustody.totalCost +=
+        +buyRequest.custodies[i].price * buyRequest.custodies[i].quantity;
 
       await supplierCustody.save();
 
@@ -620,10 +621,11 @@ const delivered = async (req, res) => {
       }
 
       //update supplierMaterial
-      supplierMaterial.lastQuantity = buyRequest.custodies[i].quantity;
-      supplierMaterial.totalQuantity += buyRequest.custodies[i].quantity;
-      supplierMaterial.lastPrice = buyRequest.custodies[i].price;
-      supplierMaterial.totalCost += buyRequest.custodies[i].price;
+      supplierMaterial.lastQuantity = +buyRequest.materials[i].quantity;
+      supplierMaterial.totalQuantity += +buyRequest.materials[i].quantity;
+      supplierMaterial.lastPrice = +buyRequest.materials[i].price;
+      supplierMaterial.totalCost +=
+        +buyRequest.materials[i].price * +buyRequest.materials[i].quantity;
 
       await supplierMaterial.save();
 
