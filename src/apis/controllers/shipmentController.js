@@ -391,7 +391,7 @@ const update = async (req, res) => {
  */
 const getAll = async (req, res) => {
   try {
-    const shipments = await Shipment.find();
+    const shipments = await Shipment.find().populate("order", "name");
 
     res.status(200).json({ data: shipments });
   } catch (error) {
@@ -407,7 +407,8 @@ const getAll = async (req, res) => {
 const getByID = async (req, res) => {
   const id = req.params.id;
   try {
-    const shipment = await Shipment.findById(id);
+    const shipment = await Shipment.findById(id).populate("order", "name");
+
     if (!shipment) {
       return res
         .status(404)

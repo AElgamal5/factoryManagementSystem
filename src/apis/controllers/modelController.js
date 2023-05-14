@@ -457,75 +457,119 @@ const addConsumptions = async (req, res) => {
         .json(errorFormat(id, "No model with this id", "id", "params"));
     }
 
+    //checks
     for (let i = 0; i < consumptions.length; i++) {
-      //color checks
-      const color = await Color.findById(consumptions[i].color);
-      if (!color) {
+      if (!idCheck(consumptions[i].material)) {
         return res
-          .status(404)
+          .status(400)
           .json(
             errorFormat(
-              consumptions[i].color,
-              "No color with this id",
-              `consumptions[${i}].color`,
+              consumptions[i].material,
+              "Not valid material id",
+              `consumptions[${i}].material`,
               "body"
             )
           );
       }
 
-      //size checks
-      const size = await Size.findById(consumptions[i].size);
-      if (!size) {
+      const material = await Material.findById(consumptions[i].material);
+      if (!material) {
         return res
           .status(404)
           .json(
             errorFormat(
-              consumptions[i].size,
-              "No size with this id",
-              `consumptions[${i}].size`,
+              consumptions[i].material,
+              "No material with with this id",
+              `consumptions[${i}].material`,
               "body"
             )
           );
       }
 
-      //check validity and existence of material
-      for (let j = 0; j < consumptions[i].materials.length; j++) {
-        if (!idCheck(consumptions[i].materials[j].id)) {
+      const exist = await Model.findOne({
+        _id: model._id,
+        "consumptions.material": material._id,
+      });
+
+      if (exist) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              material._id,
+              "This material is exist in consumptions array",
+              `consumptions[${i}].material`,
+              "body"
+            )
+          );
+      }
+
+      for (let j = 0; j < consumptions[i].colors.length; j++) {
+        if (!idCheck(consumptions[i].colors[j])) {
           return res
             .status(400)
             .json(
               errorFormat(
-                consumptions[i].materials[j].id,
-                "No valid material id",
-                `consumptions[${i}].materials[${j}].id`,
+                consumptions[i].colors[j],
+                "Not valid color id",
+                `consumptions[${i}].colors[${j}]`,
                 "body"
               )
             );
         }
 
-        const material = await Material.findById(
-          consumptions[i].materials[j].id
-        );
-        if (!material) {
+        const color = await Color.findById(consumptions[i].colors[j]);
+        if (!color) {
           return res
             .status(404)
             .json(
               errorFormat(
-                consumptions[i].materials[j].id,
-                "No material with this id",
-                `consumptions[${i}].materials[${j}].id`,
+                consumptions[i].colors[j],
+                "No color with this id",
+                `consumptions[${i}].colors[${i}]`,
                 "body"
               )
             );
         }
       }
 
+      for (let j = 0; j < consumptions[i].sizes.length; j++) {
+        if (!idCheck(consumptions[i].sizes[j])) {
+          return res
+            .status(400)
+            .json(
+              errorFormat(
+                consumptions[i].sizes[j],
+                "Not valid size id",
+                `consumptions[${i}].sizes[${j}]`,
+                "body"
+              )
+            );
+        }
+
+        const size = await Size.findById(consumptions[i].sizes[j]);
+        if (!size) {
+          return res
+            .status(404)
+            .json(
+              errorFormat(
+                consumptions[i].sizes[j],
+                "No size with this id",
+                `consumptions[${i}].sizes[${i}]`,
+                "body"
+              )
+            );
+        }
+      }
+    }
+
+    for (let i = 0; i < consumptions.length; i++) {
       model.consumptions.push(consumptions[i]);
     }
 
     await model.save();
 
-    res.status(200).json({ msg: "model updated tmam" });
+    res.status(200).json({ msg: "Model's consumptions updated tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "model.addConsumptions".bgYellow);
     !+process.env.PRODUCTION && console.log(error);
@@ -588,8 +632,17 @@ const getModelsUsingMaterial = async (req, res) => {
     }
 
     const models = await Model.find({
-      "consumptions.materials.id": mid,
-    }).select("_id name");
+      "consumptions.material": mid,
+    }).select("_id name consumptions.material consumptions.quantity");
+
+    if (models) {
+      for (let i = 0; i < models.length; i++) {
+        const index = models[i].consumptions.findIndex(
+          (con) => con.material.toString() === mid
+        );
+        models[i].consumptions = models[i].consumptions[index];
+      }
+    }
 
     res.status(200).json({ data: models });
   } catch (error) {

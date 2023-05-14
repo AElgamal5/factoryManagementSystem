@@ -39,7 +39,7 @@ const create = async (req, res) => {
  */
 const getAll = async (req, res) => {
   try {
-    const orders = await Order.find();
+    const orders = await Order.find().populate("client", "name");
 
     res.status(200).json({ data: orders });
   } catch (error) {
@@ -55,7 +55,7 @@ const getAll = async (req, res) => {
 const getByID = async (req, res) => {
   const id = req.params.id;
   try {
-    const order = await Order.findById(id);
+    const order = await Order.findById(id).populate("client", "name");
 
     if (!order) {
       return res

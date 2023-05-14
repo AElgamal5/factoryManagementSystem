@@ -110,20 +110,14 @@ const addConsumptionsValidation = [
     .isArray({ min: 1, max: 1000 })
     .withMessage("Model's consumptions must be array with length 1 to 1000"),
 
-  check("consumptions.*.materials")
-    .notEmpty()
-    .withMessage("Materials array is required")
-    .isArray({ min: 1, max: 1000 })
-    .withMessage("Materials array must be array with length 1 to 1000"),
-
-  check("consumptions.*.materials.*.id")
+  check("consumptions.*.material")
     .notEmpty()
     .withMessage("material's id is required")
     .isAlphanumeric()
     .isLength({ min: 24, max: 24 })
     .withMessage("Wrong material id"),
 
-  check("consumptions.*.material.*.quantity")
+  check("consumptions.*.quantity")
     .notEmpty()
     .withMessage("material's quantity is required")
     .isFloat({ min: 0.1 })
@@ -131,19 +125,17 @@ const addConsumptionsValidation = [
     .isFloat({ max: maxNo })
     .withMessage(`material's quantity maximum is ${maxNo}`),
 
-  check("consumptions.*.color")
+  check("consumptions.*.colors")
     .notEmpty()
-    .withMessage("Color id is required")
-    .isAlphanumeric()
-    .isLength({ min: 24, max: 24 })
-    .withMessage("Wrong color id"),
+    .withMessage("Colors array is required")
+    .isArray({ min: 1, max: 1000 })
+    .withMessage("Colors array must be array with length 1 to 1000"),
 
-  check("consumptions.*.size")
+  check("consumptions.*.sizes")
     .notEmpty()
-    .withMessage("Size id is required")
-    .isAlphanumeric()
-    .isLength({ min: 24, max: 24 })
-    .withMessage("Wrong size id"),
+    .withMessage("Sizes array is required")
+    .isArray({ min: 1, max: 1000 })
+    .withMessage("Sizes array must be array with length 1 to 1000"),
 ];
 
 const removeConsumptionsValidation = [

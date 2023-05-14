@@ -18,16 +18,13 @@ const modelSchema = new Schema(
 
     consumptions: [
       {
-        materials: [
-          {
-            id: { type: mongoose.Types.ObjectId, ref: "Material" },
-            quantity: { type: Number },
-          },
-        ],
+        material: { type: mongoose.Types.ObjectId, ref: "Material" },
 
-        color: { type: mongoose.Types.ObjectId, ref: "Color" },
+        quantity: { type: Number },
 
-        size: { type: mongoose.Types.ObjectId, ref: "Size" },
+        colors: [{ type: mongoose.Types.ObjectId, ref: "Color" }],
+
+        sizes: [{ type: mongoose.Types.ObjectId, ref: "Size" }],
       },
     ],
 
