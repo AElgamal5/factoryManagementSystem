@@ -1,4 +1,4 @@
-const { Custody, Role } = require("../models");
+const { Custody, Role, SupplierCustody, BuyRequest } = require("../models");
 const { errorFormat, idCheck } = require("../utils");
 
 /*
@@ -174,10 +174,69 @@ const deleteOne = async (req, res) => {
   }
 };
 
+/*
+ * method: GET
+ * path: /api/custody/supplier/brief/:sid
+ */
+const getCustodiesBySupplierID = async (req, res) => {
+  const sid = req.params.sid;
+
+  try {
+    if (!idCheck(sid)) {
+      return res
+        .status(400)
+        .json(errorFormat(sid, "Not valid supplier id", "sid", "params"));
+    }
+
+    const custodies = await SupplierCustody.find({ supplier: sid }).populate(
+      "custody",
+      "name"
+    );
+
+    res.status(200).json({ data: custodies });
+  } catch (error) {
+    console.log(
+      "Error is in: ".bgRed,
+      "custody.getCustodiesBySupplierID".bgYellow
+    );
+    !+process.env.PRODUCTION && console.log(error);
+  }
+};
+
+/*
+ * method: GET
+ * path: /api/custody/supplier/:sid
+ */
+const getCustodiesBySupplierIDInDetails = async (req, res) => {
+  const sid = req.params.sid;
+
+  try {
+    if (!idCheck(sid)) {
+      return res
+        .status(400)
+        .json(errorFormat(sid, "Not valid supplier id", "sid", "params"));
+    }
+
+    const custodies = await BuyRequest.find({
+      "custodies.supplier": sid,
+    }).select("name history custodies");
+
+    res.status(200).json({ data: custodies });
+  } catch (error) {
+    console.log(
+      "Error is in: ".bgRed,
+      "custody.getCustodiesBySupplierIDInDetails".bgYellow
+    );
+    !+process.env.PRODUCTION && console.log(error);
+  }
+};
+
 module.exports = {
   create,
   getAll,
   getByID,
   update,
   deleteOne,
+  getCustodiesBySupplierID,
+  getCustodiesBySupplierIDInDetails,
 };

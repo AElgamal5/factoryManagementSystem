@@ -35,4 +35,11 @@ router.get("/types/all", materialController.getAllTypes);
 
 router.get("/types/:type", materialController.getByType);
 
+router.get("/supplier/brief/:sid", materialController.getMaterialsBySupplierID);
+
+router.get(
+  "/supplier/:sid",
+  materialController.getMaterialsBySupplierIDInDetails
+);
+
 module.exports = router;

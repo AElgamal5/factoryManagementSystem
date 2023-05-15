@@ -1,4 +1,10 @@
-const { Material, Role, MaterialType } = require("../models");
+const {
+  Material,
+  Role,
+  MaterialType,
+  SupplierMaterial,
+  BuyRequest,
+} = require("../models");
 const { errorFormat, idCheck } = require("../utils");
 
 /*
@@ -223,7 +229,7 @@ const getAllTypes = async (req, res) => {
 };
 
 /*
- * method: POST
+ * method: GET
  * path: /api/material/types/:type
  */
 const getByType = async (req, res) => {
@@ -255,6 +261,63 @@ const getByType = async (req, res) => {
   }
 };
 
+/*
+ * method: GET
+ * path: /api/material/supplier/brief/:sid
+ */
+const getMaterialsBySupplierID = async (req, res) => {
+  const sid = req.params.sid;
+
+  try {
+    if (!idCheck(sid)) {
+      return res
+        .status(400)
+        .json(errorFormat(sid, "Not valid supplier id", "sid", "params"));
+    }
+
+    const custodies = await SupplierMaterial.find({ supplier: sid }).populate(
+      "material",
+      "name"
+    );
+
+    res.status(200).json({ data: custodies });
+  } catch (error) {
+    console.log(
+      "Error is in: ".bgRed,
+      "material.getMaterialsBySupplierID".bgYellow
+    );
+    !+process.env.PRODUCTION && console.log(error);
+  }
+};
+
+/*
+ * method: GET
+ * path: /api/material/supplier/:sid
+ */
+const getMaterialsBySupplierIDInDetails = async (req, res) => {
+  const sid = req.params.sid;
+
+  try {
+    if (!idCheck(sid)) {
+      return res
+        .status(400)
+        .json(errorFormat(sid, "Not valid supplier id", "sid", "params"));
+    }
+
+    const materials = await BuyRequest.find({
+      "materials.supplier": sid,
+    }).select("name history materials");
+
+    res.status(200).json({ data: materials });
+  } catch (error) {
+    console.log(
+      "Error is in: ".bgRed,
+      "material.getMaterialsBySupplierIDInDetails".bgYellow
+    );
+    !+process.env.PRODUCTION && console.log(error);
+  }
+};
+
 module.exports = {
   create,
   getAll,
@@ -263,4 +326,6 @@ module.exports = {
   deleteOne,
   getAllTypes,
   getByType,
+  getMaterialsBySupplierID,
+  getMaterialsBySupplierIDInDetails,
 };

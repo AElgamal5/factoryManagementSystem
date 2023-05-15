@@ -30,4 +30,11 @@ router.patch(
 
 router.delete("/:id", idValidation, custodyController.deleteOne);
 
+router.get("/supplier/brief/:sid", custodyController.getCustodiesBySupplierID);
+
+router.get(
+  "/supplier/:sid",
+  custodyController.getCustodiesBySupplierIDInDetails
+);
+
 module.exports = router;
