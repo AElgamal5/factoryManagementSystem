@@ -11,8 +11,8 @@ const create = async (req, res) => {
     const role = await Role.create({ title, number });
     res.status(201).json({ data: role });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "create".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "role.create".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -33,8 +33,8 @@ const getByID = async (req, res) => {
 
     res.status(200).json({ data: role });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "getByID".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "role.getByID".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -47,8 +47,8 @@ const getAll = async (req, res) => {
     const roles = await Role.find();
     res.status(200).json({ data: roles });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "getAll".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "role.getAll".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -70,8 +70,8 @@ const deleteOne = async (req, res) => {
 
     res.status(200).json({ msg: "Role deleted tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "deleteOne".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "role.deleteOne".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 module.exports = { create, getByID, getAll, deleteOne };

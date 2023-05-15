@@ -18,4 +18,5 @@ module.exports = {
   Size: require("./sizeModel"),
   Stage: require("./stageModel"),
   MaterialType: require("./materialTypeModel"),
+  MachineType: require("./machineTypeModel"),
 };

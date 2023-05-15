@@ -14,7 +14,7 @@ const create = async (req, res) => {
 
     res.status(201).json({ data: stage });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "create".bgYellow);
+    console.log("Error is in: ".bgRed, "stage.create".bgYellow);
     console.log(error);
   }
 };
@@ -29,7 +29,7 @@ const getAll = async (req, res) => {
 
     res.status(200).json({ data: stages });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "getAll".bgYellow);
+    console.log("Error is in: ".bgRed, "stage.getAll".bgYellow);
     console.log(error);
   }
 };
@@ -51,7 +51,7 @@ const getByID = async (req, res) => {
 
     res.status(200).json({ data: stage });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "getByID".bgYellow);
+    console.log("Error is in: ".bgRed, "stage.getByID".bgYellow);
     console.log(error);
   }
 };
@@ -82,7 +82,7 @@ const update = async (req, res) => {
 
     res.status(200).json({ msg: "stage updated tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "update".bgYellow);
+    console.log("Error is in: ".bgRed, "stage.update".bgYellow);
     console.log(error);
   }
 };
@@ -106,8 +106,8 @@ const deleteOne = async (req, res) => {
 
     res.status(200).json({ msg: "stage deleted tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "deleteOne".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "stage.deleteOne".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 

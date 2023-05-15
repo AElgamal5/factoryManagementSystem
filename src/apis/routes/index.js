@@ -16,4 +16,5 @@ module.exports = {
   carton: require("./carton"),
   shipment: require("./shipment"),
   order: require("./order"),
+  machineType: require("./machineType"),
 };

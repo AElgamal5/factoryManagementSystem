@@ -16,8 +16,8 @@ const create = async (req, res) => {
 
     res.status(201).json({ data: color });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "create".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "color.create".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -31,8 +31,8 @@ const getAll = async (req, res) => {
 
     res.status(200).json({ data: colors });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "getAll".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "color.getAll".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -53,8 +53,8 @@ const getByID = async (req, res) => {
 
     res.status(200).json({ data: color });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "getByID".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "color.getByID".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 
@@ -75,8 +75,8 @@ const deleteOne = async (req, res) => {
 
     res.status(200).json({ msg: "Color deleted tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "deleteOne".bgYellow);
-    console.log(error);
+    console.log("Error is in: ".bgRed, "color.deleteOne".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
   }
 };
 

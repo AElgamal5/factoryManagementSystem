@@ -16,4 +16,5 @@ module.exports = {
   cartonMiddlewares: require("./cartonMiddlewares"),
   shipmentMiddlewares: require("./shipmentMiddlewares"),
   orderMiddlewares: require("./orderMiddlewares"),
+  machineTypeMiddleware: require("./machineTypeMiddleware"),
 };
