@@ -191,58 +191,55 @@ const updateModels = async (req, res) => {
       }
     }
 
+    //empty these fields
+    order.totalMaterialsRequired = [];
+    order.totalQuantity = 0;
+    order.models = [];
+
     for (let i = 0; i < models.length; i++) {
       const model = await Model.findOne({
         _id: models[i].id,
-        "consumptions.color": models[i].color,
-        "consumptions.size": models[i].size,
+        "consumptions.colors": models[i].color,
+        "consumptions.sizes": models[i].size,
       });
 
-      order.totalQuantity = 0;
-      order.totalQuantity += +models[i].quantity;
+      for (let j = 0; j < model.consumptions.length; j++) {
+        const colorIndex = model.consumptions[j].colors.findIndex(
+          (color) => color.toString() === models[i].color
+        );
+
+        const sizeIndex = model.consumptions[j].sizes.findIndex(
+          (size) => size.toString() === models[i].size
+        );
+
+        if (colorIndex > -1 && sizeIndex > -1) {
+          const totalIndex = order.totalMaterialsRequired.findIndex(
+            (tot) => tot.id.toString() === model.consumptions[j].material
+          );
+
+          if (totalIndex > -1) {
+            order.totalMaterialsRequired[totalIndex].quantity +=
+              +model.consumptions[j].quantity * models[i].quantity;
+          } else {
+            order.totalMaterialsRequired.push({
+              id: model.consumptions[j].material,
+              quantity: +model.consumptions[j].quantity * models[i].quantity,
+            });
+          }
+        }
+      }
+
+      order.totalQuantity += models[i].quantity;
+
       order.models.push({
         id: models[i].id,
         color: models[i].color,
         size: models[i].size,
         quantity: models[i].quantity,
       });
-      await order.save();
-
-      // const index = model.consumptions.findIndex(
-      //   (con) =>
-      //     con.color.toString() === models[i].color &&
-      //     con.size.toString() === models[i].size
-      // );
-
-      // console.log(model.consumptions[index].materials);
-
-      // for (let j = 0; j < model.consumptions[index].materials.length; j++) {
-      //   const exist = await Order.findOneAndUpdate(
-      //     {
-      //       _id: order._id,
-      //       "totalMaterialsRequired.id":
-      //         model.consumptions[index].materials[j].id,
-      //     },
-      //     {
-      //       $inc: {
-      //         "totalMaterialsRequired.$.quantity":
-      //           +model.consumptions[index].materials[j].quantity *
-      //           +models[i].quantity,
-      //       },
-      //     }
-      //   );
-
-      //   if (!exist) {
-      //     order.totalMaterialsRequired.push({
-      //       id: model.consumptions[index].materials[j].id,
-      //       quantity:
-      //         +model.consumptions[index].materials[j].quantity *
-      //         +models[i].quantity,
-      //     });
-      //     await order.save();
-      //   }
-      // }
     }
+
+    await order.save();
 
     res.status(200).json({ msg: "Models added to order tmam" });
   } catch (error) {
