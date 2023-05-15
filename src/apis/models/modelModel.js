@@ -12,7 +12,7 @@ const modelSchema = new Schema(
       {
         id: { type: mongoose.Types.ObjectId, ref: "Stage" },
         priority: { type: Number },
-        machineType: { type: String },
+        machineType: { type: mongoose.Types.ObjectId, ref: "MachineType" },
       },
     ],
 

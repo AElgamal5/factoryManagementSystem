@@ -294,11 +294,25 @@ const addStages = async (req, res) => {
       //     );
       // }
 
-      let stage = await Stage.findById(stages[i].id);
+      const stage = await Stage.findById(stages[i].id);
       if (!stage) {
         return res
           .status(404)
           .json(errorFormat(id, "No stage with this id", "id", "body"));
+      }
+
+      const machineType = await MachineType.findById(stages[i].machineType);
+      if (!machineType) {
+        return res
+          .status(404)
+          .json(
+            errorFormat(
+              stages[i].machineType,
+              "No machine type with this array",
+              `stages[${i}].machineType`,
+              "body"
+            )
+          );
       }
 
       model.stages.push({
