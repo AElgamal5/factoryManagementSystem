@@ -1,4 +1,11 @@
-const { Model, Stage, Material, Color, Size } = require("../models");
+const {
+  Model,
+  Stage,
+  Material,
+  Color,
+  Size,
+  MachineTypes,
+} = require("../models");
 const { errorFormat, idCheck } = require("../utils");
 
 /*
