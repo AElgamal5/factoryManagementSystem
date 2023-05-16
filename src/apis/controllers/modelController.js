@@ -106,7 +106,9 @@ const getByID = async (req, res) => {
  */
 const getAll = async (req, res) => {
   try {
-    const models = await Model.find();
+    const models = await Model.find()
+      .populate("colors", "name")
+      .populate("sizes", "name");
 
     res.status(200).json({ data: models });
   } catch (error) {
