@@ -217,7 +217,7 @@ const updateStyles = async (req, res) => {
         quantity: styles[i].quantity,
       });
 
-      carton.quantity += styles[i].quantity;
+      carton.quantity += +styles[i].quantity;
     }
 
     await carton.save();
