@@ -60,7 +60,7 @@ const getByID = async (req, res) => {
       .populate("models.id", "name")
       .populate("models.color", "name")
       .populate("models.size", "name")
-      .populate("models.shipments", "name createdAt");
+      .populate("shipments", "name createdAt");
 
     if (!order) {
       return res
