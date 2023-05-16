@@ -16,6 +16,10 @@ const modelSchema = new Schema(
       },
     ],
 
+    colors: [{ type: mongoose.Types.ObjectId, ref: "Color" }],
+
+    sizes: [{ type: mongoose.Types.ObjectId, ref: "Size" }],
+
     consumptions: [
       {
         material: { type: mongoose.Types.ObjectId, ref: "Material" },

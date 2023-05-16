@@ -13,10 +13,54 @@ const { errorFormat, idCheck } = require("../utils");
  * path: /api/model/
  */
 const create = async (req, res) => {
-  const { name, note, details, image } = req.body;
+  const { name, note, details, colors, sizes, image } = req.body;
 
   try {
-    const model = await Model.create({ name, note, details });
+    for (let i = 0; i < colors.length; i++) {
+      if (!idCheck(colors[i])) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(colors[i], "Not valid color", `colors[${i}]`, "body")
+          );
+      }
+      const color = await Color.findById(colors[i]);
+      if (!color) {
+        return res
+          .status(404)
+          .json(
+            errorFormat(
+              colors[i],
+              "No color with this id",
+              `colors[${i}]`,
+              "body"
+            )
+          );
+      }
+
+      if (!idCheck(sizes[i])) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(colors[i], "Not valid size", `sizes[${i}]`, "body")
+          );
+      }
+      const size = await Size.findById(sizes[i]);
+      if (!size) {
+        return res
+          .status(404)
+          .json(
+            errorFormat(
+              sizes[i],
+              "No color with this id",
+              `sizes[${i}]`,
+              "body"
+            )
+          );
+      }
+    }
+
+    const model = await Model.create({ name, note, details, colors, sizes });
 
     res.status(201).json({ data: model });
   } catch (error) {
@@ -33,7 +77,14 @@ const getByID = async (req, res) => {
   const id = req.params.id;
 
   try {
-    const model = await Model.findById(id);
+    const model = await Model.findById(id)
+      .populate("colors", "name")
+      .populate("sizes", "name")
+      .populate("stages.id", "name")
+      .populate("stages.machineType", "name")
+      .populate("consumptions.material", "name")
+      .populate("consumptions.colors", "name")
+      .populate("consumptions.sizes", "name");
 
     if (!model) {
       return res
