@@ -4,7 +4,7 @@ const {
   Material,
   Color,
   Size,
-  MachineTypes,
+  MachineType,
 } = require("../models");
 const { errorFormat, idCheck } = require("../utils");
 
@@ -308,14 +308,14 @@ const addStages = async (req, res) => {
           .json(errorFormat(id, "No stage with this id", "id", "body"));
       }
 
-      const machineType = await MachineTypes.findById(stages[i].machineType);
+      const machineType = await MachineType.findById(stages[i].machineType);
       if (!machineType) {
         return res
           .status(404)
           .json(
             errorFormat(
               stages[i].machineType,
-              "No machine type with this array",
+              "No machine type with this id",
               `stages[${i}].machineType`,
               "body"
             )
