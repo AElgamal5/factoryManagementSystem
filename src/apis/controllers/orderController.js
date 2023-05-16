@@ -295,7 +295,21 @@ const getOrdersByModelID = async (req, res) => {
         .json(errorFormat(mid, "No model with this id", "mid", "params"));
     }
 
-    const orders = await Order.find({ "models.id": mid }).select("name");
+    const orders = await Order.find({ "models.id": mid })
+      .select("name models")
+      .populate("models.color", "name")
+      .populate("models.size", "name");
+
+    for (let i = 0; i < orders.length; i++) {
+      let models = [];
+      for (let j = 0; j < orders[i].models.length; j++) {
+        if (orders[i].models[j].id.toString() === mid) {
+          models.push(orders[i].models[j]);
+        }
+      }
+
+      orders[i].models = models;
+    }
 
     return res.status(200).json({ data: orders });
   } catch (error) {
