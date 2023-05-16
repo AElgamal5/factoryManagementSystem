@@ -37,7 +37,8 @@ const create = async (req, res) => {
             )
           );
       }
-
+    }
+    for (let i = 0; i < sizes.length; i++) {
       if (!idCheck(sizes[i])) {
         return res
           .status(400)
@@ -143,13 +144,65 @@ const deleteOne = async (req, res) => {
  */
 const updateProfile = async (req, res) => {
   const id = req.params.id;
-  const { name, note, details, image } = req.body;
+  const { name, note, details, colors, sizes, image } = req.body;
 
   try {
+    if (colors) {
+      for (let i = 0; i < colors.length; i++) {
+        if (!idCheck(colors[i])) {
+          return res
+            .status(400)
+            .json(
+              errorFormat(colors[i], "Not valid color", `colors[${i}]`, "body")
+            );
+        }
+        const color = await Color.findById(colors[i]);
+        if (!color) {
+          return res
+            .status(404)
+            .json(
+              errorFormat(
+                colors[i],
+                "No color with this id",
+                `colors[${i}]`,
+                "body"
+              )
+            );
+        }
+      }
+    }
+
+    if (sizes) {
+      for (let i = 0; i < sizes.length; i++) {
+        if (!idCheck(sizes[i])) {
+          return res
+            .status(400)
+            .json(
+              errorFormat(colors[i], "Not valid size", `sizes[${i}]`, "body")
+            );
+        }
+        const size = await Size.findById(sizes[i]);
+        if (!size) {
+          return res
+            .status(404)
+            .json(
+              errorFormat(
+                sizes[i],
+                "No color with this id",
+                `sizes[${i}]`,
+                "body"
+              )
+            );
+        }
+      }
+    }
+
     const model = await Model.findByIdAndUpdate(id, {
       name,
       note,
       details,
+      colors,
+      sizes,
     });
 
     if (!model) {

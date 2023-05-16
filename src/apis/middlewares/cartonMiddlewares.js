@@ -14,15 +14,15 @@ const createValidate = [
     })
     .withMessage("Carton's name length should be 1 to 200 characters"),
 
-  check("quantity")
-    .notEmpty()
-    .withMessage("Carton's quantity is required")
-    .isNumeric()
-    .withMessage("Carton's quantity must contain numbers only")
-    .isInt({ min: 1 })
-    .withMessage("Carton's quantity must be greater than or equal 1")
-    .isInt({ max: maxNo })
-    .withMessage("Carton's quantity value is too large"),
+  // check("quantity")
+  //   .notEmpty()
+  //   .withMessage("Carton's quantity is required")
+  //   .isNumeric()
+  //   .withMessage("Carton's quantity must contain numbers only")
+  //   .isInt({ min: 1 })
+  //   .withMessage("Carton's quantity must be greater than or equal 1")
+  //   .isInt({ max: maxNo })
+  //   .withMessage("Carton's quantity value is too large"),
 
   check("model")
     .notEmpty()
@@ -115,6 +115,14 @@ const stylesValidate = [
     .isAlphanumeric()
     .isLength({ min: 24, max: 24 })
     .withMessage("Wrong size id"),
+
+  check("styles.*.quantity")
+    .notEmpty()
+    .withMessage("Styles's quantity is required")
+    .isNumeric()
+    .withMessage("Styles's quantity must be a number")
+    .isInt({ min: 1, max: maxNo })
+    .withMessage(`Styles's quantity range form 1 to ${maxNo}`),
 ];
 
 module.exports = { createValidate, updateValidate, stylesValidate };

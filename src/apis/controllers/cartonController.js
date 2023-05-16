@@ -6,7 +6,7 @@ const { errorFormat, idCheck } = require("../utils");
  * path: /api/carton/
  */
 const create = async (req, res) => {
-  const { name, quantity, model: modelID, details, note } = req.body;
+  const { name, model: modelID, details, note } = req.body;
 
   try {
     //check model id
@@ -24,7 +24,6 @@ const create = async (req, res) => {
 
     const carton = await Carton.create({
       name,
-      quantity,
       model: modelID,
       details,
       note,
@@ -60,7 +59,7 @@ const getByID = async (req, res) => {
   const id = req.params.id;
 
   try {
-    const carton = await Carton.findById(id);
+    const carton = await Carton.findById(id).populate("model", "name");
 
     if (!carton) {
       return res
@@ -164,6 +163,8 @@ const updateStyles = async (req, res) => {
         .json(errorFormat(id, "No carton with this id", "id", "params"));
     }
 
+    carton.quantity += 0;
+
     for (let i = 0; i < styles.length; i++) {
       //style checks
       if (!idCheck(styles[i].color)) {
@@ -193,8 +194,8 @@ const updateStyles = async (req, res) => {
 
       const exist = await Model.findOne({
         _id: carton.model,
-        "consumptions.color": styles[i].color,
-        "consumptions.size": styles[i].size,
+        "consumptions.colors": styles[i].color,
+        "consumptions.sizes": styles[i].size,
       });
 
       if (!exist) {
@@ -213,7 +214,10 @@ const updateStyles = async (req, res) => {
       carton.styles.push({
         color: styles[i].color,
         size: styles[i].size,
+        quantity: styles[i].quantity,
       });
+
+      carton.quantity += styles[i].quantity;
     }
 
     await carton.save();

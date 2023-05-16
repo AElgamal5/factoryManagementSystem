@@ -87,6 +87,30 @@ const updateValidate = [
       max: 200,
     })
     .withMessage("Note length should be 3 to 200 characters"),
+
+  check("colors")
+    .optional()
+    .isArray({ min: 1, max: 1000 })
+    .withMessage("Model's colors must be array with length 1 to 1000"),
+
+  check("colors.*")
+    .notEmpty()
+    .withMessage("Color is required")
+    .isAlphanumeric()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Wrong color id"),
+
+  check("sizes")
+    .optional()
+    .isArray({ min: 1, max: 1000 })
+    .withMessage("Model's sizes must be array with length 1 to 1000"),
+
+  check("sizes.*")
+    .notEmpty()
+    .withMessage("Size is required")
+    .isAlphanumeric()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Wrong size id"),
 ];
 
 const addStagesValidation = [

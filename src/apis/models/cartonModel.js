@@ -11,7 +11,7 @@ const cartonSchema = new Schema(
 
     quantity: {
       type: Number,
-      required: true,
+      default: 0,
     },
 
     model: {
@@ -23,6 +23,7 @@ const cartonSchema = new Schema(
       {
         color: { type: mongoose.Types.ObjectId, ref: "Color" },
         size: { type: mongoose.Types.ObjectId, ref: "Size" },
+        quantity: { type: Number },
       },
     ],
 
