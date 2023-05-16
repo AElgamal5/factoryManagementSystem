@@ -38,4 +38,6 @@ router.patch(
 
 router.delete("/:id", idValidation, orderController.deleteOne);
 
+router.get("/model/:mid", orderController.getOrdersByModelID);
+
 module.exports = router;

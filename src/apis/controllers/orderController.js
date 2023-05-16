@@ -271,4 +271,41 @@ const deleteOne = async (req, res) => {
   }
 };
 
-module.exports = { create, getAll, getByID, update, updateModels, deleteOne };
+/*
+ * method: GET
+ * path: /api/order/model/:mid
+ */
+const getOrdersByModelID = async (req, res) => {
+  const mid = req.params.mid;
+
+  try {
+    if (!idCheck(mid)) {
+      return res
+        .status(400)
+        .json(errorFormat(mid, "Not valid model id", "mid", "params"));
+    }
+    const model = await Model.findById(mid);
+    if (!model) {
+      return res
+        .status(404)
+        .json(errorFormat(mid, "No model with this id", "mid", "params"));
+    }
+
+    const orders = await Order.find({ "models.id": mid }).select("name");
+
+    return res.status(200).json({ data: orders });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "order.getOrdersByModelID".bgYellow);
+    !+process.env.PRODUCTION && console.log(error);
+  }
+};
+
+module.exports = {
+  create,
+  getAll,
+  getByID,
+  update,
+  updateModels,
+  deleteOne,
+  getOrdersByModelID,
+};
