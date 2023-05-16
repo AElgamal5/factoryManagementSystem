@@ -74,4 +74,6 @@ router.patch(
 
 router.get("/material/:mid", modelController.getModelsUsingMaterial);
 
+router.post("/consumptions/:mid", modelController.getConsumptionsByIDAndStyle);
+
 module.exports = router;

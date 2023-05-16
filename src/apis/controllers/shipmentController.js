@@ -107,6 +107,9 @@ const addCartons = async (req, res) => {
       }
     }
 
+    //replace with given cartons
+    shipment.cartons = [];
+
     //updating docs
     for (let i = 0; i < cartons.length; i++) {
       const carton = await Carton.findById(cartons[i].id);

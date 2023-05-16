@@ -778,6 +778,88 @@ const getModelsUsingMaterial = async (req, res) => {
   }
 };
 
+/*
+ * method: POST
+ * path: /api/model/consumptions/:mid
+ */
+const getConsumptionsByIDAndStyle = async (req, res) => {
+  const mid = req.params.mid;
+  const { color: colorID, size: sizeID } = req.body;
+
+  try {
+    //checks
+    if (!idCheck(colorID)) {
+      return res
+        .status(400)
+        .json(errorFormat(colorID, "Not valid color id", "color", "body"));
+    }
+    const color = await Color.findById(colorID);
+    if (!color) {
+      return res
+        .status(404)
+        .json(errorFormat(colorID, "NO color with this id", "color", "body"));
+    }
+
+    if (!idCheck(sizeID)) {
+      return res
+        .status(400)
+        .json(errorFormat(sizeID, "Not valid size id", "size", "body"));
+    }
+    const size = await Size.findById(sizeID);
+    if (!size) {
+      return res
+        .status(404)
+        .json(errorFormat(sizeID, "NO size with this id", "size", "body"));
+    }
+
+    if (!idCheck(mid)) {
+      return res
+        .status(400)
+        .json(errorFormat(mid, "Not valid model id", "mid", "params"));
+    }
+
+    const model = await Model.findById(mid)
+      .populate("consumptions.material", "name")
+      .populate("consumptions.colors", "name")
+      .populate("consumptions.sizes", "name");
+
+    if (!model) {
+      return res
+        .status(404)
+        .json(errorFormat(mid, "NO model with this id", "mid", "params"));
+    }
+
+    let consumptions = [];
+
+    for (let i = 0; i < model.consumptions.length; i++) {
+      const colorIndex = model.consumptions[i].colors.findIndex(
+        (color) => color._id.toString() === colorID
+      );
+      if (colorIndex < 0) {
+        continue;
+      }
+      const sizeIndex = model.consumptions[i].sizes.findIndex(
+        (size) => size._id.toString() === sizeID
+      );
+      if (sizeIndex < 0) {
+        continue;
+      }
+
+      model.consumptions[i].colors = model.consumptions[i].colors[colorIndex];
+      model.consumptions[i].sizes = model.consumptions[i].sizes[sizeIndex];
+
+      consumptions.push(model.consumptions[i]);
+    }
+    res.status(200).json({ data: consumptions });
+  } catch (error) {
+    console.log(
+      "Error is in: ".bgRed,
+      "model.getConsumptionsByIDAndStyle".bgYellow
+    );
+    !+process.env.PRODUCTION && console.log(error);
+  }
+};
+
 module.exports = {
   create,
   getByID,
@@ -795,4 +877,5 @@ module.exports = {
   addConsumptions,
   removeConsumptions,
   getModelsUsingMaterial,
+  getConsumptionsByIDAndStyle,
 };
