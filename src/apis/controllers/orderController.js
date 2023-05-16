@@ -55,7 +55,11 @@ const getAll = async (req, res) => {
 const getByID = async (req, res) => {
   const id = req.params.id;
   try {
-    const order = await Order.findById(id).populate("client", "name");
+    const order = await Order.findById(id)
+      .populate("client", "name")
+      .populate("models.id", "name")
+      .populate("models.color", "name")
+      .populate("models.size", "name");
 
     if (!order) {
       return res
