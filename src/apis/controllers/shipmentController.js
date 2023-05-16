@@ -453,6 +453,38 @@ const deleteOne = async (req, res) => {
   }
 };
 
+/*
+ * method: GET
+ * path: /api/shipment/carton/:cid
+ */
+const getShipmentsByCartonID = async (req, res) => {
+  cid = req.params.cid;
+
+  try {
+    if (!idCheck(cid)) {
+      return res
+        .status(400)
+        .json(errorFormat(cid, "Not valid carton id", "cid", "params"));
+    }
+    const carton = await Carton.findById(cid);
+    if (!carton) {
+      return res
+        .status(404)
+        .json(errorFormat(cid, "No carton with this id", "cid", "params"));
+    }
+
+    const shipments = await Shipment.find({ "cartons.id": cid });
+
+    return res.status(200).json({ data: shipments });
+  } catch (error) {
+    console.log(
+      "Error is in: ".bgRed,
+      "shipment.getShipmentsByCartonID".bgYellow
+    );
+    !+process.env.PRODUCTION && console.log(error);
+  }
+};
+
 module.exports = {
   create,
   addCartons,
@@ -463,4 +495,5 @@ module.exports = {
   getAll,
   getByID,
   deleteOne,
+  getShipmentsByCartonID,
 };

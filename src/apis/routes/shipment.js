@@ -50,4 +50,6 @@ router.get("/:id", idValidation, shipmentController.getByID);
 
 router.delete("/:id", idValidation, shipmentController.deleteOne);
 
+router.get("/carton/:cid", shipmentController.getShipmentsByCartonID);
+
 module.exports = router;
