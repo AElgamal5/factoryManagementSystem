@@ -59,7 +59,8 @@ const getByID = async (req, res) => {
       .populate("client", "name")
       .populate("models.id", "name")
       .populate("models.color", "name")
-      .populate("models.size", "name");
+      .populate("models.size", "name")
+      .populate("models.shipments", "name createdAt");
 
     if (!order) {
       return res
