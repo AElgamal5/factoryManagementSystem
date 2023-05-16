@@ -308,7 +308,7 @@ const addStages = async (req, res) => {
           .json(errorFormat(id, "No stage with this id", "id", "body"));
       }
 
-      const machineType = await MachineType.findById(stages[i].machineType);
+      const machineType = await MachineTypes.findById(stages[i].machineType);
       if (!machineType) {
         return res
           .status(404)
