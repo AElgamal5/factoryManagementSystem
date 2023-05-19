@@ -17,4 +17,5 @@ module.exports = {
   shipmentMiddlewares: require("./shipmentMiddlewares"),
   orderMiddlewares: require("./orderMiddlewares"),
   machineTypeMiddleware: require("./machineTypeMiddleware"),
+  userRoleMiddlewares: require("./userRoleMiddlewares"),
 };

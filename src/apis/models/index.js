@@ -19,4 +19,5 @@ module.exports = {
   Stage: require("./stageModel"),
   MaterialType: require("./materialTypeModel"),
   MachineType: require("./machineTypeModel"),
+  UserRole: require("./userRoleModel"),
 };
