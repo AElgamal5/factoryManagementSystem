@@ -18,4 +18,5 @@ module.exports = {
   orderController: require("./orderController"),
   machineTypeController: require("./machineTypeController"),
   userRoleController: require("./userRoleController"),
+  userController: require("./userController"),
 };

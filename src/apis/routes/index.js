@@ -18,4 +18,5 @@ module.exports = {
   order: require("./order"),
   machineType: require("./machineType"),
   userRole: require("./userRole"),
+  user: require("./user"),
 };

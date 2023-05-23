@@ -20,4 +20,5 @@ module.exports = {
   MaterialType: require("./materialTypeModel"),
   MachineType: require("./machineTypeModel"),
   UserRole: require("./userRoleModel"),
+  User: require("./userModel"),
 };
