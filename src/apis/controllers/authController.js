@@ -209,29 +209,43 @@ const test = async (req, res) => {
               "headers"
             )
           );
+      } else {
+        const user = await User.findOne({ refreshToken: refreshToken });
+        if (!user) {
+          return res
+            .status(200)
+            .json(
+              errorFormat(
+                refreshToken,
+                "No user with this refresh token",
+                "refreshToken",
+                "body"
+              )
+            );
+        }
+
+        res.status(200).json({ msg: "Token tmam" });
       }
     });
 
-    const user = await User.findOne({ refreshToken: refreshToken });
-    if (!user) {
-      return res
-        .status(200)
-        .json(
-          errorFormat(
-            refreshToken,
-            "No user with this refresh token",
-            "refreshToken",
-            "body"
-          )
-        );
-    }
+    // const user = await User.findOne({ refreshToken: refreshToken });
+    // if (!user) {
+    //   return res
+    //     .status(200)
+    //     .json(
+    //       errorFormat(
+    //         refreshToken,
+    //         "No user with this refresh token",
+    //         "refreshToken",
+    //         "body"
+    //       )
+    //     );
+    // }
 
-    res.status(200).json({ msg: "Token tmam" });
+    // res.status(200).json({ msg: "Token tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "auth.test".bgYellow);
-    // if (process.env.PRODUCTION === "false")
-
-    console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
