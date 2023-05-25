@@ -28,7 +28,7 @@ const create = async (req, res) => {
     res.status(201).json({ data: buyRequest });
   } catch (error) {
     console.log("Error is in: ".bgRed, "buyRequest.create".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -43,7 +43,7 @@ const getAll = async (req, res) => {
     res.status(200).json({ data: buyRequests });
   } catch (error) {
     console.log("Error is in: ".bgRed, "buyRequest.getAll".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -70,7 +70,7 @@ const getByID = async (req, res) => {
     res.status(200).json({ data: buyRequest });
   } catch (error) {
     console.log("Error is in: ".bgRed, "buyRequest.getByID".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -92,7 +92,7 @@ const deleteOne = async (req, res) => {
     res.status(200).json({ msg: "Buy request deleted tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "buyRequest.deleteOne".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -122,7 +122,7 @@ const updateProfile = async (req, res) => {
     res.status(200).json({ msg: "Buy request updated tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "buyRequest.updateProfile".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -238,7 +238,7 @@ const addMaterials = async (req, res) => {
     res.status(200).json({ msg: "materials added tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "buyRequest.addMaterials".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -348,7 +348,7 @@ const addCustodies = async (req, res) => {
     res.status(200).json({ msg: "custodies added tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "buyRequest.addCustodies".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -384,7 +384,7 @@ const removeMaterials = async (req, res) => {
     res.status(200).json({ msg: "materials removed tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "buyRequest.removeMaterials".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -420,7 +420,7 @@ const removeCustodies = async (req, res) => {
     res.status(200).json({ msg: "custodies removed tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "buyRequest.removeCustodies".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -472,7 +472,7 @@ const approve = async (req, res) => {
     res.status(200).json({ msg: "Buy request approved tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "buyRequest.approve".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -658,7 +658,7 @@ const delivered = async (req, res) => {
     res.status(200).json({ msg: "Buy request delivered tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "buyRequest.delivered".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -734,7 +734,7 @@ const updateMaterials = async (req, res) => {
     res.status(200).json({ msg: "Buy request materials updated tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "buyRequest.updateMaterials".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -810,7 +810,7 @@ const updateCustodies = async (req, res) => {
     res.status(200).json({ msg: "Buy request custodies updated tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "buyRequest.updateCustodies".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 

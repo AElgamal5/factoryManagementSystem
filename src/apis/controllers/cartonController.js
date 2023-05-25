@@ -32,7 +32,7 @@ const create = async (req, res) => {
     res.status(201).json({ data: carton });
   } catch (error) {
     console.log("Error is in: ".bgRed, "carton.create".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -47,7 +47,7 @@ const getAll = async (req, res) => {
     res.status(200).json({ data: cartons });
   } catch (error) {
     console.log("Error is in: ".bgRed, "carton.getAll".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -70,7 +70,7 @@ const getByID = async (req, res) => {
     res.status(200).json({ data: carton });
   } catch (error) {
     console.log("Error is in: ".bgRed, "carton.getByID".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -119,7 +119,7 @@ const update = async (req, res) => {
     res.status(200).json({ msg: "Carton updated tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "carton.update".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -142,7 +142,7 @@ const deleteOne = async (req, res) => {
     res.status(200).json({ msg: "Carton deleted tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "carton.deleteOne".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -225,7 +225,7 @@ const updateStyles = async (req, res) => {
     res.status(200).json({ msg: "Carton styles updated tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "carton.updateStyles".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 

@@ -28,7 +28,7 @@ const create = async (req, res) => {
     res.status(201).json({ data: supplier });
   } catch (error) {
     console.log("Error is in: ".bgRed, "supplier.create".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -50,7 +50,7 @@ const getByID = async (req, res) => {
     res.status(200).json({ data: supplier });
   } catch (error) {
     console.log("Error is in: ".bgRed, "supplier.getByID".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -65,7 +65,7 @@ const getAll = async (req, res) => {
     res.status(200).json({ data: suppliers });
   } catch (error) {
     console.log("Error is in: ".bgRed, "supplier.getAll".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -114,7 +114,7 @@ const update = async (req, res) => {
     res.status(200).json({ msg: "Supplier is updated tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "supplier.update".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -135,7 +135,7 @@ const deleteOne = async (req, res) => {
     res.status(200).json({ msg: "Supplier deleted tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "supplier.deleteOne".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -164,7 +164,7 @@ const getSuppliersByCustody = async (req, res) => {
       "Error is in: ".bgRed,
       "supplier.getSuppliersByCustody".bgYellow
     );
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -193,7 +193,7 @@ const getSuppliersByMaterial = async (req, res) => {
       "Error is in: ".bgRed,
       "supplier.getSuppliersByCustody".bgYellow
     );
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 

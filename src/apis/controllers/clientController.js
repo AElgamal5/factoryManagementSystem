@@ -30,7 +30,7 @@ const create = async (req, res) => {
     res.status(201).json({ data: client });
   } catch (error) {
     console.log("Error is in: ".bgRed, "client.create".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -44,7 +44,7 @@ const getAll = async (req, res) => {
     res.status(200).json({ data: clients });
   } catch (error) {
     console.log("Error is in: ".bgRed, "client.getAll".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -66,7 +66,7 @@ const getByID = async (req, res) => {
     res.status(200).json({ data: client });
   } catch (error) {
     console.log("Error is in: ".bgRed, "client.getByID".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -114,7 +114,7 @@ const update = async (req, res) => {
     res.status(200).json({ msg: "Client updated tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "client.update".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -136,7 +136,7 @@ const deleteOne = async (req, res) => {
     res.status(200).json({ msg: "Client deleted tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "client.deleteOne".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 

@@ -14,7 +14,7 @@ const create = async (req, res) => {
     res.status(201).json({ data: materialType });
   } catch (error) {
     console.log("Error is in: ".bgRed, "materialType.create".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -29,7 +29,7 @@ const getAll = async (req, res) => {
     res.status(200).json({ data: materialTypes });
   } catch (error) {
     console.log("Error is in: ".bgRed, "materialType.getAll".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -52,7 +52,7 @@ const getByID = async (req, res) => {
     res.status(200).json({ data: materialType });
   } catch (error) {
     console.log("Error is in: ".bgRed, "materialType.getByID".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -75,7 +75,7 @@ const deleteOne = async (req, res) => {
     res.status(200).json({ msg: "MaterialType deleted tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "materialType.deleteOne".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 

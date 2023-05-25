@@ -14,7 +14,7 @@ const create = async (req, res) => {
     res.status(201).json({ data: doc });
   } catch (error) {
     console.log("Error is in: ".bgRed, "userRole.create".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -28,7 +28,7 @@ const getAll = async (req, res) => {
     res.status(200).json({ data: docs });
   } catch (error) {
     console.log("Error is in: ".bgRed, "userRole.getAll".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -50,7 +50,7 @@ const getByID = async (req, res) => {
     res.status(200).json({ data: doc });
   } catch (error) {
     console.log("Error is in: ".bgRed, "userRole.getByID".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -79,7 +79,7 @@ const update = async (req, res) => {
     res.status(200).json({ msg: "User role updated tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "userRole.update".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -102,7 +102,7 @@ const deleteOne = async (req, res) => {
     res.status(200).json({ msg: "User role deleted tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "userRole.deleteOne".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 

@@ -40,7 +40,7 @@ const create = async (req, res) => {
     res.status(201).json({ data: user });
   } catch (error) {
     console.log("Error is in: ".bgRed, "user.create".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -54,7 +54,7 @@ const getAll = async (req, res) => {
     res.status(200).json({ data: users });
   } catch (error) {
     console.log("Error is in: ".bgRed, "user.getAll".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -76,7 +76,7 @@ const getByID = async (req, res) => {
     res.status(200).json({ data: user });
   } catch (error) {
     console.log("Error is in: ".bgRed, "user.getByID".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -131,7 +131,7 @@ const update = async (req, res) => {
     res.status(200).json({ msg: "User updated tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "user.update".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -153,7 +153,7 @@ const deleteOne = async (req, res) => {
     res.status(200).json({ msg: "User deleted tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "user.deleteOne".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 

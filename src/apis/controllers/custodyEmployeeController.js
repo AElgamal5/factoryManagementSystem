@@ -190,7 +190,7 @@ const assign = async (req, res) => {
     res.status(201).json({ msg: "Custody assigned tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "custodyEmployee.assign".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -390,7 +390,7 @@ const back = async (req, res) => {
     res.status(200).json({ msg: "Custody returned tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "custodyEmployee.back".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -422,7 +422,7 @@ const allCustodiesForEmployee = async (req, res) => {
       "Error is in: ".bgRed,
       "custodyEmployee.allCustodiesForEmployee".bgYellow
     );
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -454,7 +454,7 @@ const allEmployeesForCustody = async (req, res) => {
       "Error is in: ".bgRed,
       "custodyEmployee.allEmployeesForCustody".bgYellow
     );
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -482,7 +482,7 @@ const updateNote = async (req, res) => {
     res.status(200).json({ msg: "note added tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "custodyEmployee.updateNote".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -505,7 +505,7 @@ const getByID = async (req, res) => {
     res.status(200).json({ data: doc });
   } catch (error) {
     console.log("Error is in: ".bgRed, "custodyEmployee.getByID".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -534,7 +534,7 @@ const getByCustodyIDAndEmployeeID = async (req, res) => {
       "Error is in: ".bgRed,
       "custodyEmployee.getByMaterialIDAndEmployeeID".bgYellow
     );
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 

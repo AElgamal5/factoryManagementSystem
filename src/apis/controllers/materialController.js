@@ -67,7 +67,7 @@ const create = async (req, res) => {
     res.status(201).json({ data: material });
   } catch (error) {
     console.log("Error is in: ".bgRed, "material.create".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -82,7 +82,7 @@ const getAll = async (req, res) => {
     res.status(200).json({ data: materials });
   } catch (error) {
     console.log("Error is in: ".bgRed, "material.getAll".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -105,7 +105,7 @@ const getByID = async (req, res) => {
     res.status(200).json({ data: material });
   } catch (error) {
     console.log("Error is in: ".bgRed, "material.getByID".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -186,7 +186,7 @@ const update = async (req, res) => {
     res.status(200).json({ msg: "material updated tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "material.update".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -209,7 +209,7 @@ const deleteOne = async (req, res) => {
     res.status(200).json({ msg: "material deleted tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "material.deleteOne".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -224,7 +224,7 @@ const getAllTypes = async (req, res) => {
     res.status(200).json({ data: types });
   } catch (error) {
     console.log("Error is in: ".bgRed, "material.getAllTypes".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -257,7 +257,7 @@ const getByType = async (req, res) => {
     res.status(200).json({ data: materials });
   } catch (error) {
     console.log("Error is in: ".bgRed, "material.getByType".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -286,7 +286,7 @@ const getMaterialsBySupplierID = async (req, res) => {
       "Error is in: ".bgRed,
       "material.getMaterialsBySupplierID".bgYellow
     );
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -314,7 +314,7 @@ const getMaterialsBySupplierIDInDetails = async (req, res) => {
       "Error is in: ".bgRed,
       "material.getMaterialsBySupplierIDInDetails".bgYellow
     );
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 

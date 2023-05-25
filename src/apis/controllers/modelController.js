@@ -66,7 +66,7 @@ const create = async (req, res) => {
     res.status(201).json({ data: model });
   } catch (error) {
     console.log("Error is in: ".bgRed, "model.create".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -95,7 +95,7 @@ const getByID = async (req, res) => {
     res.status(200).json({ data: model });
   } catch (error) {
     console.log("Error is in: ".bgRed, "model.getByID".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -112,7 +112,7 @@ const getAll = async (req, res) => {
     res.status(200).json({ data: models });
   } catch (error) {
     console.log("Error is in: ".bgRed, "model.getAll".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -135,7 +135,7 @@ const deleteOne = async (req, res) => {
     res.status(200).json({ msg: "Model deleted tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "model.deleteOne".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -215,7 +215,7 @@ const updateProfile = async (req, res) => {
     res.status(200).json({ msg: "Model profile updated tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "model.updateProfile".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -262,7 +262,7 @@ const updateProfile = async (req, res) => {
 //     res.status(200).json({ msg: "Colors added tmam" });
 //   } catch (error) {
 //     console.log("Error is in: ".bgRed, "model.addColors".bgYellow);
-//     !+process.env.PRODUCTION && console.log(error);
+//     if (process.env.PRODUCTION === "false") console.log(error);
 //   }
 // };
 
@@ -309,7 +309,7 @@ const updateProfile = async (req, res) => {
 //     res.status(200).json({ msg: "Sizes added tmam" });
 //   } catch (error) {
 //     console.log("Error is in: ".bgRed, "model.addSizes".bgYellow);
-//     !+process.env.PRODUCTION && console.log(error);
+//     if (process.env.PRODUCTION === "false") console.log(error);
 //   }
 // };
 
@@ -339,7 +339,7 @@ const updateProfile = async (req, res) => {
 //     res.status(200).json({ msg: "Colors removed tmam" });
 //   } catch (error) {
 //     console.log("Error is in: ".bgRed, "model.removeColors".bgYellow);
-//     !+process.env.PRODUCTION && console.log(error);
+//     if (process.env.PRODUCTION === "false") console.log(error);
 //   }
 // };
 
@@ -369,7 +369,7 @@ const updateProfile = async (req, res) => {
 //     res.status(200).json({ msg: "Sizes removed tmam" });
 //   } catch (error) {
 //     console.log("Error is in: ".bgRed, "model.removeSizes".bgYellow);
-//     !+process.env.PRODUCTION && console.log(error);
+//     if (process.env.PRODUCTION === "false") console.log(error);
 //   }
 // };
 
@@ -439,7 +439,7 @@ const addStages = async (req, res) => {
     res.status(200).json({ msg: "Stages added tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "model.addStages".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -478,7 +478,7 @@ const removeStages = async (req, res) => {
     res.status(200).json({ msg: "Stages removed tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "model.removeStages".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -532,7 +532,7 @@ const removeStages = async (req, res) => {
 //     res.status(200).json({ msg: "Materials added tmam" });
 //   } catch (error) {
 //     console.log("Error is in: ".bgRed, "model.addStages".bgYellow);
-//     !+process.env.PRODUCTION && console.log(error);
+//     if (process.env.PRODUCTION === "false") console.log(error);
 //   }
 // };
 
@@ -563,7 +563,7 @@ const removeStages = async (req, res) => {
 //     res.status(200).json({ msg: "Materials removed tmam" });
 //   } catch (error) {
 //     console.log("Error is in: ".bgRed, "model.removeMaterials".bgYellow);
-//     !+process.env.PRODUCTION && console.log(error);
+//     if (process.env.PRODUCTION === "false") console.log(error);
 //   }
 // };
 
@@ -698,7 +698,7 @@ const addConsumptions = async (req, res) => {
     res.status(200).json({ msg: "Model's consumptions updated tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "model.addConsumptions".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -739,7 +739,7 @@ const removeConsumptions = async (req, res) => {
     res.status(200).json({ msg: "model updated tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "model.removeConsumptions".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -773,7 +773,7 @@ const getModelsUsingMaterial = async (req, res) => {
     res.status(200).json({ data: models });
   } catch (error) {
     console.log("Error is in: ".bgRed, "model.getModelsUsingMaterial".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -855,7 +855,7 @@ const getConsumptionsByIDAndStyle = async (req, res) => {
       "Error is in: ".bgRed,
       "model.getConsumptionsByIDAndStyle".bgYellow
     );
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 

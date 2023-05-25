@@ -60,7 +60,7 @@ const create = async (req, res) => {
     res.status(201).json({ data: employee });
   } catch (error) {
     console.log("Error is in: ".bgRed, "employee.create".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -83,7 +83,7 @@ const getByID = async (req, res) => {
     res.status(200).json({ data: employee });
   } catch (error) {
     console.log("Error is in: ".bgRed, "employee.getByID".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -98,7 +98,7 @@ const getAll = async (req, res) => {
     res.status(200).json({ data: employees });
   } catch (error) {
     console.log("Error is in: ".bgRed, "employee.getAll".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -121,7 +121,7 @@ const getByCode = async (req, res) => {
     res.status(200).json({ data: employee });
   } catch (error) {
     console.log("Error is in: ".bgRed, "employee.getByCode".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -146,7 +146,7 @@ const searchByName = async (req, res) => {
     res.status(200).json({ data: employees });
   } catch (error) {
     console.log("Error is in: ".bgRed, "employee.getByCode".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -226,7 +226,7 @@ const updateProfile = async (req, res) => {
     res.status(200).json({ msg: "Employee is updated tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "employee.updateProfile".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -257,7 +257,7 @@ const deleteOne = async (req, res) => {
     res.status(200).json({ msg: "Employee deleted tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "employee.deleteOne".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 

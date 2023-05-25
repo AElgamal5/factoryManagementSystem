@@ -17,7 +17,7 @@ const create = async (req, res) => {
     res.status(201).json({ data: size });
   } catch (error) {
     console.log("Error is in: ".bgRed, "size.create".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -32,7 +32,7 @@ const getAll = async (req, res) => {
     res.status(200).json({ data: sizes });
   } catch (error) {
     console.log("Error is in: ".bgRed, "size.getAll".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -54,7 +54,7 @@ const getByID = async (req, res) => {
     res.status(200).json({ data: size });
   } catch (error) {
     console.log("Error is in: ".bgRed, "size.getByID".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -76,7 +76,7 @@ const deleteOne = async (req, res) => {
     res.status(200).json({ msg: "Size deleted tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "size.deleteOne".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 

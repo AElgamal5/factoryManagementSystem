@@ -56,12 +56,18 @@ const login = async (req, res) => {
     user.refreshToken = refreshToken;
     await user.save();
 
-    res
-      .status(200)
-      .json({ accessToken: accessToken, refreshToken: refreshToken });
+    const userData = await User.findById(user._id)
+      .populate("role")
+      .select("-password -refreshToken -__v ");
+
+    res.status(200).json({
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+      user: userData,
+    });
   } catch (error) {
     console.log("Error is in: ".bgRed, "auth.login".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -128,7 +134,7 @@ const regenerateToken = async (req, res) => {
     res.status(200).json({ accessToken });
   } catch (error) {
     console.log("Error is in: ".bgRed, "auth.regenerateToken".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -156,7 +162,7 @@ const logout = async (req, res) => {
     res.status(200).json({ msg: "user logged out tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "auth.logout".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 

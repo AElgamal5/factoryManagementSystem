@@ -42,7 +42,7 @@ const create = async (req, res) => {
     res.status(201).json({ data: shipment });
   } catch (error) {
     console.log("Error is in: ".bgRed, "shipment.create".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -135,7 +135,7 @@ const addCartons = async (req, res) => {
     res.status(200).json({ msg: "Cartons added to shipment tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "shipment.addCartons".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -215,7 +215,7 @@ const removeCartons = async (req, res) => {
     res.status(200).json({ msg: "Cartons removed tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "shipment.removeCartons".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -271,7 +271,7 @@ const approve = async (req, res) => {
     res.status(200).json({ msg: "Shipment approved tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "shipment.approve".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -325,7 +325,7 @@ const ship = async (req, res) => {
     res.status(200).json({ msg: "Shipment shipped tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "shipment.ship".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -384,7 +384,7 @@ const update = async (req, res) => {
     res.status(200).json({ msg: "shipment profile updated tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "shipment.update".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -399,7 +399,7 @@ const getAll = async (req, res) => {
     res.status(200).json({ data: shipments });
   } catch (error) {
     console.log("Error is in: ".bgRed, "shipment.getAll".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -423,7 +423,7 @@ const getByID = async (req, res) => {
     res.status(200).json({ data: shipment });
   } catch (error) {
     console.log("Error is in: ".bgRed, "shipment.getByID".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -454,7 +454,7 @@ const deleteOne = async (req, res) => {
     res.status(200).json({ msg: "Shipment deleted tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "shipment.deleteOne".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -486,7 +486,7 @@ const getShipmentsByCartonID = async (req, res) => {
       "Error is in: ".bgRed,
       "shipment.getShipmentsByCartonID".bgYellow
     );
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 

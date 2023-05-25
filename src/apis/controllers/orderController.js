@@ -29,7 +29,7 @@ const create = async (req, res) => {
     res.status(201).json({ data: order });
   } catch (error) {
     console.log("Error is in: ".bgRed, "order.create".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -44,7 +44,7 @@ const getAll = async (req, res) => {
     res.status(200).json({ data: orders });
   } catch (error) {
     console.log("Error is in: ".bgRed, "order.getAll".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -71,7 +71,7 @@ const getByID = async (req, res) => {
     res.status(200).json({ data: order });
   } catch (error) {
     console.log("Error is in: ".bgRed, "order.getByID".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -117,7 +117,7 @@ const update = async (req, res) => {
     res.status(200).json({ msg: "order updated tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "order.update".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -249,7 +249,7 @@ const updateModels = async (req, res) => {
     res.status(200).json({ msg: "Models added to order tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "order.updateModels".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -272,7 +272,7 @@ const deleteOne = async (req, res) => {
     res.status(200).json({ msg: "Order deleted tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "order.deleteOne".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -315,7 +315,7 @@ const getOrdersByModelID = async (req, res) => {
     return res.status(200).json({ data: orders });
   } catch (error) {
     console.log("Error is in: ".bgRed, "order.getOrdersByModelID".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 

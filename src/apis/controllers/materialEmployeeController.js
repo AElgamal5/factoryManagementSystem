@@ -212,7 +212,7 @@ const assign = async (req, res) => {
     res.status(statusCode).json({ msg: "material assigned tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "materialEmployee.assign".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -434,7 +434,7 @@ const back = async (req, res) => {
     res.status(200).json({ msg: "material returned tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "materialEmployee.back".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -466,7 +466,7 @@ const allMaterialsForEmployee = async (req, res) => {
       "Error is in: ".bgRed,
       "materialEmployee.allMaterialsForEmployee".bgYellow
     );
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -498,7 +498,7 @@ const allEmployeesForMaterial = async (req, res) => {
       "Error is in: ".bgRed,
       "materialEmployee.allEmployeesForMaterial".bgYellow
     );
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -526,7 +526,7 @@ const updateNote = async (req, res) => {
     res.status(200).json({ msg: "note added tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "materialEmployee.updateNote".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -549,7 +549,7 @@ const getByID = async (req, res) => {
     res.status(200).json({ data: doc });
   } catch (error) {
     console.log("Error is in: ".bgRed, "materialEmployee.getByID".bgYellow);
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -578,7 +578,7 @@ const getByMaterialIDAndEmployeeID = async (req, res) => {
       "Error is in: ".bgRed,
       "materialEmployee.getByMaterialIDAndEmployeeID".bgYellow
     );
-    !+process.env.PRODUCTION && console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
