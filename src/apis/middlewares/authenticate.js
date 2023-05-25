@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 
+const { User } = require("../models");
 const { errorFormat } = require("../utils");
 
 const auth = (req, res, next) => {
@@ -19,8 +20,9 @@ const auth = (req, res, next) => {
 
   const token = authHeader.split(" ")[1];
 
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-    if (err) {
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err, decoded) => {
+    const user = await User.findById(decoded.userID);
+    if (err || !user || user.refreshToken === "") {
       return res
         .status(401)
         .json(

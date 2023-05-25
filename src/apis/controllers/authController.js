@@ -121,17 +121,17 @@ const regenerateToken = async (req, res) => {
                 "body"
               )
             );
+        } else {
+          const accessToken = jwt.sign(
+            { userID: exist._id.toString() },
+            process.env.ACCESS_TOKEN_SECRET,
+            { expiresIn: "10m" }
+          );
+
+          res.status(200).json({ accessToken });
         }
       }
     );
-
-    const accessToken = jwt.sign(
-      { userID: exist._id },
-      process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "10m" }
-    );
-
-    res.status(200).json({ accessToken });
   } catch (error) {
     console.log("Error is in: ".bgRed, "auth.regenerateToken".bgYellow);
     if (process.env.PRODUCTION === "false") console.log(error);
