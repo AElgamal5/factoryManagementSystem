@@ -167,10 +167,11 @@ const logout = async (req, res) => {
 };
 
 /*
- * method: GET
+ * method: POST
  * path: /api/auth/test
  */
-const test = (req, res) => {
+const test = async (req, res) => {
+  const refreshToken = req.body.refreshToken;
   try {
     const authHeader = req.headers["authorization"];
 
@@ -179,6 +180,18 @@ const test = (req, res) => {
         .status(200)
         .json(
           errorFormat(authHeader, "No sent token", "authorization", "headers")
+        );
+    }
+    if (!refreshToken) {
+      return res
+        .status(200)
+        .json(
+          errorFormat(
+            refreshToken,
+            "No sent refresh token",
+            "refreshToken",
+            "body"
+          )
         );
     }
 
@@ -199,10 +212,26 @@ const test = (req, res) => {
       }
     });
 
+    const user = await User.findOne({ refreshToken: refreshToken });
+    if (!user) {
+      return res
+        .status(200)
+        .json(
+          errorFormat(
+            refreshToken,
+            "No user with this refresh token",
+            "refreshToken",
+            "body"
+          )
+        );
+    }
+
     res.status(200).json({ msg: "Token tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "auth.test".bgYellow);
-    if (process.env.PRODUCTION === "false") console.log(error);
+    // if (process.env.PRODUCTION === "false")
+
+    console.log(error);
   }
 };
 
