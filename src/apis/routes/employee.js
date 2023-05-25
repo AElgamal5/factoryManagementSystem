@@ -7,7 +7,10 @@ const {
   employeeMiddlewares,
   idValidation,
   validationResult,
+  authenticate,
 } = require("../middlewares");
+
+router.use(authenticate);
 
 router.post(
   "/",

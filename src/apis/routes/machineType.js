@@ -7,7 +7,10 @@ const {
   validationResult,
   idValidation,
   machineTypeMiddleware,
+  authenticate,
 } = require("../middlewares");
+
+router.use(authenticate);
 
 router.post(
   "/",

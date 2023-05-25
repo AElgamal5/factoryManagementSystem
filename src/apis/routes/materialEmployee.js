@@ -7,7 +7,10 @@ const {
   validationResult,
   materialEmployeeMiddlewares,
   idValidation,
+  authenticate,
 } = require("../middlewares");
+
+router.use(authenticate);
 
 router.post(
   "/assign",

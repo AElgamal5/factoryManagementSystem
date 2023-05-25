@@ -7,7 +7,10 @@ const {
   validationResult,
   buyRequestMiddlewares,
   idValidation,
+  authenticate,
 } = require("../middlewares");
+
+router.use(authenticate);
 
 router.post(
   "/",
