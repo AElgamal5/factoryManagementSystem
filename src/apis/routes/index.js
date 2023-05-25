@@ -19,4 +19,5 @@ module.exports = {
   machineType: require("./machineType"),
   userRole: require("./userRole"),
   user: require("./user"),
+  auth: require("./auth"),
 };

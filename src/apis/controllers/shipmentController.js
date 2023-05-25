@@ -410,7 +410,9 @@ const getAll = async (req, res) => {
 const getByID = async (req, res) => {
   const id = req.params.id;
   try {
-    const shipment = await Shipment.findById(id).populate("order", "name");
+    const shipment = await Shipment.findById(id)
+      .populate("order", "name")
+      .populate("cartons.id", "name");
 
     if (!shipment) {
       return res

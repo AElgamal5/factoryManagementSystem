@@ -40,6 +40,7 @@ const {
   machineType,
   userRole,
   user,
+  auth,
 } = require("./apis/routes");
 app.use("/api/employee", employee);
 app.use("/api/supplier", supplier);
@@ -61,6 +62,7 @@ app.use("/api/order", order);
 app.use("/api/machineType", machineType);
 app.use("/api/userRole", userRole);
 app.use("/api/user", user);
+app.use("/api/auth", auth);
 
 //connect to DB and running the server
 (function start() {

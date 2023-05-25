@@ -19,4 +19,5 @@ module.exports = {
   machineTypeController: require("./machineTypeController"),
   userRoleController: require("./userRoleController"),
   userController: require("./userController"),
+  authController: require("./authController"),
 };

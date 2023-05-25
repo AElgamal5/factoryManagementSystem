@@ -19,4 +19,6 @@ module.exports = {
   machineTypeMiddleware: require("./machineTypeMiddleware"),
   userRoleMiddlewares: require("./userRoleMiddlewares"),
   userMiddlewares: require("./userMiddlewares"),
+  authMiddlewares: require("./authMiddlewares"),
+  authenticate: require("./authenticate"),
 };

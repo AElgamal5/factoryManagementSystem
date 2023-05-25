@@ -13,7 +13,7 @@ const userSchema = new Schema({
 
   image: { type: String },
 
-  token: { type: String },
+  refreshToken: { type: String },
 
   state: { type: Number, default: 1 },
 });
