@@ -50,7 +50,7 @@ const create = async (req, res) => {
  */
 const getAll = async (req, res) => {
   try {
-    const users = await User.find().populate("role");
+    const users = await User.find().populate("role").select("-password");
     res.status(200).json({ data: users });
   } catch (error) {
     console.log("Error is in: ".bgRed, "user.getAll".bgYellow);
@@ -65,7 +65,7 @@ const getAll = async (req, res) => {
 const getByID = async (req, res) => {
   const id = req.params.id;
   try {
-    const user = await User.findById(id).populate("role");
+    const user = await User.findById(id).populate("role").select("-password");
 
     if (!user) {
       return res

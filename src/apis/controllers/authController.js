@@ -19,6 +19,19 @@ const login = async (req, res) => {
         .json(errorFormat(code, "No user with this code", "code", "body"));
     }
 
+    if (+user.state === 0) {
+      return res
+        .status(403)
+        .json(
+          errorFormat(
+            user.state,
+            "This user is deactivated",
+            "user.state",
+            "others"
+          )
+        );
+    }
+
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
       return res
