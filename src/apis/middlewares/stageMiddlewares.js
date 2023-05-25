@@ -57,6 +57,13 @@ const createValidate = [
       max: 200,
     })
     .withMessage("Note length should be 3 to 200 characters"),
+
+  check("machineType")
+    .notEmpty()
+    .withMessage("stage's machineType is required")
+    .isAlphanumeric()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Wrong machineType id"),
 ];
 
 const updateValidate = [
@@ -112,6 +119,12 @@ const updateValidate = [
       max: 200,
     })
     .withMessage("Note length should be 3 to 200 characters"),
+
+  check("machineType")
+    .optional()
+    .isAlphanumeric()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Wrong machineType id"),
 ];
 
 module.exports = { createValidate, updateValidate };

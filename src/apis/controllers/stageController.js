@@ -1,5 +1,5 @@
-const { Stage } = require("../models");
-const { errorFormat } = require("../utils");
+const { Stage, MachineType } = require("../models");
+const { errorFormat, idCheck } = require("../utils");
 
 /*
  * method: POST
@@ -7,10 +7,41 @@ const { errorFormat } = require("../utils");
  */
 
 const create = async (req, res) => {
-  const { name, type, code, rate, price, image, note } = req.body;
+  const {
+    name,
+    type,
+    code,
+    rate,
+    price,
+    image,
+    note,
+    machineType: machineTypeID,
+  } = req.body;
 
   try {
-    const stage = await Stage.create({ name, code, type, rate, price, note });
+    const machineType = await MachineType.findById(machineTypeID);
+    if (!machineType) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(
+            machineTypeID,
+            "No machine type with this id",
+            "machineType",
+            "body"
+          )
+        );
+    }
+
+    const stage = await Stage.create({
+      name,
+      code,
+      type,
+      rate,
+      price,
+      note,
+      machineType: machineTypeID,
+    });
 
     res.status(201).json({ data: stage });
   } catch (error) {
@@ -25,7 +56,7 @@ const create = async (req, res) => {
  */
 const getAll = async (req, res) => {
   try {
-    const stages = await Stage.find();
+    const stages = await Stage.find().populate("machineType", "name");
 
     res.status(200).json({ data: stages });
   } catch (error) {
@@ -41,7 +72,7 @@ const getAll = async (req, res) => {
 const getByID = async (req, res) => {
   const id = req.params.id;
   try {
-    const stage = await Stage.findById(id);
+    const stage = await Stage.findById(id).populate("machineType", "name");
 
     if (!stage) {
       return res
@@ -62,9 +93,34 @@ const getByID = async (req, res) => {
  */
 const update = async (req, res) => {
   const id = req.params.id;
-  const { name, type, code, rate, price, image, note } = req.body;
+  const {
+    name,
+    type,
+    code,
+    rate,
+    price,
+    image,
+    note,
+    machineType: machineTypeID,
+  } = req.body;
 
   try {
+    if (machineTypeID) {
+      const machineType = await MachineType.findById(machineTypeID);
+      if (!machineType) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              machineTypeID,
+              "No machine type with this id",
+              "machineType",
+              "body"
+            )
+          );
+      }
+    }
+
     const stage = await Stage.findByIdAndUpdate(id, {
       name,
       type,
@@ -72,6 +128,7 @@ const update = async (req, res) => {
       rate,
       price,
       note,
+      machineType: machineTypeID,
     });
 
     if (!stage) {

@@ -82,7 +82,6 @@ const getByID = async (req, res) => {
       .populate("colors", "name")
       .populate("sizes", "name")
       .populate("stages.id", "name")
-      .populate("stages.machineType", "name")
       .populate("consumptions.material", "name")
       .populate("consumptions.colors", "name")
       .populate("consumptions.sizes", "name");
@@ -414,24 +413,24 @@ const addStages = async (req, res) => {
           .json(errorFormat(id, "No stage with this id", "id", "body"));
       }
 
-      const machineType = await MachineType.findById(stages[i].machineType);
-      if (!machineType) {
-        return res
-          .status(404)
-          .json(
-            errorFormat(
-              stages[i].machineType,
-              "No machine type with this id",
-              `stages[${i}].machineType`,
-              "body"
-            )
-          );
-      }
+      // const machineType = await MachineType.findById(stages[i].machineType);
+      // if (!machineType) {
+      //   return res
+      //     .status(404)
+      //     .json(
+      //       errorFormat(
+      //         stages[i].machineType,
+      //         "No machine type with this id",
+      //         `stages[${i}].machineType`,
+      //         "body"
+      //       )
+      //     );
+      // }
 
       model.stages.push({
         id: stages[i].id,
         priority: stages[i].priority,
-        machineType: stages[i].machineType,
+        // machineType: stages[i].machineType,
       });
     }
 

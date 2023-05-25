@@ -16,6 +16,8 @@ const stageSchema = new Schema(
 
     image: { type: String },
 
+    machineType: { type: mongoose.Types.ObjectId, ref: "MachineType" },
+
     note: { type: String },
   },
   { timestamps: true }

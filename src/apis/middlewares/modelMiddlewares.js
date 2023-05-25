@@ -135,14 +135,14 @@ const addStagesValidation = [
     .isInt({ max: 1000 })
     .withMessage("Maximum stage's priority is 1000"),
 
-  check("stages.*.machineType")
-    .notEmpty()
-    .withMessage("stage's machineType is required")
-    .isString()
-    .isLength({ min: 3 })
-    .withMessage("Minimum stage's machineType is 3")
-    .isLength({ max: 200 })
-    .withMessage("Maximum stage's machineType is 200"),
+  // check("stages.*.machineType")
+  //   .notEmpty()
+  //   .withMessage("stage's machineType is required")
+  //   .isString()
+  //   .isLength({ min: 3 })
+  //   .withMessage("Minimum stage's machineType is 3")
+  //   .isLength({ max: 200 })
+  //   .withMessage("Maximum stage's machineType is 200"),
 ];
 
 const removeStagesValidation = [
