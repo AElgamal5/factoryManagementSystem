@@ -20,4 +20,6 @@ router.post("/token", authController.regenerateToken);
 
 router.get("/logout", authenticate, authController.logout);
 
+router.get("/test", authenticate, authController.test);
+
 module.exports = router;

@@ -166,4 +166,17 @@ const logout = async (req, res) => {
   }
 };
 
-module.exports = { login, regenerateToken, logout };
+/*
+ * method: GET
+ * path: /api/auth/test
+ */
+const test = (req, res) => {
+  try {
+    res.status(200).json({ msg: "Token tmam" });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "auth.test".bgYellow);
+    if (process.env.PRODUCTION === "false") console.log(error);
+  }
+};
+
+module.exports = { login, regenerateToken, logout, test };
