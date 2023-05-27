@@ -5,6 +5,7 @@ const {
   Custody,
   SupplierCustody,
   SupplierMaterial,
+  Image,
 } = require("../models");
 const { currentTime, errorFormat, idCheck } = require("../utils");
 
@@ -13,10 +14,21 @@ const { currentTime, errorFormat, idCheck } = require("../utils");
  * path: /api/buyRequest/
  */
 const create = async (req, res) => {
-  const { name, details, note } = req.body;
+  const { name, details, note, image } = req.body;
 
   try {
-    const buyRequest = await BuyRequest.create({ name, details, note });
+    //image checks
+    let imageDocID;
+    if (image) {
+      imageDocID = (await Image.create({ data: image }))._id;
+    }
+
+    const buyRequest = await BuyRequest.create({
+      name,
+      details,
+      note,
+      image: imageDocID,
+    });
 
     buyRequest.history.push({
       state: "Not approved",
@@ -58,7 +70,8 @@ const getByID = async (req, res) => {
       .populate("materials.id", "_id name")
       .populate("materials.supplier", "_id name")
       .populate("custodies.id", "_id name")
-      .populate("custodies.supplier", "_id name");
+      .populate("custodies.supplier", "_id name")
+      .populate("image");
 
     //check if exist
     if (!buyRequest) {
@@ -103,14 +116,10 @@ const deleteOne = async (req, res) => {
 const updateProfile = async (req, res) => {
   const id = req.params.id;
 
-  const { name, details, note } = req.body;
+  const { name, details, note, image } = req.body;
 
   try {
-    const buyRequest = await BuyRequest.findByIdAndUpdate(id, {
-      name,
-      details,
-      note,
-    });
+    const buyRequest = await BuyRequest.findById(id);
 
     //check if exist
     if (!buyRequest) {
@@ -118,6 +127,22 @@ const updateProfile = async (req, res) => {
         .status(404)
         .json(errorFormat(id, "No buy request with this id", "id", "params"));
     }
+
+    let imageDocID;
+    if (image) {
+      const exist = await Image.findById(buyRequest.image);
+      if (exist) {
+        await Image.findByIdAndDelete(buyRequest.image);
+      }
+      imageDocID = (await Image.create({ data: image }))._id;
+    }
+
+    await BuyRequest.findByIdAndUpdate(id, {
+      name,
+      details,
+      note,
+      image: imageDocID,
+    });
 
     res.status(200).json({ msg: "Buy request updated tmam" });
   } catch (error) {
