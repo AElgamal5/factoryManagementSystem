@@ -8,6 +8,7 @@ const {
   validationResult,
   idValidation,
   authenticate,
+  imageValidate,
 } = require("../middlewares");
 
 router.use(authenticate);
@@ -16,6 +17,7 @@ router.post(
   "/",
   modelMiddlewares.createValidate,
   validationResult,
+  imageValidate,
   modelController.create
 );
 
@@ -25,7 +27,14 @@ router.get("/", modelController.getAll);
 
 router.delete("/:id", idValidation, modelController.deleteOne);
 
-router.patch("/:id", idValidation, modelController.updateProfile);
+router.patch(
+  "/:id",
+  idValidation,
+  modelMiddlewares.updateValidate,
+  validationResult,
+  imageValidate,
+  modelController.updateProfile
+);
 
 // router.patch("/colors/add/:id", idValidation, modelController.addColors);
 

@@ -5,6 +5,7 @@ const {
   Color,
   Size,
   MachineType,
+  Image,
 } = require("../models");
 const { errorFormat, idCheck } = require("../utils");
 
@@ -61,7 +62,20 @@ const create = async (req, res) => {
       }
     }
 
-    const model = await Model.create({ name, note, details, colors, sizes });
+    //image checks
+    let imageDocID;
+    if (image) {
+      imageDocID = (await Image.create({ data: image }))._id;
+    }
+
+    const model = await Model.create({
+      name,
+      note,
+      details,
+      colors,
+      sizes,
+      image: imageDocID,
+    });
 
     res.status(201).json({ data: model });
   } catch (error) {
@@ -84,7 +98,8 @@ const getByID = async (req, res) => {
       .populate("stages.id", "name")
       .populate("consumptions.material", "name")
       .populate("consumptions.colors", "name")
-      .populate("consumptions.sizes", "name");
+      .populate("consumptions.sizes", "name")
+      .populate("image");
 
     if (!model) {
       return res
@@ -148,6 +163,13 @@ const updateProfile = async (req, res) => {
   const { name, note, details, colors, sizes, image } = req.body;
 
   try {
+    const model = await Model.findById(id);
+    if (!model) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "No model with this id", "id", "params"));
+    }
+
     if (colors) {
       for (let i = 0; i < colors.length; i++) {
         if (!idCheck(colors[i])) {
@@ -198,19 +220,23 @@ const updateProfile = async (req, res) => {
       }
     }
 
-    const model = await Model.findByIdAndUpdate(id, {
+    let imageDocID;
+    if (image) {
+      const exist = await Image.findById(model.image);
+      if (exist) {
+        await Image.findByIdAndDelete(model.image);
+      }
+      imageDocID = (await Image.create({ data: image }))._id;
+    }
+
+    await Model.findByIdAndUpdate(id, {
       name,
       note,
       details,
       colors,
       sizes,
+      image: imageDocID,
     });
-
-    if (!model) {
-      return res
-        .status(404)
-        .json(errorFormat(id, "No model with this id", "id", "params"));
-    }
 
     res.status(200).json({ msg: "Model profile updated tmam" });
   } catch (error) {
