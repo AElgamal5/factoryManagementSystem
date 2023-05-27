@@ -36,6 +36,8 @@ const buyRequestSchema = new Schema(
       },
     ],
 
+    image: { type: mongoose.Types.ObjectId, ref: "Image" },
+
     note: { type: String },
   },
   { timestamps: true }

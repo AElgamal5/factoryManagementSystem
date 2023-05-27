@@ -50,7 +50,7 @@ const custodySchema = new Schema(
 
     details: { type: String },
 
-    image: { type: String },
+    image: { type: mongoose.Types.ObjectId, ref: "Image" },
 
     note: { type: String },
   },

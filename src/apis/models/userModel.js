@@ -11,7 +11,7 @@ const userSchema = new Schema({
 
   password: { type: String },
 
-  image: { type: String },
+  image: { type: mongoose.Types.ObjectId, ref: "Image" },
 
   refreshToken: { type: String },
 

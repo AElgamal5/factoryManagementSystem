@@ -21,4 +21,5 @@ module.exports = {
   userMiddlewares: require("./userMiddlewares"),
   authMiddlewares: require("./authMiddlewares"),
   authenticate: require("./authenticate"),
+  imageValidate: require("./imageValidate"),
 };

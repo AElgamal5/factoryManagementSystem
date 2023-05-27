@@ -28,7 +28,7 @@ const orderSchema = new Schema(
 
     totalQuantity: { type: Number, default: 0 },
 
-    image: { type: String },
+    // image: { type: mongoose.Types.ObjectId, ref: "Image" },
 
     details: { type: String },
 

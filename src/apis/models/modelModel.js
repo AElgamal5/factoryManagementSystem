@@ -6,7 +6,7 @@ const modelSchema = new Schema(
   {
     name: { type: String, required: true },
 
-    image: { type: String },
+    image: { type: mongoose.Types.ObjectId, ref: "Image" },
 
     stages: [
       {

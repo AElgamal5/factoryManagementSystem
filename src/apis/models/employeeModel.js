@@ -43,7 +43,7 @@ const employeeSchema = new Schema(
       },
     ],
 
-    image: { type: String },
+    image: { type: mongoose.Types.ObjectId, ref: "Image" },
 
     phoneNo: { type: String, unique: true },
 

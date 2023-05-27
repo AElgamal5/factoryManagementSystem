@@ -14,7 +14,7 @@ const stageSchema = new Schema(
 
     price: { type: Number },
 
-    image: { type: String },
+    // image: { type: String },
 
     machineType: { type: mongoose.Types.ObjectId, ref: "MachineType" },
 

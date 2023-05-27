@@ -1,6 +1,6 @@
 const bcrypt = require("bcrypt");
 
-const { User, UserRole } = require("../models");
+const { User, UserRole, Image } = require("../models");
 const { idCheck, errorFormat } = require("../utils");
 
 /*
@@ -30,11 +30,18 @@ const create = async (req, res) => {
     //hashing
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    //image checks
+    let imageDoc;
+    if (image) {
+      imageDoc = (await Image.create({ data: image }))._id;
+    }
+
     const user = await User.create({
       name,
       code,
       role: roleID,
       password: hashedPassword,
+      image: imageDoc,
     });
 
     res.status(201).json({ data: user });
@@ -65,7 +72,10 @@ const getAll = async (req, res) => {
 const getByID = async (req, res) => {
   const id = req.params.id;
   try {
-    const user = await User.findById(id).populate("role").select("-password");
+    const user = await User.findById(id)
+      .populate("role")
+      .populate("image")
+      .select("-password");
 
     if (!user) {
       return res
@@ -121,6 +131,15 @@ const update = async (req, res) => {
     if (password) {
       const hashedPassword = await bcrypt.hash(password, 10);
       user.password = hashedPassword;
+    }
+
+    if (image) {
+      const exist = await Image.findById(user.image);
+      if (exist) {
+        await Image.findByIdAndDelete(user.image);
+      }
+      const imageDoc = await Image.create({ data: image });
+      user.image = imageDoc._id;
     }
 
     user.name = name || user.name;

@@ -21,4 +21,5 @@ module.exports = {
   MachineType: require("./machineTypeModel"),
   UserRole: require("./userRoleModel"),
   User: require("./userModel"),
+  Image: require("./imageModel"),
 };

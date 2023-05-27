@@ -45,7 +45,7 @@ const materialSchema = new Schema(
       ref: "Role",
     },
 
-    image: { type: String },
+    image: { type: mongoose.Types.ObjectId, ref: "Image" },
 
     note: { type: String },
   },
