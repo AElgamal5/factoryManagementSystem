@@ -222,13 +222,13 @@ const updateProfile = async (req, res) => {
       }
     }
 
-    let imageDoc;
+    let imageDocID;
     if (image) {
       const exist = await Image.findById(employee.image);
       if (exist) {
         await Image.findByIdAndDelete(employee.image);
       }
-      imageDoc = (await Image.create({ data: image }))._id;
+      imageDocID = (await Image.create({ data: image }))._id;
     }
 
     //update the employee
@@ -239,7 +239,7 @@ const updateProfile = async (req, res) => {
       phoneNo,
       NID,
       note,
-      image: imageDoc,
+      image: imageDocID,
     });
 
     res.status(200).json({ msg: "Employee is updated tmam" });

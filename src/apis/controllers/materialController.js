@@ -4,6 +4,7 @@ const {
   MaterialType,
   SupplierMaterial,
   BuyRequest,
+  Image,
 } = require("../models");
 const { errorFormat, idCheck } = require("../utils");
 
@@ -53,6 +54,12 @@ const create = async (req, res) => {
         );
     }
 
+    //image checks
+    let imageDocID;
+    if (image) {
+      imageDocID = (await Image.create({ data: image }))._id;
+    }
+
     const material = await Material.create({
       name,
       details,
@@ -62,6 +69,7 @@ const create = async (req, res) => {
       note,
       max,
       min,
+      image: imageDocID,
     });
 
     res.status(201).json({ data: material });
@@ -93,7 +101,11 @@ const getAll = async (req, res) => {
 const getByID = async (req, res) => {
   const id = req.params.id;
   try {
-    const material = await Material.findById(id).populate(["role", "type"]);
+    const material = await Material.findById(id).populate([
+      "role",
+      "type",
+      "image",
+    ]);
 
     //check if exist
     if (!material) {
@@ -131,6 +143,14 @@ const update = async (req, res) => {
   } = req.body;
 
   try {
+    //check if material exist
+    const material = await Material.findById(id);
+    if (!material) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "No material with this id", "id", "params"));
+    }
+
     //check role validity & existence
     if (roleID) {
       if (!idCheck(roleID)) {
@@ -163,7 +183,16 @@ const update = async (req, res) => {
       }
     }
 
-    const material = await Material.findByIdAndUpdate(id, {
+    let imageDocID;
+    if (image) {
+      const exist = await Image.findById(material.image);
+      if (exist) {
+        await Image.findByIdAndDelete(material.image);
+      }
+      imageDocID = (await Image.create({ data: image }))._id;
+    }
+
+    await Material.findByIdAndUpdate(id, {
       name,
       quantity,
       available,
@@ -174,14 +203,8 @@ const update = async (req, res) => {
       note,
       max,
       min,
+      image: imageDocID,
     });
-
-    //check if material exist
-    if (!material) {
-      return res
-        .status(404)
-        .json(errorFormat(id, "No material with this id", "id", "params"));
-    }
 
     res.status(200).json({ msg: "material updated tmam" });
   } catch (error) {

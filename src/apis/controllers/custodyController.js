@@ -1,4 +1,10 @@
-const { Custody, Role, SupplierCustody, BuyRequest } = require("../models");
+const {
+  Custody,
+  Role,
+  SupplierCustody,
+  BuyRequest,
+  Image,
+} = require("../models");
 const { errorFormat, idCheck } = require("../utils");
 
 /*
@@ -22,6 +28,12 @@ const create = async (req, res) => {
         .json(errorFormat(roleID, "No role with this id", "role", "body"));
     }
 
+    //image checks
+    let imageDocID;
+    if (image) {
+      imageDocID = (await Image.create({ data: image }))._id;
+    }
+
     const custody = await Custody.create({
       name,
       // quantity: 0,
@@ -32,6 +44,7 @@ const create = async (req, res) => {
       note,
       max,
       min,
+      image: imageDocID,
     });
 
     res.status(201).json({ data: custody });
@@ -63,7 +76,9 @@ const getAll = async (req, res) => {
 const getByID = async (req, res) => {
   const id = req.params.id;
   try {
-    const custody = await Custody.findById(id).populate("role");
+    const custody = await Custody.findById(id)
+      .populate("role")
+      .populate("image");
 
     //check if exist
     if (!custody) {
@@ -123,6 +138,15 @@ const update = async (req, res) => {
       }
     }
 
+    let imageDocID;
+    if (image) {
+      const exist = await Image.findById(custody.image);
+      if (exist) {
+        await Image.findByIdAndDelete(custody.image);
+      }
+      imageDocID = (await Image.create({ data: image }))._id;
+    }
+
     await Custody.findByIdAndUpdate(id, {
       name,
       quantity,
@@ -133,6 +157,7 @@ const update = async (req, res) => {
       note,
       max,
       min,
+      image: imageDocID,
     });
 
     res.status(200).json({ msg: "Custody updated tmam" });
