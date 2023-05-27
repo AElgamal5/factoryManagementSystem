@@ -143,7 +143,7 @@ const update = async (req, res) => {
     }
 
     user.name = name || user.name;
-    user.name = state || user.state;
+    user.state = state || user.state;
 
     await user.save();
 
