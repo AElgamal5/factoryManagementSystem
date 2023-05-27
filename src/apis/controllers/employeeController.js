@@ -1,4 +1,4 @@
-const { Employee, Role } = require("../models");
+const { Employee, Role, Image } = require("../models");
 const { errorFormat, idCheck } = require("../utils");
 
 /*
@@ -48,6 +48,12 @@ const create = async (req, res) => {
       }
     }
 
+    //image checks
+    let imageDocID;
+    if (image) {
+      imageDocID = (await Image.create({ data: image }))._id;
+    }
+
     const employee = await Employee.create({
       name,
       code,
@@ -55,6 +61,7 @@ const create = async (req, res) => {
       phoneNo,
       NID,
       note,
+      image: imageDocID,
     });
 
     res.status(201).json({ data: employee });
@@ -72,7 +79,9 @@ const getByID = async (req, res) => {
   const id = req.params.id;
 
   try {
-    const employee = await Employee.findById(id).populate("role");
+    const employee = await Employee.findById(id)
+      .populate("role")
+      .populate("image");
 
     if (!employee) {
       return res
@@ -213,6 +222,15 @@ const updateProfile = async (req, res) => {
       }
     }
 
+    let imageDoc;
+    if (image) {
+      const exist = await Image.findById(employee.image);
+      if (exist) {
+        await Image.findByIdAndDelete(employee.image);
+      }
+      imageDoc = (await Image.create({ data: image }))._id;
+    }
+
     //update the employee
     await Employee.findByIdAndUpdate(id, {
       name,
@@ -221,6 +239,7 @@ const updateProfile = async (req, res) => {
       phoneNo,
       NID,
       note,
+      image: imageDoc,
     });
 
     res.status(200).json({ msg: "Employee is updated tmam" });
