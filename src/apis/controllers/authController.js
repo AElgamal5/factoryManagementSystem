@@ -249,4 +249,48 @@ const test = async (req, res) => {
   }
 };
 
-module.exports = { login, regenerateToken, logout, test };
+/*
+ * method: POST
+ * path: /api/auth/testCredentials
+ */
+const testCredentials = async (req, res) => {
+  const { code, password } = req.body;
+  try {
+    const user = await User.findOne({ code });
+
+    if (!user) {
+      return res
+        .status(404)
+        .json(errorFormat(code, "No user with this code", "code", "body"));
+    }
+
+    if (+user.state === 0) {
+      return res
+        .status(403)
+        .json(
+          errorFormat(
+            user.state,
+            "This user is deactivated",
+            "user.state",
+            "others"
+          )
+        );
+    }
+
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(password, "Wrong user's password", "password", "body")
+        );
+    }
+
+    res.status(200).json({ msg: "Good Credentials" });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "auth.testCredentials".bgYellow);
+    if (process.env.PRODUCTION === "false") console.log(error);
+  }
+};
+
+module.exports = { login, regenerateToken, logout, test, testCredentials };
