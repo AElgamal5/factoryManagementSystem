@@ -11,7 +11,7 @@ const server = http.createServer(app);
 const io = socketIO(server);
 
 //middleware
-app.use(express.json({ limit: "11mb" }));
+app.use(express.json({ limit: "15mb" }));
 app.use(cors());
 app.use((req, res, next) => {
   console.log(req.path, req.method);
