@@ -27,7 +27,7 @@ const shipmentSchema = new Schema(
     },
 
     // exitPermission: { type: String },
-    exitPermission: { type: mongoose.Types.ObjectId, ref: "Image" },
+    image: { type: mongoose.Types.ObjectId, ref: "Image" },
 
     details: { type: String },
 

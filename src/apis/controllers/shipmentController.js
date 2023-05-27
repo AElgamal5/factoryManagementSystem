@@ -335,7 +335,7 @@ const ship = async (req, res) => {
  */
 const update = async (req, res) => {
   const id = req.params.id;
-  const { name, order: orderID, details, note } = req.body;
+  const { name, order: orderID, details, note, image } = req.body;
 
   try {
     const shipment = await Shipment.findById(id);
@@ -367,11 +367,21 @@ const update = async (req, res) => {
       });
     }
 
+    let imageDocID;
+    if (image) {
+      const exist = await Image.findById(shipment.image);
+      if (exist) {
+        await Image.findByIdAndDelete(shipment.image);
+      }
+      imageDocID = (await Image.create({ data: image }))._id;
+    }
+
     await Shipment.findByIdAndUpdate(id, {
       name,
       order: orderID,
       details,
       note,
+      image: imageDocID,
     });
 
     shipment.history.push({
@@ -412,7 +422,8 @@ const getByID = async (req, res) => {
   try {
     const shipment = await Shipment.findById(id)
       .populate("order", "name")
-      .populate("cartons.id", "name");
+      .populate("cartons.id", "name")
+      .populate("image");
 
     if (!shipment) {
       return res
