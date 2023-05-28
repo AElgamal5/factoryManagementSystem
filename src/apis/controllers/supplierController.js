@@ -18,13 +18,21 @@ const create = async (req, res) => {
         );
     }
 
+    //image checks
+    let imageDocID;
+    if (image) {
+      imageDocID = (await Image.create({ data: image }))._id;
+    }
+
     const supplier = await Supplier.create({
       name,
       phoneNo,
       address,
       state,
       note,
+      image: imageDocID,
     });
+
     res.status(201).json({ data: supplier });
   } catch (error) {
     console.log("Error is in: ".bgRed, "supplier.create".bgYellow);
@@ -40,7 +48,7 @@ const getByID = async (req, res) => {
   const id = req.params.id;
 
   try {
-    const supplier = await Supplier.findById(id);
+    const supplier = await Supplier.findById(id).populate("image");
     if (!supplier) {
       return res
         .status(404)
@@ -102,6 +110,15 @@ const update = async (req, res) => {
       }
     }
 
+    let imageDocID;
+    if (image) {
+      const exist = await Image.findById(supplier.image);
+      if (exist) {
+        await Image.findByIdAndDelete(supplier.image);
+      }
+      imageDocID = (await Image.create({ data: image }))._id;
+    }
+
     //update the supplier
     await Supplier.findByIdAndUpdate(id, {
       name,
@@ -109,6 +126,7 @@ const update = async (req, res) => {
       address,
       state,
       note,
+      image: imageDocID,
     });
 
     res.status(200).json({ msg: "Supplier is updated tmam" });

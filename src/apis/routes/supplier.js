@@ -8,6 +8,7 @@ const {
   validationResult,
   idValidation,
   authenticate,
+  imageValidate,
 } = require("../middlewares");
 
 router.use(authenticate);
@@ -16,6 +17,7 @@ router.post(
   "/",
   supplierMiddlewares.createValidate,
   validationResult,
+  imageValidate,
   supplierController.create
 );
 
@@ -28,6 +30,7 @@ router.patch(
   idValidation,
   supplierMiddlewares.updateValidate,
   validationResult,
+  imageValidate,
   supplierController.update
 );
 

@@ -6,7 +6,7 @@ const { errorFormat } = require("../utils");
  * path: /api/client/
  */
 const create = async (req, res) => {
-  const { name, phoneNo, address, state, note } = req.body;
+  const { name, phoneNo, address, state, note, image } = req.body;
 
   try {
     //check if the phoneNo exist before
@@ -19,12 +19,19 @@ const create = async (req, res) => {
         );
     }
 
+    //image checks
+    let imageDocID;
+    if (image) {
+      imageDocID = (await Image.create({ data: image }))._id;
+    }
+
     const client = await Client.create({
       name,
       phoneNo,
       address,
       state,
       note,
+      image: imageDocID,
     });
 
     res.status(201).json({ data: client });
@@ -55,7 +62,7 @@ const getAll = async (req, res) => {
 const getByID = async (req, res) => {
   const id = req.params.id;
   try {
-    const client = await Client.findById(id);
+    const client = await Client.findById(id).populate("image");
 
     if (!client) {
       return res
@@ -97,19 +104,30 @@ const update = async (req, res) => {
       }
     }
 
-    const client = await Client.findByIdAndUpdate(id, {
-      name,
-      phoneNo,
-      address,
-      state,
-      note,
-    });
-
+    const client = await Client.findById(id);
     if (!client) {
       return res
         .status(404)
         .json(errorFormat(id, "No client with this id", "id", "params"));
     }
+
+    let imageDocID;
+    if (image) {
+      const exist = await Image.findById(client.image);
+      if (exist) {
+        await Image.findByIdAndDelete(client.image);
+      }
+      imageDocID = (await Image.create({ data: image }))._id;
+    }
+
+    await Client.findByIdAndUpdate(id, {
+      name,
+      phoneNo,
+      address,
+      state,
+      note,
+      image: imageDocID,
+    });
 
     res.status(200).json({ msg: "Client updated tmam" });
   } catch (error) {

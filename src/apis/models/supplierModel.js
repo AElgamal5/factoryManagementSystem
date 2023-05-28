@@ -13,6 +13,8 @@ const supplierSchema = new Schema(
     state: { type: String },
 
     note: { type: String },
+
+    image: { type: mongoose.Types.ObjectId, ref: "Image" },
   },
   { timestamps: true }
 );
