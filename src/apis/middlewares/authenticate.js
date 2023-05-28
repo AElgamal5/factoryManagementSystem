@@ -30,6 +30,14 @@ const auth = (req, res, next) => {
   }
 
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err, decoded) => {
+    if (!decoded) {
+      return res
+        .status(401)
+        .json(
+          errorFormat(token, "Invalid user's token", "authorization", "headers")
+        );
+    }
+
     const user = await User.findById(decoded.userID);
     if (err || !user || user.refreshToken === "") {
       return res

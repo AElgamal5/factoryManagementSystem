@@ -28,6 +28,8 @@ const orderSchema = new Schema(
 
     totalQuantity: { type: Number, default: 0 },
 
+    clientMaterial: [{ type: mongoose.Types.ObjectId, ref: "Material" }],
+
     // image: { type: mongoose.Types.ObjectId, ref: "Image" },
 
     details: { type: String },

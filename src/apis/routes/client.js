@@ -38,4 +38,10 @@ router.patch(
 
 router.delete("/:id", idValidation, clientController.deleteOne);
 
+router.patch(
+  "/updateMaterials/:id",
+  idValidation,
+  clientController.updateMaterials
+);
+
 module.exports = router;

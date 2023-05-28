@@ -95,7 +95,7 @@ const getByID = async (req, res) => {
     const model = await Model.findById(id)
       .populate("colors", "name")
       .populate("sizes", "name")
-      .populate("stages.id", "name")
+      .populate("stages.id")
       .populate("consumptions.material", "name")
       .populate("consumptions.colors", "name")
       .populate("consumptions.sizes", "name")

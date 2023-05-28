@@ -1,5 +1,5 @@
-const { Client, Image } = require("../models");
-const { errorFormat } = require("../utils");
+const { Client, Image, Order, Material } = require("../models");
+const { errorFormat, idCheck } = require("../utils");
 
 /*
  * method: POST
@@ -158,4 +158,105 @@ const deleteOne = async (req, res) => {
   }
 };
 
-module.exports = { create, getAll, getByID, update, deleteOne };
+/*
+ * method: PATCH
+ * path: /api/client/updateMaterials/:id
+ */
+const updateMaterials = async (req, res) => {
+  const id = req.params.id;
+
+  const { order: orderID, materials } = req.body;
+
+  try {
+    if (!idCheck(id)) {
+      return res
+        .status(400)
+        .json(errorFormat(id, "Invalid client id", "id", "params"));
+    }
+    const client = await Client.findById(id);
+    if (!client) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "No client with this id", "id", "params"));
+    }
+
+    if (!idCheck(orderID)) {
+      return res
+        .status(400)
+        .json(errorFormat(orderID, "Invalid order id", "order", "body"));
+    }
+    const order = await Order.findById(orderID);
+    if (!order) {
+      return res
+        .status(404)
+        .json(errorFormat(orderID, "No order with this id", "order", "body"));
+    }
+
+    if (order.client.toString() !== client._id.toString()) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(
+            orderID,
+            "This client does not have this order",
+            "order",
+            "body"
+          )
+        );
+    }
+
+    order.clientMaterial = [];
+
+    for (let i = 0; i < materials.length; i++) {
+      if (!idCheck(materials[i])) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              materials[i],
+              "Invalid material id",
+              `${materials[i]}`,
+              "body"
+            )
+          );
+      }
+
+      const material = await Material.findById(materials[i]);
+
+      if (!material) {
+        return res
+          .status(404)
+          .json(
+            materials[i],
+            "No material with this id",
+            `${materials[i]}`,
+            "body"
+          );
+      }
+
+      order.clientMaterial.push(materials[i]);
+    }
+
+    await order.save();
+
+    res.status(200).json({ msg: "Client's materials added tmam" });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "client.updateMaterials".bgYellow);
+    if (process.env.PRODUCTION === "false") console.log(error);
+  }
+};
+
+/*
+ * method: GET
+ * path: /api/client/materials/:id
+ */
+// const materials
+
+module.exports = {
+  create,
+  getAll,
+  getByID,
+  update,
+  deleteOne,
+  updateMaterials,
+};
