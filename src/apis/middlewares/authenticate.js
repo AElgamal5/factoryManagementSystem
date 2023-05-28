@@ -19,6 +19,8 @@ const auth = (req, res, next) => {
   }
   const token = authHeader.split(" ")[1];
 
+  console.log("Token", token);
+
   if (!token) {
     return res
       .status(403)

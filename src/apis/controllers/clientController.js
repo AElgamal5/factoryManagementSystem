@@ -1,4 +1,4 @@
-const { Client } = require("../models");
+const { Client, Image } = require("../models");
 const { errorFormat } = require("../utils");
 
 /*
@@ -83,7 +83,7 @@ const getByID = async (req, res) => {
  */
 const update = async (req, res) => {
   const id = req.params.id;
-  const { name, phoneNo, address, state, note } = req.body;
+  const { name, phoneNo, address, state, note, image } = req.body;
 
   try {
     //keep phoneNo unique

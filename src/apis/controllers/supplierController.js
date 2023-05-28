@@ -1,4 +1,9 @@
-const { Supplier, SupplierCustody, SupplierMaterial } = require("../models");
+const {
+  Supplier,
+  SupplierCustody,
+  SupplierMaterial,
+  Image,
+} = require("../models");
 const { errorFormat, idCheck } = require("../utils");
 
 /*
@@ -6,7 +11,7 @@ const { errorFormat, idCheck } = require("../utils");
  * path: /api/supplier/
  */
 const create = async (req, res) => {
-  const { name, phoneNo, address, state, note } = req.body;
+  const { name, phoneNo, address, state, note, image } = req.body;
 
   try {
     const exist = await Supplier.findOne({ phoneNo });
@@ -83,7 +88,7 @@ const getAll = async (req, res) => {
  */
 const update = async (req, res) => {
   const id = req.params.id;
-  const { name, phoneNo, address, state, note } = req.body;
+  const { name, phoneNo, address, state, note, image } = req.body;
 
   try {
     const supplier = await Supplier.findById(id);
