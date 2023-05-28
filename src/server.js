@@ -64,6 +64,9 @@ app.use("/api/userRole", userRole);
 app.use("/api/user", user);
 app.use("/api/auth", auth);
 
+//migration
+const userMigrate = require("./apis/utils/userMigration");
+
 //connect to DB and running the server
 (function start() {
   mongoose
@@ -71,6 +74,7 @@ app.use("/api/auth", auth);
     .then(() => {
       server.listen(process.env.PORT, () => {
         console.log("Connected to DB & server running on port: 5000".bgGreen);
+        userMigrate();
       });
     })
     .catch((err) => {

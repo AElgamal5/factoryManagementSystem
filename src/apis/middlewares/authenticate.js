@@ -9,9 +9,17 @@ const auth = (req, res, next) => {
   }
 
   const authHeader = req.headers["authorization"];
+
+  if (!authHeader) {
+    return res
+      .status(403)
+      .json(
+        errorFormat(authHeader, "No sent token", "authorization", "headers")
+      );
+  }
   const token = authHeader.split(" ")[1];
 
-  if (!authHeader || !token) {
+  if (!token) {
     return res
       .status(403)
       .json(
