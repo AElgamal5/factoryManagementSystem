@@ -51,7 +51,6 @@ router.get(
 
 router.post(
   "/consumption",
-  idValidation,
   orderMiddlewares.updateModelsValidate,
   validationResult,
   orderController.consumption

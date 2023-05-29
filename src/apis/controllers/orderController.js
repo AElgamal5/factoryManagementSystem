@@ -468,7 +468,12 @@ const consumption = async (req, res) => {
       }
     }
 
-    res.status(200).json({ data: order.totalMaterialsRequired });
+    const data = await order.populate(
+      "totalMaterialsRequired.id",
+      "name unit available"
+    );
+
+    res.status(200).json({ data: data.totalMaterialsRequired });
   } catch (error) {
     console.log("Error is in: ".bgRed, "order.consumption".bgYellow);
     if (process.env.PRODUCTION === "false") console.log(error);
