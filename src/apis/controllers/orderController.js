@@ -480,6 +480,26 @@ const consumption = async (req, res) => {
   }
 };
 
+/*
+ * method: GET
+ * path: /api/order/client/:id
+ */
+const getByClientID = async (req, res) => {
+  const id = req.params.id;
+  try {
+    const client = await Client.findById(id);
+    if (!client) {
+      return res.status(404).json(errorFormat(id, "No client"));
+    }
+
+    const docs = await Order.find({ client: id });
+    res.status(200).json({ data: docs });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "order.getByClientID".bgYellow);
+    if (process.env.PRODUCTION === "false") console.log(error);
+  }
+};
+
 module.exports = {
   create,
   getAll,
@@ -490,4 +510,5 @@ module.exports = {
   getOrdersByModelID,
   getClientMaterial,
   consumption,
+  getByClientID,
 };

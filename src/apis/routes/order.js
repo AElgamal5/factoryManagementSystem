@@ -56,4 +56,6 @@ router.post(
   orderController.consumption
 );
 
+router.get("/client/:id", idValidation, orderController.getByClientID);
+
 module.exports = router;
