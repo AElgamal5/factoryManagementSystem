@@ -50,7 +50,7 @@ router.get(
 );
 
 router.post(
-  "/consumption/:id",
+  "/consumption",
   idValidation,
   orderMiddlewares.updateModelsValidate,
   validationResult,

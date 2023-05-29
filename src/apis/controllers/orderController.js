@@ -368,16 +368,11 @@ const getClientMaterial = async (req, res) => {
  * path: /api/order/consumption/:id
  */
 const consumption = async (req, res) => {
-  const id = req.params.id;
+  // const id = req.params.id;
   const models = req.body.models;
 
   try {
-    const order = await Order.findById(id);
-    if (!order) {
-      return res
-        .status(404)
-        .json(errorFormat(id, "no order with this id", "id", "params"));
-    }
+    const order = new Order();
 
     //checks
     for (let i = 0; i < models.length; i++) {
