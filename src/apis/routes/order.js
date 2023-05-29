@@ -49,4 +49,12 @@ router.get(
   orderController.getClientMaterial
 );
 
+router.post(
+  "/consumption/:id",
+  idValidation,
+  orderMiddlewares.updateModelsValidate,
+  validationResult,
+  orderController.consumption
+);
+
 module.exports = router;
