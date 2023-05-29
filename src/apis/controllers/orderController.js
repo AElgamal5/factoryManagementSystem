@@ -221,7 +221,8 @@ const updateModels = async (req, res) => {
 
         if (colorIndex > -1 && sizeIndex > -1) {
           const totalIndex = order.totalMaterialsRequired.findIndex(
-            (tot) => tot.id.toString() === model.consumptions[j].material
+            (tot) =>
+              tot.id.toString() === model.consumptions[j].material.toString()
           );
 
           if (totalIndex > -1) {
@@ -246,21 +247,21 @@ const updateModels = async (req, res) => {
       });
     }
 
-    let TMR = [];
+    // let TMR = [];
 
-    for (let i = 0; i < order.totalMaterialsRequired.length; i++) {
-      const index = TMR.findIndex((obj) => {
-        obj.id === order.totalMaterialsRequired[i].id;
-      });
+    // for (let i = 0; i < order.totalMaterialsRequired.length; i++) {
+    //   const index = TMR.findIndex((obj) => {
+    //     obj.id === order.totalMaterialsRequired[i].id;
+    //   });
 
-      if (index > -1) {
-        TMR[index].quantity += +order.totalMaterialsRequired[i].quantity;
-      } else {
-        TMR.push(order.totalMaterialsRequired[i]);
-      }
-    }
+    //   if (index > -1) {
+    //     TMR[index].quantity += +order.totalMaterialsRequired[i].quantity;
+    //   } else {
+    //     TMR.push(order.totalMaterialsRequired[i]);
+    //   }
+    // }
 
-    order.totalMaterialsRequired = TMR;
+    // order.totalMaterialsRequired = TMR;
 
     await order.save();
 
@@ -366,110 +367,7 @@ const getClientMaterial = async (req, res) => {
  * method: GET
  * path: /api/order/consumption
  */
-const consumption = async (req, res) => {
-  const models = req.body.models;
-  try {
-    //checks
-    for (let i = 0; i < models.length; i++) {
-      if (!idCheck(models[i].id)) {
-        return res
-          .status(400)
-          .json(
-            errorFormat(
-              models[i].id,
-              "Not valid model id",
-              `models[${i}].id`,
-              "body"
-            )
-          );
-      }
-      if (!idCheck(models[i].color)) {
-        return res
-          .status(400)
-          .json(
-            errorFormat(
-              models[i].color,
-              "Not valid model color",
-              `models[${i}].color`,
-              "body"
-            )
-          );
-      }
-      if (!idCheck(models[i].size)) {
-        return res
-          .status(400)
-          .json(
-            errorFormat(
-              models[i].size,
-              "Not valid model size",
-              `models[${i}].size`,
-              "body"
-            )
-          );
-      }
-
-      const model = await Model.findOne({
-        _id: models[i].id,
-        "consumptions.colors": models[i].color,
-        "consumptions.sizes": models[i].size,
-      });
-
-      if (!model) {
-        return res
-          .status(404)
-          .json(
-            errorFormat(
-              models[i].id,
-              "no model with this data : id || color || size",
-              `models[${i}].id`,
-              "body"
-            )
-          );
-      }
-    }
-
-    let totalMaterialsRequired = [];
-
-    for (let i = 0; i < models.length; i++) {
-      const model = await Model.findOne({
-        _id: models[i].id,
-        "consumptions.colors": models[i].color,
-        "consumptions.sizes": models[i].size,
-      });
-
-      for (let j = 0; j < model.consumptions.length; j++) {
-        const colorIndex = model.consumptions[j].colors.findIndex(
-          (color) => color.toString() === models[i].color
-        );
-
-        const sizeIndex = model.consumptions[j].sizes.findIndex(
-          (size) => size.toString() === models[i].size
-        );
-
-        if (colorIndex > -1 && sizeIndex > -1) {
-          const totalIndex = totalMaterialsRequired.findIndex(
-            (tot) => tot.id.toString() === model.consumptions[j].material
-          );
-
-          if (totalIndex > -1) {
-            totalMaterialsRequired[totalIndex].quantity +=
-              +model.consumptions[j].quantity * models[i].quantity;
-          } else {
-            totalMaterialsRequired.push({
-              id: model.consumptions[j].material,
-              quantity: +model.consumptions[j].quantity * models[i].quantity,
-            });
-          }
-        }
-      }
-    }
-
-    res.status(200).json({ msg: "Models added to order tmam" });
-  } catch (error) {
-    console.log("Error is in: ".bgRed, "order.consumption".bgYellow);
-    if (process.env.PRODUCTION === "false") console.log(error);
-  }
-};
+const consumption = async (req, res) => {};
 
 module.exports = {
   create,
