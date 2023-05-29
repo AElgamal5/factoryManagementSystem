@@ -177,14 +177,14 @@ const test = async (req, res) => {
 
     if (!authHeader) {
       return res
-        .status(200)
+        .status(400)
         .json(
           errorFormat(authHeader, "No sent token", "authorization", "headers")
         );
     }
     if (!refreshToken) {
       return res
-        .status(200)
+        .status(400)
         .json(
           errorFormat(
             refreshToken,
@@ -200,7 +200,7 @@ const test = async (req, res) => {
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err, decoded) => {
       if (err) {
         return res
-          .status(200)
+          .status(401)
           .json(
             errorFormat(
               token,
@@ -213,7 +213,7 @@ const test = async (req, res) => {
         const user = await User.findOne({ refreshToken: refreshToken });
         if (!user) {
           return res
-            .status(200)
+            .status(401)
             .json(
               errorFormat(
                 refreshToken,
