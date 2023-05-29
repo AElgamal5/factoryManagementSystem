@@ -111,4 +111,43 @@ const updateModelsValidate = [
     .withMessage(`model's quantity must be in range form 1 to ${maxNo}`),
 ];
 
-module.exports = { createValidate, updateValidate, updateModelsValidate };
+const updateClientMaterialsValidate = [
+  check("order")
+    .notEmpty()
+    .withMessage("order's id is required")
+    .isAlphanumeric()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Wrong order id"),
+
+  check("clientMaterials")
+    .notEmpty()
+    .withMessage("Client material is required")
+    .isArray({ min: 1, max: 1000 })
+    .withMessage("Client material must be array with length 1 to 1000"),
+
+  check("clientMaterials.*.material")
+    .notEmpty()
+    .withMessage("material is required")
+    .isAlphanumeric()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Wrong material id"),
+
+  check("clientMaterials.*.quantity")
+    .notEmpty()
+    .withMessage("Quantity is required")
+    .isFloat({ min: 0.1, max: maxNo })
+    .withMessage(`Quantity must be in range form 0.1 to ${maxNo}`),
+
+  check("clientMaterials.*.date")
+    .notEmpty()
+    .withMessage("date is required")
+    .isDate()
+    .withMessage(`Wrong date format`),
+];
+
+module.exports = {
+  createValidate,
+  updateValidate,
+  updateModelsValidate,
+  updateClientMaterialsValidate,
+};

@@ -165,14 +165,9 @@ const deleteOne = async (req, res) => {
 const updateMaterials = async (req, res) => {
   const id = req.params.id;
 
-  const { order: orderID, materials } = req.body;
+  const { order: orderID, clientMaterials } = req.body;
 
   try {
-    if (!idCheck(id)) {
-      return res
-        .status(400)
-        .json(errorFormat(id, "Invalid client id", "id", "params"));
-    }
     const client = await Client.findById(id);
     if (!client) {
       return res
@@ -205,38 +200,48 @@ const updateMaterials = async (req, res) => {
         );
     }
 
-    order.clientMaterial = [];
-
-    for (let i = 0; i < materials.length; i++) {
-      if (!idCheck(materials[i])) {
+    //checks
+    for (let i = 0; i < clientMaterials.length; i++) {
+      if (!idCheck(clientMaterials[i].material)) {
         return res
           .status(400)
           .json(
             errorFormat(
-              materials[i],
+              clientMaterials[i].material,
               "Invalid material id",
-              `${materials[i]}`,
+              `clientMaterials[${i}].material`,
               "body"
             )
           );
       }
 
-      const material = await Material.findById(materials[i]);
+      const material = await Material.findById(clientMaterials[i].material);
 
       if (!material) {
         return res
           .status(404)
           .json(
-            materials[i],
+            clientMaterials[i].material,
             "No material with this id",
-            `${materials[i]}`,
+            `clientMaterials[${i}].material`,
             "body"
           );
       }
-
-      order.clientMaterial.push(materials[i]);
     }
 
+    for (let i = 0; i < clientMaterials.length; i++) {
+      const material = await Material.findById(clientMaterials[i].material);
+      material.quantity += +clientMaterials[i].quantity;
+      material.available += +clientMaterials[i].quantity;
+
+      order.clientMaterial.push({
+        material: clientMaterials[i].material,
+        quantity: clientMaterials[i].quantity,
+        date: clientMaterials[i].date,
+      });
+
+      await material.save();
+    }
     await order.save();
 
     res.status(200).json({ msg: "Client's materials added tmam" });

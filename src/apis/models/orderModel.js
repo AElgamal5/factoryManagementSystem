@@ -28,7 +28,13 @@ const orderSchema = new Schema(
 
     totalQuantity: { type: Number, default: 0 },
 
-    clientMaterial: [{ type: mongoose.Types.ObjectId, ref: "Material" }],
+    clientMaterial: [
+      {
+        material: { type: mongoose.Types.ObjectId, ref: "Material" },
+        quantity: { type: Number },
+        date: { type: Date },
+      },
+    ],
 
     // image: { type: mongoose.Types.ObjectId, ref: "Image" },
 

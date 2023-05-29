@@ -7,6 +7,7 @@ const { clientController } = require("../controllers");
 // supplierMiddlewares is the same checks for client
 const {
   supplierMiddlewares,
+  orderMiddlewares,
   validationResult,
   idValidation,
   authenticate,
@@ -41,6 +42,8 @@ router.delete("/:id", idValidation, clientController.deleteOne);
 router.patch(
   "/updateMaterials/:id",
   idValidation,
+  orderMiddlewares.updateClientMaterialsValidate,
+  validationResult,
   clientController.updateMaterials
 );
 
