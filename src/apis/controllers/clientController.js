@@ -1,5 +1,5 @@
 const { Client, Image, Order, Material } = require("../models");
-const { errorFormat, idCheck } = require("../utils");
+const { errorFormat, idCheck, currentTime } = require("../utils");
 
 /*
  * method: POST
@@ -237,7 +237,7 @@ const updateMaterials = async (req, res) => {
       order.clientMaterial.push({
         material: clientMaterials[i].material,
         quantity: clientMaterials[i].quantity,
-        date: clientMaterials[i].date,
+        date: currentTime(),
       });
 
       await material.save();

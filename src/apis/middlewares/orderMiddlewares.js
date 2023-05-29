@@ -138,11 +138,11 @@ const updateClientMaterialsValidate = [
     .isFloat({ min: 0.1, max: maxNo })
     .withMessage(`Quantity must be in range form 0.1 to ${maxNo}`),
 
-  check("clientMaterials.*.date")
-    .notEmpty()
-    .withMessage("date is required")
-    .isDate()
-    .withMessage(`Wrong date format`),
+  // check("clientMaterials.*.date")
+  //   .notEmpty()
+  //   .withMessage("date is required")
+  //   .isDate()
+  //   .withMessage(`Wrong date format`),
 ];
 
 module.exports = {
