@@ -280,7 +280,7 @@ const testCredentials = async (req, res) => {
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
       return res
-        .status(401)
+        .status(400)
         .json(
           errorFormat(password, "Wrong user's password", "password", "body")
         );

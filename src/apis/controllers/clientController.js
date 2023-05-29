@@ -251,12 +251,6 @@ const updateMaterials = async (req, res) => {
   }
 };
 
-/*
- * method: GET
- * path: /api/client/materials/:id
- */
-// const materials
-
 module.exports = {
   create,
   getAll,

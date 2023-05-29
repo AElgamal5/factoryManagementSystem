@@ -61,7 +61,8 @@ const getByID = async (req, res) => {
       .populate("models.color", "name")
       .populate("models.size", "name")
       .populate("shipments", "name createdAt")
-      .populate("totalMaterialsRequired.id", "name available");
+      .populate("totalMaterialsRequired.id", "name available unit")
+      .populate("clientMaterial.material", "name available unit");
 
     if (!order) {
       return res
@@ -320,6 +321,31 @@ const getOrdersByModelID = async (req, res) => {
   }
 };
 
+/*
+ * method: GET
+ * path: /api/order/clientMaterial/:id
+ */
+const getClientMaterial = async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const order = await Order.findById(id)
+      .populate("clientMaterial.material", "name available unit")
+      .select("clientMaterial");
+
+    if (!order) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "no order with this id", "id", "params"));
+    }
+
+    res.status(200).json({ data: order });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "order.getClientMaterial".bgYellow);
+    if (process.env.PRODUCTION === "false") console.log(error);
+  }
+};
+
 module.exports = {
   create,
   getAll,
@@ -328,4 +354,5 @@ module.exports = {
   updateModels,
   deleteOne,
   getOrdersByModelID,
+  getClientMaterial,
 };

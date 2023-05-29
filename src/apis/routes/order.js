@@ -43,4 +43,10 @@ router.delete("/:id", idValidation, orderController.deleteOne);
 
 router.get("/model/:mid", orderController.getOrdersByModelID);
 
+router.get(
+  "/clientMaterial/:id",
+  idValidation,
+  orderController.getClientMaterial
+);
+
 module.exports = router;
