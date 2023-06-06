@@ -40,6 +40,8 @@ const orderSchema = new Schema(
 
     details: { type: String },
 
+    status: { type: Boolean, default: false },
+
     note: { type: String },
   },
   { timestamps: true }

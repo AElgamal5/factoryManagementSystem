@@ -83,7 +83,7 @@ const getByID = async (req, res) => {
  */
 const update = async (req, res) => {
   const id = req.params.id;
-  const { name, client: clientID, details, note } = req.body;
+  const { name, client: clientID, details, note, status } = req.body;
 
   try {
     //check validity and existence of clientID
@@ -108,6 +108,7 @@ const update = async (req, res) => {
       client: clientID,
       details,
       note,
+      status,
     });
 
     if (!order) {

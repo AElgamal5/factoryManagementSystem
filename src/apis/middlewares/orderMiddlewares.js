@@ -74,6 +74,11 @@ const updateValidate = [
     .isAlphanumeric()
     .isLength({ min: 24, max: 24 })
     .withMessage("Wrong client ID"),
+
+  check("status")
+    .optional()
+    .isBoolean()
+    .withMessage("status must be a boolean"),
 ];
 
 const updateModelsValidate = [
