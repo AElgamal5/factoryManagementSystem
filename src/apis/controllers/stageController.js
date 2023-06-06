@@ -16,6 +16,7 @@ const create = async (req, res) => {
     image,
     note,
     machineType: machineTypeID,
+    stageErrors,
   } = req.body;
 
   try {
@@ -41,6 +42,7 @@ const create = async (req, res) => {
       price,
       note,
       machineType: machineTypeID,
+      stageErrors,
     });
 
     res.status(201).json({ data: stage });
@@ -102,6 +104,7 @@ const update = async (req, res) => {
     image,
     note,
     machineType: machineTypeID,
+    stageErrors,
   } = req.body;
 
   try {
@@ -129,6 +132,7 @@ const update = async (req, res) => {
       price,
       note,
       machineType: machineTypeID,
+      stageErrors,
     });
 
     if (!stage) {

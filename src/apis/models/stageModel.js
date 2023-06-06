@@ -19,6 +19,8 @@ const stageSchema = new Schema(
     machineType: { type: mongoose.Types.ObjectId, ref: "MachineType" },
 
     note: { type: String },
+
+    stageErrors: [{ type: String }],
   },
   { timestamps: true }
 );

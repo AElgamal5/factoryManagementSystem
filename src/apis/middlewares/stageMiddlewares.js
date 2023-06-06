@@ -64,6 +64,19 @@ const createValidate = [
     .isAlphanumeric()
     .isLength({ min: 24, max: 24 })
     .withMessage("Wrong machineType id"),
+
+  check("stageErrors")
+    .optional()
+    .isArray({ min: 1, max: 200 })
+    .withMessage("Stage's errors must be an array with in range from 1 to 200"),
+
+  check("stageErrors.*")
+    .notEmpty()
+    .isString()
+    .isLength({ min: 3 })
+    .withMessage("error's description must be at least 3 characters")
+    .isLength({ max: 300 })
+    .withMessage("error's description must be at most 300 characters"),
 ];
 
 const updateValidate = [
@@ -125,6 +138,19 @@ const updateValidate = [
     .isAlphanumeric()
     .isLength({ min: 24, max: 24 })
     .withMessage("Wrong machineType id"),
+
+  check("stageErrors")
+    .optional()
+    .isArray({ min: 1, max: 200 })
+    .withMessage("Stage's errors must be an array with in range from 1 to 200"),
+
+  check("stageErrors.*")
+    .notEmpty()
+    .isString()
+    .isLength({ min: 3 })
+    .withMessage("error's description must be at least 3 characters")
+    .isLength({ max: 300 })
+    .withMessage("error's description must be at most 300 characters"),
 ];
 
 module.exports = { createValidate, updateValidate };
