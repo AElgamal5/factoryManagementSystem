@@ -22,4 +22,5 @@ module.exports = {
   UserRole: require("./userRoleModel"),
   User: require("./userModel"),
   Image: require("./imageModel"),
+  UserEmployee: require("./userEmployeeModel"),
 };

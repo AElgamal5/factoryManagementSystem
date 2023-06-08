@@ -41,6 +41,7 @@ const {
   userRole,
   user,
   auth,
+  userEmployee,
 } = require("./apis/routes");
 app.use("/api/employee", employee);
 app.use("/api/supplier", supplier);
@@ -63,6 +64,7 @@ app.use("/api/machineType", machineType);
 app.use("/api/userRole", userRole);
 app.use("/api/user", user);
 app.use("/api/auth", auth);
+app.use("/api/userEmployee", userEmployee);
 
 //migration
 const userMigrate = require("./apis/utils/userMigration");

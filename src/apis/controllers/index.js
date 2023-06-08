@@ -20,4 +20,5 @@ module.exports = {
   userRoleController: require("./userRoleController"),
   userController: require("./userController"),
   authController: require("./authController"),
+  userEmployeeController: require("./userEmployeeController"),
 };

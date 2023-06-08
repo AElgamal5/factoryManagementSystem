@@ -20,4 +20,5 @@ module.exports = {
   userRole: require("./userRole"),
   user: require("./user"),
   auth: require("./auth"),
+  userEmployee: require("./userEmployee"),
 };
