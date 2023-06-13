@@ -3,4 +3,5 @@ module.exports = {
   idCheck: require("./idCheck"),
   isBeforeTomorrow: require("./isBeforeTomorrow"),
   currentTime: require("./currentTime"),
+  currentDate: require("./currentDate"),
 };

@@ -23,4 +23,5 @@ module.exports = {
   authenticate: require("./authenticate"),
   imageValidate: require("./imageValidate"),
   userEmployeeMiddlewares: require("./userEmployeeMiddlewares"),
+  cardMiddlewares: require("./cardMiddlewares"),
 };

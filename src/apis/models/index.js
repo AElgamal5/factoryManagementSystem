@@ -23,4 +23,6 @@ module.exports = {
   User: require("./userModel"),
   Image: require("./imageModel"),
   UserEmployee: require("./userEmployeeModel"),
+  Salary: require("./salaryModel"),
+  Card: require("./cardModel"),
 };

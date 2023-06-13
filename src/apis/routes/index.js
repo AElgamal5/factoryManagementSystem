@@ -21,4 +21,5 @@ module.exports = {
   user: require("./user"),
   auth: require("./auth"),
   userEmployee: require("./userEmployee"),
+  card: require("./card"),
 };
