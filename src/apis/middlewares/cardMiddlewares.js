@@ -86,4 +86,20 @@ const updateValidate = [
     .withMessage("Card's details length should be 3 to 200 characters"),
 ];
 
-module.exports = { createValidate, updateValidate };
+const trackingValidate = [
+  check("stage")
+    .notEmpty()
+    .withMessage("Stage is required")
+    .isAlphanumeric()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Wrong stage id"),
+
+  check("employee")
+    .notEmpty()
+    .withMessage("Employee is required")
+    .isAlphanumeric()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Wrong employee id"),
+];
+
+module.exports = { createValidate, updateValidate, trackingValidate };

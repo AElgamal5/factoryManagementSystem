@@ -254,4 +254,249 @@ const update = async (req, res) => {
   }
 };
 
-module.exports = { create, getAll, getByID, deleteOne, update };
+/*
+ * method: PATCH
+ * path: /api/card/:id/tracking/add
+ */
+const addTracking = async (req, res) => {
+  const id = req.params.id;
+  const { stage: stageID, employee: employeeID } = req.body;
+
+  try {
+    //card check
+    const card = await Card.findById(id);
+    if (!card) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "No card with this id", "id", "params"));
+    }
+
+    //stage check
+    const stage = await Stage.findById(stageID);
+    if (!stage) {
+      return res
+        .status(404)
+        .json(errorFormat(stageID, "No Stage with this id", "stage", "body"));
+    }
+
+    //check if card.model have the givin stage
+    const modelStage = await Model.findOne({
+      _id: card.model,
+      "stages.id": stageID,
+    });
+    if (!modelStage) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(
+            stageID,
+            "This stage does not exist in card model",
+            "stage",
+            "body"
+          )
+        );
+    }
+
+    //employee check
+    const employee = await Employee.findById(employeeID);
+    if (!employee) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(
+            employeeID,
+            "No employee with this id",
+            "employee",
+            "body"
+          )
+        );
+    }
+
+    const current = currentDate();
+
+    const salary = await Salary.findOne({
+      employee: employeeID,
+      "date.month": current.month,
+      "date.year": current.year,
+    });
+
+    //if salary exist then deal with the doc and if not exist create new one
+    if (salary) {
+      const workIndex = salary.work.findIndex(
+        (obj) => obj.stage.toString() === stageID
+      );
+
+      console.log(workIndex);
+
+      //update work array and total by card.quantity
+      if (workIndex === -1) {
+        salary.work.push({
+          stage: stageID,
+          quantity: card.quantity,
+        });
+      } else {
+        salary.work[workIndex].quantity += card.quantity;
+      }
+      salary.total += card.quantity;
+      await salary.save();
+    } else {
+      const salary = await Salary.create({
+        employee: employeeID,
+        date: {
+          month: current.month,
+          year: current.year,
+        },
+      });
+
+      salary.work.push({
+        stage: stageID,
+        quantity: card.quantity,
+      });
+
+      salary.total += card.quantity;
+
+      await salary.save();
+    }
+
+    card.tracking.push({
+      stage: stageID,
+      employee: employeeID,
+      dateOut: currentTime(),
+    });
+    await card.save();
+
+    res.status(200).json({ msg: "Tracking added tmam" });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "card.addTracking".bgYellow);
+    if (process.env.PRODUCTION === "false") console.log(error);
+  }
+};
+
+/*
+ * method: PATCH
+ * path: /api/card/:id/tracking/remove
+ */
+const removeTracking = async (req, res) => {
+  const id = req.params.id;
+  const { stage: stageID, employee: employeeID } = req.body;
+
+  try {
+    //card check
+    const card = await Card.findById(id);
+    if (!card) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "No card with this id", "id", "params"));
+    }
+
+    //stage check
+    const stage = await Stage.findById(stageID);
+    if (!stage) {
+      return res
+        .status(404)
+        .json(errorFormat(stageID, "No Stage with this id", "stage", "body"));
+    }
+
+    //check if card.model have the givin stage
+    const modelStage = await Model.findOne({
+      _id: card.model,
+      "stages.id": stageID,
+    });
+    if (!modelStage) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(
+            stageID,
+            "This stage does not exist in card model",
+            "stage",
+            "body"
+          )
+        );
+    }
+
+    //employee check
+    const employee = await Employee.findById(employeeID);
+    if (!employee) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(
+            employeeID,
+            "No employee with this id",
+            "employee",
+            "body"
+          )
+        );
+    }
+
+    //find tracking index
+    const trackingIndex = card.tracking.findIndex(
+      (obj) =>
+        obj.employee.toString() === employeeID &&
+        obj.stage.toString() === stageID
+    );
+
+    const current = currentDate();
+
+    const salary = await Salary.findOne({
+      employee: employeeID,
+      "date.month": current.month,
+      "date.year": current.year,
+    });
+
+    if (!salary) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(
+            employeeID,
+            "This card did not assign by the givin employee",
+            "employee",
+            "body"
+          )
+        );
+    }
+
+    //find work index
+    const workIndex = salary.work.findIndex(
+      (obj) => obj.stage.toString() === stageID
+    );
+
+    if (workIndex === -1) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(
+            employeeID,
+            "This card did not assign by the givin employee",
+            "employee",
+            "body"
+          )
+        );
+    }
+
+    //update salary.work and card.tracking
+    salary.total -= card.quantity;
+    salary.work.pull(salary.work[workIndex]._id);
+    await salary.save();
+
+    card.tracking.pull(card.tracking[trackingIndex]._id);
+    await card.save();
+
+    res.status(200).json({ msg: "Tracking removed tmam" });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "card.addTracking".bgYellow);
+    if (process.env.PRODUCTION === "false") console.log(error);
+  }
+};
+
+module.exports = {
+  create,
+  getAll,
+  getByID,
+  deleteOne,
+  update,
+  addTracking,
+  removeTracking,
+};

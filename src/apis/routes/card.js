@@ -33,4 +33,20 @@ router.patch(
   cardController.update
 );
 
+router.patch(
+  "/:id/tracking/add",
+  idValidation,
+  cardMiddlewares.trackingValidate,
+  validationResult,
+  cardController.addTracking
+);
+
+router.patch(
+  "/:id/tracking/remove",
+  idValidation,
+  cardMiddlewares.trackingValidate,
+  validationResult,
+  cardController.removeTracking
+);
+
 module.exports = router;

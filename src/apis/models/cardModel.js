@@ -30,14 +30,16 @@ const cardSchema = new Schema(
     ],
 
     cardErrors: [
-      {
-        stage: { type: mongoose.Types.ObjectId, ref: "Stage" },
-        description: { type: String },
-        dateIn: { type: Date },
-        dateOut: { type: Date },
-        enteredBy: { type: mongoose.Types.ObjectId, ref: "Employee" },
-        doneBy: { type: mongoose.Types.ObjectId, ref: "Employee" },
-      },
+      [
+        {
+          stage: { type: mongoose.Types.ObjectId, ref: "Stage" },
+          description: { type: String },
+          dateIn: { type: Date },
+          dateOut: { type: Date },
+          enteredBy: { type: mongoose.Types.ObjectId, ref: "Employee" },
+          doneBy: { type: mongoose.Types.ObjectId, ref: "Employee" },
+        },
+      ],
     ],
   },
   { timestamps: true }
