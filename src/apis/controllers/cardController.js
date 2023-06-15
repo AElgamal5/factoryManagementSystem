@@ -64,7 +64,7 @@ const create = async (req, res) => {
       details,
     });
 
-    card.history.push({ state: "Created", date: new Date(currentTime()) });
+    card.history.push({ state: "Created", date: currentTime() });
     await card.save();
 
     res.status(201).json({ data: card });
@@ -141,6 +141,13 @@ const update = async (req, res) => {
   const { code, order: orderID, model: modelID, quantity, details } = req.body;
 
   try {
+    const card = await Card.findById(id);
+    if (!card) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "No card with this id", "id", "params"));
+    }
+
     //code check
     if (code) {
       const exist = await Card.findOne({ code });
@@ -158,6 +165,8 @@ const update = async (req, res) => {
       }
     }
 
+    let order, model;
+
     //order checks
     if (orderID) {
       if (!idCheck(orderID)) {
@@ -165,7 +174,7 @@ const update = async (req, res) => {
           .status(400)
           .json(errorFormat(orderID, "Invalid order id", "order", "body"));
       }
-      const order = await Order.findById(orderID);
+      order = await Order.findById(orderID);
       if (!order) {
         return res
           .status(404)
@@ -180,17 +189,69 @@ const update = async (req, res) => {
           .status(400)
           .json(errorFormat(modelID, "Invalid model id", "model", "body"));
       }
-      const model = await Model.findById(modelID);
+      model = await Model.findById(modelID);
       if (!model) {
         return res
           .status(404)
           .json(errorFormat(modelID, "No model with this id", "model", "body"));
       }
     }
+
+    //check if the order have model
+    if (order && model) {
+      const orderModel = await Order.findOne({
+        _id: orderID,
+        "models.id": modelID,
+      });
+      if (!orderModel) {
+        return res
+          .status(400)
+          .json(
+            errorFormat("the order do not have model", "order&model", "body")
+          );
+      }
+    } else if (order) {
+      const orderModel = await Order.findOne({
+        _id: orderID,
+        "models.id": card.model,
+      });
+      if (!orderModel) {
+        return res
+          .status(400)
+          .json(
+            errorFormat("the order do not have model", "order&model", "body")
+          );
+      }
+    } else if (model) {
+      const orderModel = await Order.findOne({
+        _id: card.order,
+        "models.id": modelID,
+      });
+      if (!orderModel) {
+        return res
+          .status(400)
+          .json(
+            errorFormat("the order do not have model", "order&model", "body")
+          );
+      }
+    }
+
+    await Card.findByIdAndUpdate(id, {
+      code,
+      order: orderID,
+      model: modelID,
+      quantity,
+      details,
+    });
+
+    card.history.push({ state: "Updated", date: currentTime() });
+    await card.save();
+
+    res.status(200).json({ msg: "Card updated tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "card.deleteOne".bgYellow);
+    console.log("Error is in: ".bgRed, "card.update".bgYellow);
     if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
-module.exports = { create, getAll, getByID, deleteOne };
+module.exports = { create, getAll, getByID, deleteOne, update };

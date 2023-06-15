@@ -1,8 +1,8 @@
 const currentDate = () => {
   const now = new Date();
 
-  //+2 hour to get cairo timezone without summer time modification
-  now.setHours(now.getHours() + 2);
+  //+3 hour to get cairo timezone with summer time modification
+  now.setHours(now.getHours() + 3);
 
   const date = {
     year: now.getFullYear(),

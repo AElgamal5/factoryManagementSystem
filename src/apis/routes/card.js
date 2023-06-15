@@ -25,4 +25,12 @@ router.get("/:id", idValidation, cardController.getByID);
 
 router.delete("/:id", idValidation, cardController.deleteOne);
 
+router.patch(
+  "/:id",
+  idValidation,
+  cardMiddlewares.updateValidate,
+  validationResult,
+  cardController.update
+);
+
 module.exports = router;
