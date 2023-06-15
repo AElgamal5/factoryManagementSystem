@@ -39,7 +39,9 @@ const create = async (req, res) => {
  */
 const getAll = async (req, res) => {
   try {
-    const orders = await Order.find().populate("client", "name");
+    const orders = await Order.find()
+      .populate("client", "name")
+      .populate("models.id", "name");
 
     res.status(200).json({ data: orders });
   } catch (error) {
