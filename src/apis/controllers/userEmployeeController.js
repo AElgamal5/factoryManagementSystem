@@ -1,5 +1,5 @@
 const { UserEmployee, User, Employee, Order, Model } = require("../models");
-const { errorFormat, idCheck } = require("../utils");
+const { errorFormat, idCheck, currentTime } = require("../utils");
 
 /*
  * method: POST
@@ -361,7 +361,7 @@ const workAdding = async (req, res) => {
     doc.work.push({
       order: orderID,
       model: modelID,
-      date: new Date(),
+      date: currentTime(),
     });
 
     await doc.save();

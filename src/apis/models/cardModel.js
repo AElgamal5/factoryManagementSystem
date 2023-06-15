@@ -38,6 +38,7 @@ const cardSchema = new Schema(
           dateOut: { type: Date },
           enteredBy: { type: mongoose.Types.ObjectId, ref: "Employee" },
           doneBy: { type: mongoose.Types.ObjectId, ref: "Employee" },
+          verifiedBy: { type: mongoose.Types.ObjectId, ref: "Employee" },
         },
       ],
     ],

@@ -49,4 +49,12 @@ router.patch(
   cardController.removeTracking
 );
 
+router.patch(
+  "/:id/errors/add",
+  idValidation,
+  cardMiddlewares.cardErrorsValidate,
+  validationResult,
+  cardController.addError
+);
+
 module.exports = router;

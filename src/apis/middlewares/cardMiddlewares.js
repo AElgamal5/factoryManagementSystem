@@ -102,4 +102,43 @@ const trackingValidate = [
     .withMessage("Wrong employee id"),
 ];
 
-module.exports = { createValidate, updateValidate, trackingValidate };
+const cardErrorsValidate = [
+  check("cardErrors")
+    .notEmpty()
+    .withMessage("cardErrors is required")
+    .isArray({ min: 1, max: 1000 })
+    .withMessage(
+      "cardErrors must be an array with in range form 1 to 1000 elements"
+    ),
+
+  check("cardErrors.*.*.stage")
+    .notEmpty()
+    .withMessage("stage is required")
+    .isAlphanumeric()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Wrong stage id"),
+
+  check("cardErrors.*.*.description")
+    .notEmpty()
+    .withMessage("description is required")
+    .isString()
+    .withMessage("description must be string")
+    .isLength({ min: 3 })
+    .withMessage("description must be at least 3 characters")
+    .isLength({ max: 300 })
+    .withMessage("description must be at most 300 characters"),
+
+  check("cardErrors.*.*.enteredBy")
+    .notEmpty()
+    .withMessage("enteredBy is required")
+    .isAlphanumeric()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Wrong enteredBy id"),
+];
+
+module.exports = {
+  createValidate,
+  updateValidate,
+  trackingValidate,
+  cardErrorsValidate,
+};
