@@ -136,9 +136,33 @@ const cardErrorsValidate = [
     .withMessage("Wrong enteredBy id"),
 ];
 
+const cardErrorConfirmValidate = [
+  check("stage")
+    .notEmpty()
+    .withMessage("stage is required")
+    .isAlphanumeric()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Wrong stage id"),
+
+  check("doneBy")
+    .notEmpty()
+    .withMessage("doneBy is required")
+    .isAlphanumeric()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Wrong doneBy id"),
+
+  check("verifiedBy")
+    .notEmpty()
+    .withMessage("verifiedBy is required")
+    .isAlphanumeric()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Wrong verifiedBy id"),
+];
+
 module.exports = {
   createValidate,
   updateValidate,
   trackingValidate,
   cardErrorsValidate,
+  cardErrorConfirmValidate,
 };

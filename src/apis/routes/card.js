@@ -57,4 +57,12 @@ router.patch(
   cardController.addError
 );
 
+router.patch(
+  "/:id/errors/confirm",
+  idValidation,
+  cardMiddlewares.cardErrorConfirmValidate,
+  validationResult,
+  cardController.confirmError
+);
+
 module.exports = router;

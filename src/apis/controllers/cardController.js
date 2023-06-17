@@ -522,7 +522,19 @@ const addError = async (req, res) => {
       const errors = [];
 
       for (let j = 0; j < cardErrors[i].length; j++) {
-        //stage check
+        //stage checks
+        if (!idCheck(cardErrors[i][j].stage)) {
+          return res
+            .status(400)
+            .json(
+              errorFormat(
+                cardErrors[i][j].stage,
+                "Invalid stage id",
+                `cardErrors[${i}][${j}].stage`,
+                "body"
+              )
+            );
+        }
         const stage = await Stage.findById(cardErrors[i][j].stage);
         if (!stage) {
           return res
@@ -573,6 +585,18 @@ const addError = async (req, res) => {
         }
 
         //user checks
+        if (!idCheck(cardErrors[i][j].enteredBy)) {
+          return res
+            .status(400)
+            .json(
+              errorFormat(
+                cardErrors[i][j].enteredBy,
+                "Invalid enteredBy id",
+                `cardErrors[${i}][${j}].enteredBy`,
+                "body"
+              )
+            );
+        }
         const user = await User.findById(cardErrors[i][j].enteredBy);
         if (!user) {
           return res
@@ -733,6 +757,170 @@ const addError = async (req, res) => {
   }
 };
 
+/*
+ * method: PATCH
+ * path: /api/card/:id/errors/confirm
+ */
+const confirmError = async (req, res) => {
+  const id = req.params.id;
+  const { stage: stageID, doneBy, verifiedBy } = req.body;
+
+  try {
+    //card check
+    const card = await Card.findById(id);
+    if (!card) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "No card with this id", "id", "params"));
+    }
+
+    //stage check
+    if (!idCheck(stageID)) {
+      return res
+        .status(400)
+        .json(errorFormat(stageID, "Invalid stage id", "stage", "body"));
+    }
+    const stage = await Stage.findById(stageID);
+    if (!stage) {
+      return res
+        .status(404)
+        .json(errorFormat(stageID, "No stage with this id", "stage", "body"));
+    }
+
+    //check if card.model have the givin stage
+    const modelStage = await Model.findOne({
+      _id: card.model,
+      "stages.id": stageID,
+    });
+    if (!modelStage) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(
+            stageID,
+            "This stage does not exist in card model",
+            "stage",
+            "body"
+          )
+        );
+    }
+
+    //doneBy employee check
+    if (!idCheck(doneBy)) {
+      return res
+        .status(400)
+        .json(errorFormat(doneBy, "Invalid doneBy id", "doneBy", "body"));
+    }
+    const employee = await Employee.findById(doneBy);
+    if (!employee) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(doneBy, "No employee with this id", "doneBy", "body")
+        );
+    }
+
+    //verifiedBy checks
+    if (!idCheck(verifiedBy)) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(verifiedBy, "Invalid verifiedBy id", "verifiedBy", "body")
+        );
+    }
+    const user = await User.findById(verifiedBy);
+    if (!user) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(verifiedBy, "No user with this id", "verifiedBy", "body")
+        );
+    }
+    const userEmployee = await UserEmployee.findOne({ user: verifiedBy });
+    if (!userEmployee) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(
+            verifiedBy,
+            "This user is not an employee",
+            "verifiedBy",
+            "body"
+          )
+        );
+    }
+    const verifiedByEmployee = await Employee.findById(userEmployee.employee);
+    if (!verifiedByEmployee) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(
+            verifiedBy,
+            "No employee doc related to this user",
+            "verifiedBy",
+            "body"
+          )
+        );
+    }
+
+    for (let i = 0; i < card.cardErrors.length; i++) {
+      const index = card.cardErrors[i].findIndex(
+        (obj) => obj.stage.toString() === stageID
+      );
+
+      //if stage not exist || stage has been verified
+      if (index === -1 || card.cardErrors[i][index].verifiedBy) {
+        continue;
+      }
+
+      //update error
+      card.cardErrors[i][index].verifiedBy = verifiedByEmployee._id;
+      card.cardErrors[i][index].doneBy = employee._id;
+      card.cardErrors[i][index].dateOut = currentTime();
+
+      const current = currentDate();
+
+      const salary = await Salary.findOne({
+        employee: employee._id,
+        "date.year": current.year,
+        "date.month": current.month,
+      });
+      if (!salary) {
+        const newSalary = await Salary.create({
+          employee: employee._id,
+          date: {
+            month: current.month,
+            year: current.year,
+          },
+        });
+
+        newSalary.work.push({ stage: stageID, quantity: 1 });
+        newSalary.total = 1;
+        await newSalary.save();
+      } else {
+        const workIndex = salary.work.findIndex(
+          (obj) => obj.stage.toString() === stageID
+        );
+
+        if (workIndex === -1) {
+          salary.work.push({ stage: stageID, quantity: 1 });
+        } else {
+          salary.work[workIndex].quantity += 1;
+        }
+        salary.total += 1;
+
+        await salary.save();
+      }
+    }
+    await card.save();
+
+    res.status(200).json({ msg: "Error confirmed for this stage tmam" });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "card.confirmError".bgYellow);
+    if (process.env.PRODUCTION === "false") console.log(error);
+  }
+};
+
 module.exports = {
   create,
   getAll,
@@ -742,4 +930,5 @@ module.exports = {
   addTracking,
   removeTracking,
   addError,
+  confirmError,
 };
