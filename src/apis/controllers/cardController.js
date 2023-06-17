@@ -94,11 +94,35 @@ const create = async (req, res) => {
  */
 const getAll = async (req, res) => {
   try {
-    const docs = await Card.find();
+    const docs = await Card.find()
+      .populate("model", "name")
+      .populate("order", "name")
+      .sort({ createdAt: -1 });
 
     res.status(200).json({ data: docs });
   } catch (error) {
     console.log("Error is in: ".bgRed, "card.getAll".bgYellow);
+    if (process.env.PRODUCTION === "false") console.log(error);
+  }
+};
+
+/*
+ * method: GET
+ * path: /api/card/last/:num
+ */
+const getLast = async (req, res) => {
+  const num = req.params.num;
+
+  try {
+    const docs = await Card.find()
+      .populate("model", "name")
+      .populate("order", "name")
+      .sort({ createdAt: -1 })
+      .limit(num);
+
+    res.status(200).json({ data: docs });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "card.getLast".bgYellow);
     if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
@@ -939,6 +963,50 @@ const confirmError = async (req, res) => {
   }
 };
 
+/*
+ * method: GET
+ * path: /api/card/order/:oid/model/:mid
+ */
+const getAllForModelOrder = async (req, res) => {
+  const mid = req.params.mid;
+  const oid = req.params.oid;
+
+  try {
+    //model checks
+    if (!idCheck(mid)) {
+      return res
+        .status(400)
+        .json(errorFormat(mid, "Invalid model id", "mid", "params"));
+    }
+    const model = await Model.findById(mid);
+    if (!model) {
+      return res
+        .status(404)
+        .json(errorFormat(mid, "No model with this id", "mid", "params"));
+    }
+
+    //order checks
+    if (!idCheck(oid)) {
+      return res
+        .status(400)
+        .json(errorFormat(oid, "Invalid order id", "oid", "params"));
+    }
+    const order = await Order.findById(oid);
+    if (!order) {
+      return res
+        .status(404)
+        .json(errorFormat(oid, "No order with this id", "oid", "params"));
+    }
+
+    const docs = await Card.find({ order: oid, model: mid });
+
+    res.status(200).json({ data: docs });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "card.getAllForModelOrder".bgYellow);
+    if (process.env.PRODUCTION === "false") console.log(error);
+  }
+};
+
 module.exports = {
   create,
   getAll,
@@ -949,4 +1017,6 @@ module.exports = {
   removeTracking,
   addError,
   confirmError,
+  getLast,
+  getAllForModelOrder,
 };
