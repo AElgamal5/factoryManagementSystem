@@ -19,12 +19,17 @@ const create = async (req, res) => {
 
   try {
     //code check
-    const exist = await Card.findOne({ code });
+    const exist = await Card.findOne({ code, order: orderID, model: modelID });
     if (exist) {
       return res
         .status(400)
         .json(
-          errorFormat(code, "Code must be unique for each card", "code", "body")
+          errorFormat(
+            code,
+            "Code must be unique for each card in model in order",
+            "code",
+            "body"
+          )
         );
     }
 
@@ -105,7 +110,16 @@ const getAll = async (req, res) => {
 const getByID = async (req, res) => {
   const id = req.params.id;
   try {
-    const doc = await Card.findById(id);
+    const doc = await Card.findById(id)
+      .populate("model", "name")
+      .populate("order", "name")
+      .populate("tracking.stage", "name")
+      .populate("tracking.employee", "name code")
+      .populate("cardErrors.stage", "name")
+      .populate("cardErrors.enteredBy", "name code")
+      .populate("cardErrors.doneBy", "name code")
+      .populate("cardErrors.verifiedBy", "name code");
+
     if (!doc) {
       return res
         .status(404)
@@ -159,14 +173,18 @@ const update = async (req, res) => {
 
     //code check
     if (code) {
-      const exist = await Card.findOne({ code });
+      const exist = await Card.findOne({
+        code,
+        order: orderID,
+        model: modelID,
+      });
       if (exist) {
         return res
           .status(400)
           .json(
             errorFormat(
               code,
-              "Code must be unique for each card",
+              "Code must be unique for each card in model in order",
               "code",
               "body"
             )
