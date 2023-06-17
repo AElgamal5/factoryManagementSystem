@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-const { User } = require("../models");
+const { User, UserEmployee } = require("../models");
 const { idCheck, errorFormat } = require("../utils");
 
 /*
@@ -18,7 +18,6 @@ const login = async (req, res) => {
         .status(404)
         .json(errorFormat(code, "No user with this code", "code", "body"));
     }
-
     if (+user.state === 0) {
       return res
         .status(403)
@@ -60,10 +59,15 @@ const login = async (req, res) => {
       .populate("role")
       .select("-password -refreshToken -__v ");
 
+    const userEmployee = await UserEmployee.findOne({ user: user._id }).select(
+      "-user -__v"
+    );
+
     res.status(200).json({
       accessToken: accessToken,
       refreshToken: refreshToken,
       user: userData,
+      userEmployee,
     });
   } catch (error) {
     console.log("Error is in: ".bgRed, "auth.login".bgYellow);
