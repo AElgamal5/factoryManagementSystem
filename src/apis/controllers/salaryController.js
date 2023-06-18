@@ -1,4 +1,4 @@
-const { Salary, Employee } = require("../models");
+const { Salary, Employee, Stage } = require("../models");
 const { errorFormat, idCheck } = require("../utils");
 
 /*
@@ -24,7 +24,18 @@ const getAllForEmployee = async (req, res) => {
       .sort({ createAt: -1 })
       .populate("work.stage", "name");
 
-    return res.status(200).json({ data: docs });
+    let costs = [];
+
+    for (let i = 0; i < docs.length; i++) {
+      let totalCost = 0;
+      for (let j = 0; j < docs[i].work.length; j++) {
+        const stage = await Stage.findById(docs[i].work[j].stage);
+        totalCost += stage.price * docs[i].work[j].quantity;
+      }
+      costs.push(totalCost);
+    }
+
+    return res.status(200).json({ data: docs, costs });
   } catch (error) {
     console.log("Error is in: ".bgRed, "salary.getAllForEmployee".bgYellow);
     if (process.env.PRODUCTION === "false") console.log(error);

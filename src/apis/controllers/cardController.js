@@ -117,6 +117,7 @@ const getLast = async (req, res) => {
     const docs = await Card.find()
       .populate("model", "name")
       .populate("order", "name")
+      .populate("tracking.stage", "name type")
       .sort({ createdAt: -1 })
       .limit(num);
 
