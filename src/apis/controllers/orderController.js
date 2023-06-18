@@ -52,6 +52,23 @@ const getAll = async (req, res) => {
 
 /*
  * method: GET
+ * path: /api/order/state/inProduction
+ */
+const getAllInProduction = async (req, res) => {
+  try {
+    const orders = await Order.find({ status: false })
+      .populate("client", "name")
+      .populate("models.id", "name");
+
+    res.status(200).json({ data: orders });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "order.getAllInProduction".bgYellow);
+    if (process.env.PRODUCTION === "false") console.log(error);
+  }
+};
+
+/*
+ * method: GET
  * path: /api/order/:id
  */
 const getByID = async (req, res) => {
@@ -514,4 +531,5 @@ module.exports = {
   getClientMaterial,
   consumption,
   getByClientID,
+  getAllInProduction,
 };

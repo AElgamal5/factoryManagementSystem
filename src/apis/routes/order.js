@@ -58,4 +58,6 @@ router.post(
 
 router.get("/client/:id", idValidation, orderController.getByClientID);
 
+router.get("/state/inProduction", orderController.getAllInProduction);
+
 module.exports = router;
