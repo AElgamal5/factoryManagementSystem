@@ -139,6 +139,7 @@ const getByID = async (req, res) => {
       .populate("order", "name")
       .populate("tracking.stage", "name")
       .populate("tracking.employee", "name code")
+      .populate("tracking.enteredBy", "name code")
       .populate("cardErrors.stage", "name")
       .populate("cardErrors.enteredBy", "name code")
       .populate("cardErrors.doneBy", "name code")
