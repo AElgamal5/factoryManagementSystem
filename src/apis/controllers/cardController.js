@@ -489,6 +489,9 @@ const addTracking = async (req, res) => {
       enteredBy: enteredByEmployee._id,
       dateOut: currentTime(),
     });
+
+    card.history.push({ state: `Adding ${stage.name}`, date: currentTime() });
+
     await card.save();
 
     res.status(200).json({ msg: "Tracking added tmam" });
@@ -608,6 +611,7 @@ const removeTracking = async (req, res) => {
     await salary.save();
 
     card.tracking.pull(card.tracking[trackingIndex]._id);
+    card.history.push({ state: `Removing ${stage.name}`, date: currentTime() });
     await card.save();
 
     res.status(200).json({ msg: "Tracking removed tmam" });
@@ -865,6 +869,7 @@ const addError = async (req, res) => {
       card.cardErrors.push(errors);
     }
 
+    card.history.push({ state: `Adding errors`, date: currentTime() });
     await card.save();
 
     res.status(200).json({ msg: "Errors added tmam" });
@@ -1029,6 +1034,7 @@ const confirmError = async (req, res) => {
         await salary.save();
       }
     }
+    card.history.push({ state: `Confirm errors`, date: currentTime() });
     await card.save();
 
     res.status(200).json({ msg: "Error confirmed for this stage tmam" });
