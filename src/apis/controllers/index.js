@@ -22,4 +22,5 @@ module.exports = {
   authController: require("./authController"),
   userEmployeeController: require("./userEmployeeController"),
   cardController: require("./cardController"),
+  salaryController: require("./salaryController"),
 };

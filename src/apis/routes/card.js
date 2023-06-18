@@ -69,4 +69,10 @@ router.get("/last/:num", cardController.getLast);
 
 router.get("/order/:oid/model/:mid", cardController.getAllForModelOrder);
 
+router.get(
+  "/:id/errors/unconfirmed",
+  idValidation,
+  cardController.unconfirmedErrors
+);
+
 module.exports = router;

@@ -25,6 +25,7 @@ const cardSchema = new Schema(
       {
         stage: { type: mongoose.Types.ObjectId, ref: "Stage" },
         employee: { type: mongoose.Types.ObjectId, ref: "Employee" },
+        enteredBy: { type: mongoose.Types.ObjectId, ref: "Employee" },
         dateOut: { type: Date },
       },
     ],

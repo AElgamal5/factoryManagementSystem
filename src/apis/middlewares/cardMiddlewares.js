@@ -100,6 +100,13 @@ const trackingValidate = [
     .isAlphanumeric()
     .isLength({ min: 24, max: 24 })
     .withMessage("Wrong employee id"),
+
+  check("enteredBy")
+    .notEmpty()
+    .withMessage("enteredBy is required")
+    .isAlphanumeric()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Wrong enteredBy id"),
 ];
 
 const cardErrorsValidate = [

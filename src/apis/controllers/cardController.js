@@ -311,7 +311,7 @@ const update = async (req, res) => {
  */
 const addTracking = async (req, res) => {
   const id = req.params.id;
-  const { stage: stageID, employee: employeeID } = req.body;
+  const { stage: stageID, employee: employeeID, enteredBy } = req.body;
 
   try {
     //card check
@@ -323,11 +323,35 @@ const addTracking = async (req, res) => {
     }
 
     //stage check
+    if (!idCheck(stageID)) {
+      return res
+        .status(400)
+        .json(errorFormat(stageID, "Invalid stage id", "stage", "body"));
+    }
     const stage = await Stage.findById(stageID);
     if (!stage) {
       return res
         .status(404)
         .json(errorFormat(stageID, "No Stage with this id", "stage", "body"));
+    }
+
+    //check if the stage exists in tracking
+    if (stage.type !== "quality") {
+      const existIndex = card.tracking.findIndex(
+        (obj) => obj.stage.toString() === stageID
+      );
+      if (existIndex !== -1) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              stageID,
+              "This stage had been tracked before",
+              "stage",
+              "body"
+            )
+          );
+      }
     }
 
     //check if card.model have the givin stage
@@ -349,6 +373,13 @@ const addTracking = async (req, res) => {
     }
 
     //employee check
+    if (!idCheck(employeeID)) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(employeeID, "Invalid employee id", "employee", "body")
+        );
+    }
     const employee = await Employee.findById(employeeID);
     if (!employee) {
       return res
@@ -358,6 +389,49 @@ const addTracking = async (req, res) => {
             employeeID,
             "No employee with this id",
             "employee",
+            "body"
+          )
+        );
+    }
+
+    //enteredBy
+    if (!idCheck(enteredBy)) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(enteredBy, "Invalid enteredBy id", "enteredBy", "body")
+        );
+    }
+    const user = await User.findById(enteredBy);
+    if (!user) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(enteredBy, "No user with this id", "enteredBy", "body")
+        );
+    }
+    const userEmployee = await UserEmployee.findOne({ user: user._id });
+    if (!userEmployee) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(
+            enteredBy,
+            "No 'UserEmployee' doc related with this id",
+            "enteredBy",
+            "body"
+          )
+        );
+    }
+    const enteredByEmployee = await Employee.findById(userEmployee.employee);
+    if (!enteredByEmployee) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(
+            enteredBy,
+            "No 'Employee' doc related to this id",
+            "enteredBy",
             "body"
           )
         );
@@ -412,6 +486,7 @@ const addTracking = async (req, res) => {
     card.tracking.push({
       stage: stageID,
       employee: employeeID,
+      enteredBy: enteredByEmployee._id,
       dateOut: currentTime(),
     });
     await card.save();
@@ -1007,6 +1082,45 @@ const getAllForModelOrder = async (req, res) => {
   }
 };
 
+/*
+ * method: GET
+ * path: /api/card/:id/errors/unconfirmed
+ */
+const unconfirmedErrors = async (req, res) => {
+  const id = req.params.id;
+  try {
+    const card = await Card.findById(id);
+    if (!card) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "No card with this id", "id", "params"));
+    }
+
+    let errors = [];
+    for (let i = 0; i < card.cardErrors.length; i++) {
+      for (let j = 0; j < card.cardErrors[i].length; j++) {
+        const index = errors.findIndex(
+          (obj) => obj._id.toString() === card.cardErrors[i][j].stage.toString()
+        );
+        if (index !== -1 || card.cardErrors[i][j].verifiedBy) {
+          continue;
+        }
+        const stage = await Stage.findById(card.cardErrors[i][j].stage);
+        errors.push({
+          _id: stage._id,
+          name: stage.name,
+          code: stage.code,
+        });
+      }
+    }
+
+    return res.status(200).json({ data: errors });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "card.unconfirmedErrors".bgYellow);
+    if (process.env.PRODUCTION === "false") console.log(error);
+  }
+};
+
 module.exports = {
   create,
   getAll,
@@ -1019,4 +1133,5 @@ module.exports = {
   confirmError,
   getLast,
   getAllForModelOrder,
+  unconfirmedErrors,
 };
