@@ -630,6 +630,7 @@ const removeTracking = async (req, res) => {
 const addError = async (req, res) => {
   const id = req.params.id;
   const cardErrors = req.body.cardErrors;
+  const io = req.io;
 
   try {
     //card check
@@ -873,6 +874,10 @@ const addError = async (req, res) => {
 
     card.history.push({ state: `Adding errors`, date: currentTime() });
     await card.save();
+
+    io.on("connection", (socket) => {
+      socket.emit("errors", { msg: "Errors added tmam" });
+    });
 
     res.status(200).json({ msg: "Errors added tmam" });
   } catch (error) {
