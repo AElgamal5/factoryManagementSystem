@@ -114,6 +114,13 @@ const updateModelsValidate = [
     .withMessage("model's quantity is required")
     .isInt({ min: 1, max: maxNo })
     .withMessage(`model's quantity must be in range form 1 to ${maxNo}`),
+
+  check("models.*.code")
+    .notEmpty()
+    .withMessage("model's code is required")
+    .isString()
+    .isLength({ min: 1, max: 100 })
+    .withMessage(`model's code must be in range form 1 to 100`),
 ];
 
 const updateClientMaterialsValidate = [

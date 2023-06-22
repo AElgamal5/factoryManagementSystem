@@ -12,6 +12,8 @@ const orderSchema = new Schema(
         color: { type: mongoose.Types.ObjectId, ref: "Color" },
         size: { type: mongoose.Types.ObjectId, ref: "Size" },
         quantity: { type: Number },
+        produced: { type: Number, default: 0 },
+        code: { type: String },
       },
     ],
 

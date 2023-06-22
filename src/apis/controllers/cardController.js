@@ -15,11 +15,19 @@ const { idCheck, errorFormat, currentDate, currentTime } = require("../utils");
  * path: /api/card/
  */
 const create = async (req, res) => {
-  const { code, order: orderID, model: modelID, quantity, details } = req.body;
+  const {
+    code,
+    order: orderID,
+    modelIndex,
+    quantity,
+    details,
+    startRange,
+    endRange,
+  } = req.body;
 
   try {
     //code check
-    const exist = await Card.findOne({ code, order: orderID, model: modelID });
+    const exist = await Card.findOne({ code, order: orderID, modelIndex });
     if (exist) {
       return res
         .status(400)
@@ -39,43 +47,63 @@ const create = async (req, res) => {
         .status(400)
         .json(errorFormat(orderID, "Invalid order id", "order", "body"));
     }
-    const order = await Order.findById(orderID);
+    if (!idCheck(modelIndex)) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(modelIndex, "Invalid model index", "modelIndex", "body")
+        );
+    }
+    const order = await Order.findOne({
+      _id: orderID,
+      "models._id": modelIndex,
+    });
     if (!order) {
       return res
         .status(404)
         .json(errorFormat(orderID, "No order with this id", "order", "body"));
     }
 
-    //model checks
-    if (!idCheck(modelID)) {
-      return res
-        .status(400)
-        .json(errorFormat(modelID, "Invalid model id", "model", "body"));
-    }
-    const model = await Model.findById(modelID);
-    if (!model) {
-      return res
-        .status(404)
-        .json(errorFormat(modelID, "No model with this id", "model", "body"));
-    }
-    const orderModel = await Order.findOne({
-      _id: orderID,
-      "models.id": modelID,
-    });
-    if (!orderModel) {
+    //model check
+    const index = order.models.findIndex(
+      (obj) => obj._id.toString() === modelIndex
+    );
+    if (index === -1) {
       return res
         .status(400)
         .json(
-          errorFormat("the order do not have model", "order&model", "body")
+          errorFormat(
+            index,
+            "can not find model in order.models",
+            "index",
+            "others"
+          )
+        );
+    }
+
+    //quantity check
+    if (endRange - startRange !== quantity) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(
+            quantity,
+            "Quantity not equal range difference",
+            quantity,
+            "body"
+          )
         );
     }
 
     const card = await Card.create({
       code,
       order: orderID,
-      model: modelID,
+      modelIndex,
+      model: order.models[index].id,
       quantity,
       details,
+      startRange,
+      endRange,
     });
 
     card.history.push({ state: "Created", date: currentTime() });
@@ -141,10 +169,11 @@ const getByID = async (req, res) => {
       .populate("tracking.stage", "name")
       .populate("tracking.employee", "name code")
       .populate("tracking.enteredBy", "name code")
-      .populate("cardErrors.stage", "name")
-      .populate("cardErrors.enteredBy", "name code")
-      .populate("cardErrors.doneBy", "name code")
-      .populate("cardErrors.verifiedBy", "name code");
+      .populate("currentErrors", "name")
+      .populate("cardErrors.pieceErrors.stage", "name")
+      .populate("cardErrors.pieceErrors.enteredBy", "name code")
+      .populate("cardErrors.pieceErrors.doneBy", "name code")
+      .populate("cardErrors.pieceErrors.verifiedBy", "name code");
 
     if (!doc) {
       return res
@@ -187,7 +216,15 @@ const deleteOne = async (req, res) => {
  */
 const update = async (req, res) => {
   const id = req.params.id;
-  const { code, order: orderID, model: modelID, quantity, details } = req.body;
+  const {
+    code,
+    order: orderID,
+    modelIndex,
+    quantity,
+    details,
+    startRange,
+    endRange,
+  } = req.body;
 
   try {
     const card = await Card.findById(id);
@@ -202,7 +239,7 @@ const update = async (req, res) => {
       const exist = await Card.findOne({
         code,
         order: orderID,
-        model: modelID,
+        modelIndex: modelIndex,
       });
       if (exist) {
         return res
@@ -210,92 +247,141 @@ const update = async (req, res) => {
           .json(
             errorFormat(
               code,
-              "Code must be unique for each card in model in order",
+              "Code must be unique for each card in modelIndex in order",
               "code",
               "body"
             )
           );
       }
+      card.code = code;
     }
 
-    let order, model;
-
-    //order checks
-    if (orderID) {
-      if (!idCheck(orderID)) {
-        return res
-          .status(400)
-          .json(errorFormat(orderID, "Invalid order id", "order", "body"));
-      }
-      order = await Order.findById(orderID);
-      if (!order) {
-        return res
-          .status(404)
-          .json(errorFormat(orderID, "No order with this id", "order", "body"));
-      }
-    }
-
-    //model checks
-    if (modelID) {
-      if (!idCheck(modelID)) {
-        return res
-          .status(400)
-          .json(errorFormat(modelID, "Invalid model id", "model", "body"));
-      }
-      model = await Model.findById(modelID);
-      if (!model) {
-        return res
-          .status(404)
-          .json(errorFormat(modelID, "No model with this id", "model", "body"));
-      }
-    }
-
-    //check if the order have model
-    if (order && model) {
+    //check if the order has model
+    if (orderID && modelIndex) {
       const orderModel = await Order.findOne({
         _id: orderID,
-        "models.id": modelID,
+        "models._id": modelIndex,
       });
+
       if (!orderModel) {
+        return res
+          .status(404)
+          .json(
+            errorFormat(
+              orderID,
+              "No order with givin 'orderID || modelIndex'",
+              "orderID",
+              "body"
+            )
+          );
+      }
+      const index = orderModel.models.findIndex(
+        (obj) => obj._id.toString() === modelIndex
+      );
+      if (index === -1) {
         return res
           .status(400)
           .json(
-            errorFormat("the order do not have model", "order&model", "body")
+            errorFormat(
+              index,
+              "can not find model in order.models",
+              "index",
+              "others"
+            )
           );
       }
-    } else if (order) {
+
+      card.order = orderID;
+      card.modelIndex = modelIndex;
+      card.model = orderModel.models[index].id;
+    } else if (orderID) {
       const orderModel = await Order.findOne({
         _id: orderID,
-        "models.id": card.model,
+        "models._id": card.modelIndex,
       });
+
       if (!orderModel) {
         return res
-          .status(400)
+          .status(404)
           .json(
-            errorFormat("the order do not have model", "order&model", "body")
+            errorFormat(
+              orderID,
+              "the order does not have card.modelIndex",
+              "orderID",
+              "body"
+            )
           );
       }
-    } else if (model) {
+
+      card.order = orderID;
+    } else if (modelIndex) {
       const orderModel = await Order.findOne({
         _id: card.order,
-        "models.id": modelID,
+        "models._id": modelIndex,
       });
       if (!orderModel) {
         return res
-          .status(400)
+          .status(404)
           .json(
-            errorFormat("the order do not have model", "order&model", "body")
+            errorFormat(
+              modelIndex,
+              "the order does not have modelIndex",
+              "modelIndex",
+              "body"
+            )
           );
       }
+
+      const index = orderModel.models.findIndex(
+        (obj) => obj._id.toString() === modelIndex
+      );
+      if (index === -1) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              index,
+              "can not find model in order.models",
+              "index",
+              "others"
+            )
+          );
+      }
+
+      card.modelIndex = modelIndex;
+      card.model = orderModel.models[index].id;
     }
 
-    await Card.findByIdAndUpdate(id, {
-      code,
-      order: orderID,
-      model: modelID,
-      quantity,
-      details,
-    });
+    //quantity , endRange & startRange checks
+    if (quantity) {
+      card.quantity = quantity;
+    }
+    if (startRange) {
+      card.startRange = startRange;
+    }
+    if (endRange) {
+      card.endRange = endRange;
+    }
+    if (
+      (quantity || startRange || endRange) &&
+      card.endRange - card.startRange !== card.quantity
+    ) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(
+            card.quantity,
+            "Quantity not equal range difference",
+            "card.quality",
+            "others"
+          )
+        );
+    }
+
+    //details
+    if (details) {
+      card.details = details;
+    }
 
     card.history.push({ state: "Updated", date: currentTime() });
     await card.save();

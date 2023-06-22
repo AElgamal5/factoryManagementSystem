@@ -6,11 +6,17 @@ const cardSchema = new Schema(
   {
     code: { type: String },
 
-    model: { type: mongoose.Types.ObjectId, ref: "Model" },
-
     order: { type: mongoose.Types.ObjectId, ref: "Order" },
 
+    modelIndex: { type: String },
+
+    model: { type: mongoose.Types.ObjectId, ref: "Model" },
+
     quantity: { type: Number },
+
+    startRange: { type: Number },
+
+    endRange: { type: Number },
 
     details: { type: String },
 
@@ -30,18 +36,23 @@ const cardSchema = new Schema(
       },
     ],
 
+    currentErrors: [{ type: mongoose.Types.ObjectId, ref: "Stage" }],
+
     cardErrors: [
-      [
-        {
-          stage: { type: mongoose.Types.ObjectId, ref: "Stage" },
-          description: { type: String },
-          dateIn: { type: Date },
-          dateOut: { type: Date },
-          enteredBy: { type: mongoose.Types.ObjectId, ref: "Employee" },
-          doneBy: { type: mongoose.Types.ObjectId, ref: "Employee" },
-          verifiedBy: { type: mongoose.Types.ObjectId, ref: "Employee" },
-        },
-      ],
+      {
+        pieceNo: { type: Number },
+        pieceErrors: [
+          {
+            stage: { type: mongoose.Types.ObjectId, ref: "Stage" },
+            description: { type: String },
+            dateIn: { type: Date },
+            dateOut: { type: Date },
+            enteredBy: { type: mongoose.Types.ObjectId, ref: "Employee" },
+            doneBy: { type: mongoose.Types.ObjectId, ref: "Employee" },
+            verifiedBy: { type: mongoose.Types.ObjectId, ref: "Employee" },
+          },
+        ],
+      },
     ],
   },
   { timestamps: true }

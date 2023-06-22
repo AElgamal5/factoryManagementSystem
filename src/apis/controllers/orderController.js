@@ -264,6 +264,7 @@ const updateModels = async (req, res) => {
         color: models[i].color,
         size: models[i].size,
         quantity: models[i].quantity,
+        code: models[i].code,
       });
     }
 
