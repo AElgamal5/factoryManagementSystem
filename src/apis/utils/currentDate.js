@@ -5,9 +5,10 @@ const currentDate = () => {
   now.setHours(now.getHours() + 3);
 
   const date = {
-    year: now.getFullYear(),
-    month: now.getMonth() + 1,
-    day: now.getDate(),
+    year: now.getUTCFullYear(),
+    month: now.getUTCMonth() + 1,
+    day: now.getUTCDate(),
+    now,
   };
 
   return date;

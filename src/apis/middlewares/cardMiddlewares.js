@@ -73,11 +73,11 @@ const updateValidate = [
     })
     .withMessage("Code length should be 1 to 200 characters"),
 
-  check("model")
+  check("modelIndex")
     .optional()
     .isAlphanumeric()
     .isLength({ min: 24, max: 24 })
-    .withMessage("Wrong card's model id"),
+    .withMessage("Wrong card's modelIndex id"),
 
   check("order")
     .optional()
@@ -91,6 +91,20 @@ const updateValidate = [
     .withMessage("Card's quantity must be a number")
     .isInt({ min: 1, max: maxNo })
     .withMessage(`Card's quantity range form 1 to ${maxNo}`),
+
+  check("startRange")
+    .optional()
+    .isNumeric()
+    .withMessage("Card's startRange must be a number")
+    .isInt({ min: 1, max: maxNo })
+    .withMessage(`Card's startRange range form 1 to ${maxNo}`),
+
+  check("endRange")
+    .optional()
+    .isNumeric()
+    .withMessage("Card's endRange must be a number")
+    .isInt({ min: 1, max: maxNo })
+    .withMessage(`Card's endRange range form 1 to ${maxNo}`),
 
   check("details")
     .optional()

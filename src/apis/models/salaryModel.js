@@ -21,7 +21,7 @@ const salarySchema = new Schema(
 
     todayCost: { type: Number, default: 0 },
 
-    details: [
+    workDetails: [
       {
         day: { type: Number },
         work: [

@@ -453,7 +453,7 @@ const addTracking = async (req, res) => {
         .json(
           errorFormat(
             stageID,
-            "This stage does not exist in card model",
+            "This stage does not exist in card.model",
             "stage",
             "body"
           )
@@ -527,49 +527,79 @@ const addTracking = async (req, res) => {
 
     const current = currentDate();
 
-    const salary = await Salary.findOne({
+    let salary = await Salary.findOne({
       employee: employeeID,
       "date.month": current.month,
       "date.year": current.year,
     });
 
-    //if salary exist then deal with the doc and if not exist create new one
-    if (salary) {
-      const workIndex = salary.work.findIndex(
-        (obj) => obj.stage.toString() === stageID
-      );
-
-      console.log(workIndex);
-
-      //update work array and total by card.quantity
-      if (workIndex === -1) {
-        salary.work.push({
-          stage: stageID,
-          quantity: card.quantity,
-        });
-      } else {
-        salary.work[workIndex].quantity += card.quantity;
-      }
-      salary.total += card.quantity;
-      await salary.save();
-    } else {
-      const salary = await Salary.create({
+    //if not exist create it
+    if (!salary) {
+      salary = await Salary.create({
         employee: employeeID,
         date: {
+          day: current.day,
           month: current.month,
           year: current.year,
         },
       });
+    }
 
-      salary.work.push({
+    //update salary.totalWorkPerMonth array
+    const workIndex = salary.totalWorkPerMonth.findIndex(
+      (obj) => obj.stage.toString() === stageID
+    );
+
+    if (workIndex === -1) {
+      salary.totalWorkPerMonth.push({
         stage: stageID,
         quantity: card.quantity,
       });
-
-      salary.total += card.quantity;
-
-      await salary.save();
+    } else {
+      salary.totalWorkPerMonth[workIndex].quantity += card.quantity;
     }
+
+    //update no. of pieces and costs
+    if (current.day === salary.date.day) {
+      salary.todayPieces += card.quantity;
+      salary.todayCost += card.quantity * stage.price;
+    } else {
+      salary.date.day = current.day;
+      salary.todayPieces = card.quantity;
+      salary.todayCost = card.quantity * stage.price;
+    }
+    salary.totalPieces += card.quantity;
+    salary.totalCost += card.quantity * stage.price;
+
+    //update salary.workDetails according to current day
+    const dayIndex = salary.workDetails.findIndex(
+      (obj) => obj.day === current.day
+    );
+    if (dayIndex === -1) {
+      salary.workDetails.push({
+        day: current.day,
+        work: [
+          {
+            stage: stage._id,
+            quantity: card.quantity,
+          },
+        ],
+      });
+    } else {
+      const stageIndex = salary.workDetails[dayIndex].work.findIndex(
+        (obj) => obj.stage.toString() === stage._id.toString()
+      );
+
+      if (stageIndex === -1) {
+        salary.workDetails[dayIndex].work.push({
+          stage: stage._id,
+          quantity: card.quantity,
+        });
+      } else {
+        salary.workDetails[dayIndex].work[stageIndex].quantity += card.quantity;
+      }
+    }
+    await salary.save();
 
     card.tracking.push({
       stage: stageID,
@@ -579,6 +609,21 @@ const addTracking = async (req, res) => {
     });
 
     card.history.push({ state: `Adding ${stage.name}`, date: currentTime() });
+
+    //check if card is finished
+    const lastStage = modelStage.stages[modelStage.stages.length - 1].id;
+    if (lastStage.toString() === stageID) {
+      //update order
+      const order = await Order.findById(card.order);
+      const orderIndex = order.models.findIndex(
+        (obj) => obj.id.toString() === card.model.toString()
+      );
+
+      order.models[orderIndex].produced += card.quantity;
+      await order.save();
+
+      card.history.push({ state: `Finished`, date: currentTime() });
+    }
 
     await card.save();
 
@@ -614,7 +659,7 @@ const removeTracking = async (req, res) => {
         .json(errorFormat(stageID, "No Stage with this id", "stage", "body"));
     }
 
-    //check if card.model have the givin stage
+    //check if card. have the givin stage
     const modelStage = await Model.findOne({
       _id: card.model,
       "stages.id": stageID,
