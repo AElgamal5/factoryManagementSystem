@@ -44,8 +44,7 @@ router.patch(
 router.patch(
   "/:id/tracking/remove",
   idValidation,
-  cardMiddlewares.trackingValidate,
-  validationResult,
+
   cardController.removeTracking
 );
 

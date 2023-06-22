@@ -525,12 +525,12 @@ const addTracking = async (req, res) => {
         );
     }
 
-    const current = currentDate();
+    const current = currentTime();
 
     let salary = await Salary.findOne({
       employee: employeeID,
-      "date.month": current.month,
-      "date.year": current.year,
+      "date.month": current.getMonth() + 1,
+      "date.year": current.getFullYear(),
     });
 
     //if not exist create it
@@ -538,9 +538,9 @@ const addTracking = async (req, res) => {
       salary = await Salary.create({
         employee: employeeID,
         date: {
-          day: current.day,
-          month: current.month,
-          year: current.year,
+          day: current.getDate(),
+          month: current.getMonth() + 1,
+          year: current.getFullYear(),
         },
       });
     }
@@ -560,11 +560,11 @@ const addTracking = async (req, res) => {
     }
 
     //update no. of pieces and costs
-    if (current.day === salary.date.day) {
+    if (current.getDate() === salary.date.day) {
       salary.todayPieces += card.quantity;
       salary.todayCost += card.quantity * stage.price;
     } else {
-      salary.date.day = current.day;
+      salary.date.day = current.getDate();
       salary.todayPieces = card.quantity;
       salary.todayCost = card.quantity * stage.price;
     }
@@ -573,11 +573,11 @@ const addTracking = async (req, res) => {
 
     //update salary.workDetails according to current day
     const dayIndex = salary.workDetails.findIndex(
-      (obj) => obj.day === current.day
+      (obj) => obj.day === current.getDate()
     );
     if (dayIndex === -1) {
       salary.workDetails.push({
-        day: current.day,
+        day: current.getDate(),
         work: [
           {
             stage: stage._id,
@@ -640,7 +640,7 @@ const addTracking = async (req, res) => {
  */
 const removeTracking = async (req, res) => {
   const id = req.params.id;
-  const { stage: stageID, employee: employeeID } = req.body;
+  const trackingID = req.body.trackingID;
 
   try {
     //card check
@@ -651,100 +651,69 @@ const removeTracking = async (req, res) => {
         .json(errorFormat(id, "No card with this id", "id", "params"));
     }
 
-    //stage check
-    const stage = await Stage.findById(stageID);
-    if (!stage) {
-      return res
-        .status(404)
-        .json(errorFormat(stageID, "No Stage with this id", "stage", "body"));
-    }
-
-    //check if card. have the givin stage
-    const modelStage = await Model.findOne({
-      _id: card.model,
-      "stages.id": stageID,
-    });
-    if (!modelStage) {
+    //check trackingID
+    if (!idCheck(trackingID)) {
       return res
         .status(400)
         .json(
           errorFormat(
-            stageID,
-            "This stage does not exist in card model",
-            "stage",
+            trackingID,
+            "Invalid trackingID value",
+            "trackingID",
             "body"
           )
         );
     }
-
-    //employee check
-    const employee = await Employee.findById(employeeID);
-    if (!employee) {
+    const trackingIndex = card.tracking.findIndex(
+      (obj) => obj._id.toString() === trackingID
+    );
+    if (trackingIndex === -1) {
       return res
         .status(404)
         .json(
           errorFormat(
-            employeeID,
-            "No employee with this id",
-            "employee",
+            trackingID,
+            "No tracking element with this id",
+            "trackingID",
             "body"
           )
         );
     }
 
-    //find tracking index
-    const trackingIndex = card.tracking.findIndex(
-      (obj) =>
-        obj.employee.toString() === employeeID &&
-        obj.stage.toString() === stageID
-    );
-
-    const current = currentDate();
+    const current = currentTime();
 
     const salary = await Salary.findOne({
-      employee: employeeID,
-      "date.month": current.month,
-      "date.year": current.year,
+      employee: card.tracking[trackingIndex].employee,
+      "date.year": current.getFullYear(),
+      "date.month": current.getMonth() + 1,
     });
-
-    if (!salary) {
-      return res
-        .status(404)
-        .json(
-          errorFormat(
-            employeeID,
-            "This card did not assign by the givin employee",
-            "employee",
-            "body"
-          )
-        );
-    }
-
-    //find work index
-    const workIndex = salary.work.findIndex(
-      (obj) => obj.stage.toString() === stageID
+    //get object due to dateOut in card.tracking
+    const dayIndex = salary.workDetails.findIndex(
+      (obj) => obj.day === card.tracking[trackingIndex].dateOut.getDate()
+    );
+    const workIndex = salary.workDetails[dayIndex].work.findIndex(
+      (obj) =>
+        obj.stage.toString() === card.tracking[trackingIndex].stage.toString()
     );
 
-    if (workIndex === -1) {
-      return res
-        .status(404)
-        .json(
-          errorFormat(
-            employeeID,
-            "This card did not assign by the givin employee",
-            "employee",
-            "body"
-          )
-        );
-    }
+    const stage = await Stage.findById(card.tracking[trackingIndex].stage);
 
-    //update salary.work and card.tracking
-    salary.total -= card.quantity;
-    salary.work.pull(salary.work[workIndex]._id);
+    //update salary
+    salary.workDetails[dayIndex].work[trackingIndex].quantity -= card.quantity;
+    salary.totalPieces -= card.quantity;
+    salary.totalCost -= card.quantity * stage.price;
+    if (card.tracking[trackingIndex].dateOut.getDate() === current.getDate()) {
+      salary.todayPieces -= card.quantity;
+      salary.todayCost -= card.quantity * stage.price;
+    }
     await salary.save();
 
-    card.tracking.pull(card.tracking[trackingIndex]._id);
-    card.history.push({ state: `Removing ${stage.name}`, date: currentTime() });
+    card.history.push({
+      state: `Removing ${stage.name}`,
+      date: currentTime(),
+    });
+
+    card.tracking.pull(trackingID);
     await card.save();
 
     res.status(200).json({ msg: "Tracking removed tmam" });
