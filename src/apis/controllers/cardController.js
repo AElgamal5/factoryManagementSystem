@@ -83,7 +83,7 @@ const create = async (req, res) => {
 
     //quantity check
     let diff = endRange - startRange;
-    if (diff % 10 === 0) {
+    if (diff % 10 === 1) {
       diff += 1;
     }
     if (diff !== quantity) {
