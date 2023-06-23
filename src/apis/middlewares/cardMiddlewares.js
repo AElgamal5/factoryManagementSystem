@@ -140,22 +140,28 @@ const trackingValidate = [
 ];
 
 const cardErrorsValidate = [
-  check("cardErrors")
+  check("pieceNo")
     .notEmpty()
-    .withMessage("cardErrors is required")
+    .withMessage("pieceNo is required")
+    .isInt({ min: 1, max: maxNo })
+    .withMessage(`pieceNo range between 1 and ${maxNo}`),
+
+  check("pieceErrors")
+    .notEmpty()
+    .withMessage("pieceErrors is required")
     .isArray({ min: 1, max: 1000 })
     .withMessage(
-      "cardErrors must be an array with in range form 1 to 1000 elements"
+      "pieceErrors must be an array with in range form 1 to 1000 elements"
     ),
 
-  check("cardErrors.*.*.stage")
+  check("pieceErrors.*.stage")
     .notEmpty()
     .withMessage("stage is required")
     .isAlphanumeric()
     .isLength({ min: 24, max: 24 })
     .withMessage("Wrong stage id"),
 
-  check("cardErrors.*.*.description")
+  check("pieceErrors.*.description")
     .notEmpty()
     .withMessage("description is required")
     .isString()
@@ -165,7 +171,7 @@ const cardErrorsValidate = [
     .isLength({ max: 300 })
     .withMessage("description must be at most 300 characters"),
 
-  check("cardErrors.*.*.enteredBy")
+  check("pieceErrors.*.enteredBy")
     .notEmpty()
     .withMessage("enteredBy is required")
     .isAlphanumeric()
