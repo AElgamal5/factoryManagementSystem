@@ -82,7 +82,11 @@ const create = async (req, res) => {
     }
 
     //quantity check
-    if (endRange - startRange + 1 !== quantity) {
+    let diff = endRange - startRange;
+    if (diff % 10 === 0) {
+      diff += 1;
+    }
+    if (diff !== quantity) {
       return res
         .status(400)
         .json(
