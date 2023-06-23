@@ -82,10 +82,7 @@ const create = async (req, res) => {
     }
 
     //quantity check
-    let diff = endRange - startRange;
-    if (diff % 10 === 1) {
-      diff += 1;
-    }
+    let diff = endRange - startRange + 1;
     if (diff !== quantity) {
       return res
         .status(400)
@@ -926,8 +923,16 @@ const addError = async (req, res) => {
       }
     }
 
+    // const cardErrorsIndex = card.cardErrors.findIndex(
+    //   (obj) => obj.pieceNo === pieceNo
+    // );
+
+    // console.log(cardErrorsIndex);
+
     //update loop
     for (let i = 0; i < pieceErrors.length; i++) {
+      const stage = await Stage.findById(pieceErrors[i].stage);
+
       const stageIndex = card.tracking.findIndex(
         (obj) => obj.stage.toString() === pieceErrors[i].stage
       );
@@ -954,8 +959,53 @@ const addError = async (req, res) => {
         (obj) => obj.stage.toString() === pieceErrors[i].stage
       );
 
-      // salary.to
+      salary.workDetails[dayIndex].work[workIndex].quantity -= 1;
+      salary.totalWorkPerMonth[totalIndex].quantity -= 1;
+      salary.totalPieces -= 1;
+      salary.totalCost -= stage.price;
+
+      if (
+        currentTime().getDate() === card.tracking[stageIndex].dateOut.getDate()
+      ) {
+        salary.todayPieces -= 1;
+        salary.todayCost -= stage.price;
+      }
+
+      await salary.save();
+
+      card.currentErrors.push(stage._id);
+
+      const cardErrorsIndex = card.cardErrors.findIndex(
+        (obj) => obj.pieceNo === pieceNo
+      );
+
+      console.log("cardErrorsIndex", cardErrorsIndex);
+      if (cardErrorsIndex === -1) {
+        card.cardErrors.push({
+          pieceNo: pieceNo,
+          pieceErrors: [
+            {
+              stage: pieceErrors[i].stage,
+              description: pieceErrors[i].description,
+              dateIn: currentTime(),
+            },
+          ],
+        });
+      } else {
+        card.cardErrors[cardErrorsIndex].pieceErrors.push({
+          stage: pieceErrors[i].stage,
+          description: pieceErrors[i].description,
+          dateIn: currentTime(),
+        });
+      }
     }
+    //push to history
+    card.history.push({
+      state: `Error in piece no.${pieceNo}`,
+      date: currentTime(),
+    });
+
+    await card.save();
 
     io.on("connection", (socket) => {
       socket.emit("errors", { msg: "Errors added tmam" });
