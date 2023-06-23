@@ -800,6 +800,27 @@ const addError = async (req, res) => {
           );
       }
 
+      const cardErrorsIndex = card.cardErrors.findIndex(
+        (obj) => obj.pieceNo === Number(pieceNo)
+      );
+      if (cardErrorsIndex !== -1) {
+        const exist = card.cardErrors[cardErrorsIndex].pieceErrors.findIndex(
+          (obj) => obj.stage.toString() === pieceErrors[i].stage
+        );
+        if (exist !== -1) {
+          return res
+            .status(400)
+            .json(
+              errorFormat(
+                pieceErrors[i].stage,
+                `this error exist in piece no.${pieceNo}`,
+                `pieceErrors[${i}].stage`,
+                "body"
+              )
+            );
+        }
+      }
+
       //enteredBy
       if (!idCheck(pieceErrors[i].enteredBy)) {
         return res
@@ -923,12 +944,6 @@ const addError = async (req, res) => {
       }
     }
 
-    // const cardErrorsIndex = card.cardErrors.findIndex(
-    //   (obj) => obj.pieceNo === pieceNo
-    // );
-
-    // console.log(cardErrorsIndex);
-
     //update loop
     for (let i = 0; i < pieceErrors.length; i++) {
       const stage = await Stage.findById(pieceErrors[i].stage);
@@ -973,13 +988,17 @@ const addError = async (req, res) => {
 
       await salary.save();
 
-      card.currentErrors.push(stage._id);
+      const currentErrorsIndex = card.currentErrors.findIndex(
+        (obj) => obj.toString() === stage._id
+      );
+      if (currentErrorsIndex === -1) {
+        card.currentErrors.push(stage._id);
+      }
 
       const cardErrorsIndex = card.cardErrors.findIndex(
-        (obj) => obj.pieceNo === pieceNo
+        (obj) => obj.pieceNo === Number(pieceNo)
       );
 
-      console.log("cardErrorsIndex", cardErrorsIndex);
       if (cardErrorsIndex === -1) {
         card.cardErrors.push({
           pieceNo: pieceNo,
