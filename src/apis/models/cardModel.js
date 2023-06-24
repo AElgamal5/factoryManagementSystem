@@ -46,9 +46,12 @@ const cardSchema = new Schema(
             stage: { type: mongoose.Types.ObjectId, ref: "Stage" },
             description: { type: String },
             dateIn: { type: Date },
-            dateOut: { type: Date },
+
             enteredBy: { type: mongoose.Types.ObjectId, ref: "Employee" },
             doneBy: { type: mongoose.Types.ObjectId, ref: "Employee" },
+            doneIn: { type: Date },
+
+            dateOut: { type: Date },
             verifiedBy: { type: mongoose.Types.ObjectId, ref: "Employee" },
           },
         ],

@@ -44,7 +44,6 @@ router.patch(
 router.patch(
   "/:id/tracking/remove",
   idValidation,
-
   cardController.removeTracking
 );
 
@@ -54,6 +53,14 @@ router.patch(
   cardMiddlewares.cardErrorsValidate,
   validationResult,
   cardController.addError
+);
+
+router.patch(
+  "/:id/errors/repair",
+  idValidation,
+  cardMiddlewares.repairValidate,
+  validationResult,
+  cardController.repair
 );
 
 router.patch(

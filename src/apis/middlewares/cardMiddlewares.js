@@ -179,6 +179,29 @@ const cardErrorsValidate = [
     .withMessage("Wrong enteredBy id"),
 ];
 
+const repairValidate = [
+  check("stage")
+    .notEmpty()
+    .withMessage("Stage is required")
+    .isAlphanumeric()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Wrong stage id"),
+
+  check("doneBy")
+    .notEmpty()
+    .withMessage("doneBy is required")
+    .isAlphanumeric()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Wrong doneBy id"),
+
+  check("enteredBy")
+    .notEmpty()
+    .withMessage("enteredBy is required")
+    .isAlphanumeric()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Wrong enteredBy id"),
+];
+
 const cardErrorConfirmValidate = [
   check("stage")
     .notEmpty()
@@ -208,4 +231,5 @@ module.exports = {
   trackingValidate,
   cardErrorsValidate,
   cardErrorConfirmValidate,
+  repairValidate,
 };

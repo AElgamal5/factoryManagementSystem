@@ -989,7 +989,7 @@ const addError = async (req, res) => {
       await salary.save();
 
       const currentErrorsIndex = card.currentErrors.findIndex(
-        (obj) => obj.toString() === stage._id
+        (obj) => obj.toString() === stage._id.toString()
       );
       if (currentErrorsIndex === -1) {
         card.currentErrors.push(stage._id);
@@ -1033,6 +1033,138 @@ const addError = async (req, res) => {
     res.status(200).json({ msg: "Errors added tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "card.addError".bgYellow);
+    if (process.env.PRODUCTION === "false") console.log(error);
+  }
+};
+
+/*
+ * method: PATCH
+ * path: /api/card/:id/errors/repair
+ */
+const repair = async (req, res) => {
+  const id = req.params.id;
+  const { stage: stageID, doneBy: doneByID, enteredBy: enteredByID } = req.body;
+
+  try {
+    //card check
+    const card = await Card.findById(id);
+    if (!card) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "No card with this id", "id", "params"));
+    }
+
+    //stage checks
+    if (!idCheck(stageID)) {
+      return res
+        .status(400)
+        .json(errorFormat(stageID, "Invalid stage ID", "stage", "body"));
+    }
+    const stage = await Stage.findById(stageID);
+    if (!stage) {
+      return res
+        .status(404)
+        .json(errorFormat(stageID, "No stage with this id", "stage", "body"));
+    }
+    const trackingIndex = card.tracking.findIndex(
+      (obj) => obj.stage.toString() === stageID
+    );
+    if (trackingIndex === -1) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(stageID, "can't repair untracked stage", "stage", "body")
+        );
+    }
+    const currentErrorsIndex = card.currentErrors.findIndex(
+      (obj) => obj.toString() === stageID
+    );
+    if (currentErrorsIndex === -1) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(
+            stageID,
+            "Can not repair stage has no errors",
+            "stage",
+            "body"
+          )
+        );
+    }
+
+    //doneBy checks
+    if (!idCheck(doneByID)) {
+      return res
+        .status(400)
+        .json(errorFormat(doneByID, "Invalid employee ID", "doneBy", "body"));
+    }
+    const doneByEmployee = await Employee.findById(doneByID);
+    if (!doneByEmployee) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(doneByID, "No employee with this ID", "doneBy", "body")
+        );
+    }
+
+    //enteredBy checks
+    if (!idCheck(enteredByID)) {
+      return res
+        .status(400)
+        .json(errorFormat(enteredByID, "Invalid user ID", "enteredBy", "body"));
+    }
+    const user = await User.findById(enteredByID);
+    if (!user) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(enteredByID, "No user with this ID", "enteredBy", "body")
+        );
+    }
+    const userEmployee = await UserEmployee.findOne({ user: enteredByID });
+    if (!userEmployee) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(
+            enteredByID,
+            "No 'UserEmployee' doc related to this id",
+            "enteredBy",
+            "body"
+          )
+        );
+    }
+    const enteredByEmployee = await Employee.findById(userEmployee.employee);
+    if (!enteredByEmployee) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(
+            enteredByID,
+            "No 'User' doc related to this ID",
+            "enteredByID",
+            "body"
+          )
+        );
+    }
+
+    const current = currentTime();
+
+    for (let i = 0; i < card.cardErrors.length; i++) {
+      for (let j = 0; j < card.cardErrors[i].pieceErrors.length; j++) {
+        if (card.cardErrors[i].pieceErrors[j].stage.toString() === stageID) {
+          card.cardErrors[i].pieceErrors[j].doneBy = doneByID;
+          card.cardErrors[i].pieceErrors[j].enteredBy = enteredByEmployee._id;
+          card.cardErrors[i].pieceErrors[j].doneIn = current;
+        }
+      }
+    }
+
+    await card.save();
+
+    res.status(200).json({ msg: "Error repaired tmam" });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "card.repair".bgYellow);
     if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
@@ -1298,4 +1430,5 @@ module.exports = {
   getLast,
   getAllForModelOrder,
   unconfirmedErrors,
+  repair,
 };
