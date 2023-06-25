@@ -1337,11 +1337,7 @@ const addError = async (req, res) => {
 
     await card.save();
 
-    io.emit("errors", { msg: "Errors added tmam" });
-
-    io.on("connection", (socket) => {
-      socket.emit("errors", { msg: "Errors added tmam" });
-    });
+    io.emit("errors", { msg: "errors", card });
 
     res.status(200).json({ msg: "Errors added tmam" });
   } catch (error) {
@@ -1357,6 +1353,7 @@ const addError = async (req, res) => {
 const repair = async (req, res) => {
   const id = req.params.id;
   const { stage: stageID, doneBy: doneByID, enteredBy: enteredByID } = req.body;
+  const io = req.io;
 
   try {
     //card check
@@ -1496,6 +1493,8 @@ const repair = async (req, res) => {
 
     await card.save();
 
+    io.emit("repairs", { msg: "repairs", card });
+
     res.status(200).json({ msg: "Error repaired tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "card.repair".bgYellow);
@@ -1510,7 +1509,7 @@ const repair = async (req, res) => {
 const confirmError = async (req, res) => {
   const id = req.params.id;
   const { stage: stageID, verifiedBy: verifiedByID } = req.body;
-
+  const io = req.io;
   try {
     //card check
     const card = await Card.findById(id);
@@ -1776,6 +1775,8 @@ const confirmError = async (req, res) => {
     });
 
     await card.save();
+
+    io.emit("errorConfirm", { msg: "errorConfirm", card });
 
     res.status(200).json({ msg: "Error confirmed for this stage tmam" });
   } catch (error) {
