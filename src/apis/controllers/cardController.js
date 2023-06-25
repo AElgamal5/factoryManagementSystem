@@ -401,6 +401,7 @@ const update = async (req, res) => {
 const addTracking = async (req, res) => {
   const id = req.params.id;
   const { stage: stageID, employee: employeeID, enteredBy } = req.body;
+  const io = req.io;
 
   try {
     //card check
@@ -630,6 +631,8 @@ const addTracking = async (req, res) => {
     }
 
     await card.save();
+
+    io.emit("addTracking", { msg: "addTracking", card, stage });
 
     res.status(200).json({ msg: "Tracking added tmam" });
   } catch (error) {
@@ -1493,7 +1496,7 @@ const repair = async (req, res) => {
 
     await card.save();
 
-    io.emit("repairs", { msg: "repairs", card });
+    io.emit("repairs", { msg: "repairs", card, stage });
 
     res.status(200).json({ msg: "Error repaired tmam" });
   } catch (error) {
@@ -1776,7 +1779,7 @@ const confirmError = async (req, res) => {
 
     await card.save();
 
-    io.emit("errorConfirm", { msg: "errorConfirm", card });
+    io.emit("errorConfirm", { msg: "errorConfirm", card, stage });
 
     res.status(200).json({ msg: "Error confirmed for this stage tmam" });
   } catch (error) {
