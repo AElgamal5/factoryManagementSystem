@@ -1819,7 +1819,58 @@ const getAllForModelOrder = async (req, res) => {
         .json(errorFormat(oid, "No order with this id", "oid", "params"));
     }
 
-    const docs = await Card.find({ order: oid, model: mid });
+    const docs = await Card.find({ order: oid, model: mid }).populate(
+      "currentErrors",
+      "name"
+    );
+
+    res.status(200).json({ data: docs });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "card.getAllForModelOrder".bgYellow);
+    if (process.env.PRODUCTION === "false") console.log(error);
+  }
+};
+
+/*
+ * method: GET
+ * path: /api/card/order/:oid/model/:mid/errors
+ */
+const getAllForModelOrderWithErrors = async (req, res) => {
+  const mid = req.params.mid;
+  const oid = req.params.oid;
+
+  try {
+    //model checks
+    if (!idCheck(mid)) {
+      return res
+        .status(400)
+        .json(errorFormat(mid, "Invalid model id", "mid", "params"));
+    }
+    const model = await Model.findById(mid);
+    if (!model) {
+      return res
+        .status(404)
+        .json(errorFormat(mid, "No model with this id", "mid", "params"));
+    }
+
+    //order checks
+    if (!idCheck(oid)) {
+      return res
+        .status(400)
+        .json(errorFormat(oid, "Invalid order id", "oid", "params"));
+    }
+    const order = await Order.findById(oid);
+    if (!order) {
+      return res
+        .status(404)
+        .json(errorFormat(oid, "No order with this id", "oid", "params"));
+    }
+
+    const docs = await Card.find({
+      order: oid,
+      model: mid,
+      cardErrors: { $exists: true, $ne: [] },
+    }).populate("currentErrors", "name");
 
     res.status(200).json({ data: docs });
   } catch (error) {
@@ -1882,4 +1933,5 @@ module.exports = {
   unconfirmedErrors,
   repair,
   addErrorCheck,
+  getAllForModelOrderWithErrors,
 };

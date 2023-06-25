@@ -75,6 +75,11 @@ router.get("/last/:num", cardController.getLast);
 
 router.get("/order/:oid/model/:mid", cardController.getAllForModelOrder);
 
+router.get(
+  "/order/:oid/model/:mid/errors",
+  cardController.getAllForModelOrderWithErrors
+);
+
 // router.get(
 //   "/:id/errors/unconfirmed",
 //   idValidation,
