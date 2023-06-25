@@ -50,7 +50,7 @@ router.patch(
 router.patch(
   "/:id/errors/add",
   idValidation,
-  cardMiddlewares.cardErrorsValidate,
+  cardMiddlewares.addErrorsValidate,
   validationResult,
   cardController.addError
 );
@@ -66,7 +66,7 @@ router.patch(
 router.patch(
   "/:id/errors/confirm",
   idValidation,
-  cardMiddlewares.cardErrorConfirmValidate,
+  cardMiddlewares.confirmErrorsValidate,
   validationResult,
   cardController.confirmError
 );
@@ -75,10 +75,18 @@ router.get("/last/:num", cardController.getLast);
 
 router.get("/order/:oid/model/:mid", cardController.getAllForModelOrder);
 
-router.get(
-  "/:id/errors/unconfirmed",
+// router.get(
+//   "/:id/errors/unconfirmed",
+//   idValidation,
+//   cardController.unconfirmedErrors
+// );
+
+router.patch(
+  "/:id/errors/add/check",
   idValidation,
-  cardController.unconfirmedErrors
+  cardMiddlewares.addErrorsValidate,
+  validationResult,
+  cardController.addErrorCheck
 );
 
 module.exports = router;

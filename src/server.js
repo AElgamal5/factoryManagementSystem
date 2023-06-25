@@ -8,7 +8,24 @@ require("dotenv").config();
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIO(server);
+const io = socketIO(server, {
+  cors: {
+    origin: "*",
+  },
+});
+
+io.on("connection", (socket) => {
+  console.log("A user connected");
+
+  socket.on("message", (data) => {
+    console.log("Received message:", data);
+    io.emit("message", data); // Broadcast the message to all connected clients
+  });
+
+  socket.on("disconnect", () => {
+    console.log("A user disconnected");
+  });
+});
 
 //middleware
 app.use(express.json({ limit: "15mb" }));
