@@ -22,15 +22,15 @@ const getAllForEmployee = async (req, res) => {
 
     const docs = await Salary.find({ employee: eid })
       .sort({ createAt: -1 })
-      .populate("work.stage", "name");
+      .populate("totalWorkPerMonth.stage", "name");
 
     let costs = [];
 
     for (let i = 0; i < docs.length; i++) {
       let totalCost = 0;
-      for (let j = 0; j < docs[i].work.length; j++) {
-        const stage = await Stage.findById(docs[i].work[j].stage);
-        totalCost += stage.price * docs[i].work[j].quantity;
+      for (let j = 0; j < docs[i].totalWorkPerMonth.length; j++) {
+        const stage = await Stage.findById(docs[i].totalWorkPerMonth[j].stage);
+        totalCost += stage.price * docs[i].totalWorkPerMonth[j].quantity;
       }
       costs.push(totalCost);
     }

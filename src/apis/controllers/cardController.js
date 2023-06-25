@@ -1297,9 +1297,9 @@ const addError = async (req, res) => {
       await salary.save();
 
       //update currentErrors
-      const currentErrorsIndex = card.currentErrors.findIndex(
-        (obj) => obj.toString() === stage._id.toString()
-      );
+      const currentErrorsIndex = card.currentErrors.findIndex((obj) => {
+        return obj.toString() === stage._id.toString();
+      });
       if (currentErrorsIndex === -1) {
         card.currentErrors.push(stage._id);
       }
@@ -1870,7 +1870,7 @@ const getAllForModelOrderWithErrors = async (req, res) => {
       order: oid,
       model: mid,
       cardErrors: { $exists: true, $ne: [] },
-    }).populate("currentErrors", "name");
+    }).populate("currentErrors", "name code");
 
     res.status(200).json({ data: docs });
   } catch (error) {
