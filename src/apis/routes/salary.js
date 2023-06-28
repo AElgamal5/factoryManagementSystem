@@ -9,4 +9,6 @@ router.use(authenticate);
 
 router.get("/employee/:eid", salaryController.getAllForEmployee);
 
+router.patch("/:id/done", salaryController.paid);
+
 module.exports = router;

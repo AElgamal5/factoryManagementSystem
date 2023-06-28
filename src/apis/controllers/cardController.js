@@ -1340,7 +1340,7 @@ const addError = async (req, res) => {
 
     await card.save();
 
-    io.emit("errors", { msg: "errors", card });
+    io.emit("errors", { msg: "errors", card, pieceNo });
 
     res.status(200).json({ msg: "Errors added tmam" });
   } catch (error) {

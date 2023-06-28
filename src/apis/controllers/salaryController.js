@@ -42,4 +42,33 @@ const getAllForEmployee = async (req, res) => {
   }
 };
 
-module.exports = { getAllForEmployee };
+/*
+ * method: PATCH
+ * path: /api/Salary/:id/done
+ */
+const paid = async (req, res) => {
+  const id = req.params.id;
+  try {
+    if (!idCheck(id)) {
+      return res
+        .status(400)
+        .json(errorFormat(id, "Invalid salary id", "id", "params"));
+    }
+    const salary = await Salary.findById(id);
+    if (!salary) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "No salary with this id", "id", "params"));
+    }
+
+    salary.state = true;
+    await salary.save();
+
+    return res.status(200).json({ msg: "Salary state : done" });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "salary.paid".bgYellow);
+    if (process.env.PRODUCTION === "false") console.log(error);
+  }
+};
+
+module.exports = { getAllForEmployee, paid };
