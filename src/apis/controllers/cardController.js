@@ -23,6 +23,7 @@ const create = async (req, res) => {
     details,
     startRange,
     endRange,
+    cutNumber,
   } = req.body;
 
   try {
@@ -105,6 +106,7 @@ const create = async (req, res) => {
       details,
       startRange,
       endRange,
+      cutNumber,
     });
 
     card.history.push({ state: "Created", date: currentTime() });
@@ -225,6 +227,7 @@ const update = async (req, res) => {
     details,
     startRange,
     endRange,
+    cutNumber,
   } = req.body;
 
   try {
@@ -382,6 +385,10 @@ const update = async (req, res) => {
     //details
     if (details) {
       card.details = details;
+    }
+
+    if (cutNumber) {
+      card.cutNumber = cutNumber;
     }
 
     card.history.push({ state: "Updated", date: currentTime() });

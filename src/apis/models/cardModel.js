@@ -18,6 +18,8 @@ const cardSchema = new Schema(
 
     endRange: { type: Number },
 
+    cutNumber: { type: Number },
+
     details: { type: String },
 
     history: [

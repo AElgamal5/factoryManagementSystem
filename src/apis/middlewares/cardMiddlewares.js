@@ -52,6 +52,14 @@ const createValidate = [
     .isInt({ min: 1, max: maxNo })
     .withMessage(`Card's endRange range form 1 to ${maxNo}`),
 
+  check("cutNumber")
+    .notEmpty()
+    .withMessage("Card's cutNumber is required")
+    .isNumeric()
+    .withMessage("Card's cutNumber must be a number")
+    .isInt({ min: 1, max: maxNo })
+    .withMessage(`Card's cutNumber range form 1 to ${maxNo}`),
+
   check("details")
     .optional()
     .isString()
