@@ -42,6 +42,13 @@ const salarySchema = new Schema(
     },
 
     details: { type: String },
+
+    priceHistory: [
+      {
+        stage: { type: mongoose.Types.ObjectId, ref: "Stage" },
+        price: { type: Number },
+      },
+    ],
   },
   { timestamps: true }
 );

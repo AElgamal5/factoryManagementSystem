@@ -8,7 +8,7 @@ const {
   User,
   UserEmployee,
 } = require("../models");
-const { idCheck, errorFormat, currentDate, currentTime } = require("../utils");
+const { idCheck, errorFormat, currentTime } = require("../utils");
 
 /*
  * method: POST
@@ -566,6 +566,14 @@ const addTracking = async (req, res) => {
       });
     } else {
       salary.totalWorkPerMonth[workIndex].quantity += card.quantity;
+    }
+
+    //check priceHistory
+    const priceIndex = salary.priceHistory.findIndex(
+      (obj) => obj.stage.toString() === stageID
+    );
+    if (priceIndex === -1) {
+      salary.priceHistory.push({ stage: stageID, price: stage.price });
     }
 
     //update no. of pieces and costs
@@ -1750,6 +1758,14 @@ const confirmError = async (req, res) => {
         } else {
           salary.workDetails[dayIndex].work[workDetailsIndex].quantity += 1;
         }
+      }
+
+      //check priceHistory
+      const priceIndex = salary.priceHistory.findIndex(
+        (obj) => obj.stage.toString() === stageID
+      );
+      if (priceIndex === -1) {
+        salary.priceHistory.push({ stage: stageID, price: stage.price });
       }
 
       //update totalWorkPerMonth
