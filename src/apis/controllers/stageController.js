@@ -1,5 +1,5 @@
-const { Stage, MachineType } = require("../models");
-const { errorFormat, idCheck } = require("../utils");
+const { Stage, MachineType, Salary } = require("../models");
+const { errorFormat, idCheck, currentTime } = require("../utils");
 
 /*
  * method: POST
@@ -109,10 +109,23 @@ const update = async (req, res) => {
 
   try {
     if (machineTypeID) {
+      if (!idCheck(machineTypeID)) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              machineTypeID,
+              "Invalid machineType id",
+              "machineType",
+              "body"
+            )
+          );
+      }
+
       const machineType = await MachineType.findById(machineTypeID);
       if (!machineType) {
         return res
-          .status(400)
+          .status(404)
           .json(
             errorFormat(
               machineTypeID,
@@ -124,7 +137,14 @@ const update = async (req, res) => {
       }
     }
 
-    const stage = await Stage.findByIdAndUpdate(id, {
+    const stage = await Stage.findById(id);
+    if (!stage) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "No stage with this id", "id", "header"));
+    }
+
+    await Stage.findByIdAndUpdate(id, {
       name,
       type,
       code,
@@ -135,10 +155,16 @@ const update = async (req, res) => {
       stageErrors,
     });
 
-    if (!stage) {
-      return res
-        .status(404)
-        .json(errorFormat(id, "No stage with this id", "id", "header"));
+    const current = currentTime();
+
+    if (price !== stage.price) {
+      await Salary.updateMany(
+        {
+          "date.month": current.getMonth() + 1,
+          "date.year": current.getFullYear(),
+        },
+        { totalCost: -1, todayCost: -1 }
+      );
     }
 
     res.status(200).json({ msg: "stage updated tmam" });

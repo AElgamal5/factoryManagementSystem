@@ -11,4 +11,6 @@ router.get("/employee/:eid", salaryController.getAllForEmployee);
 
 router.patch("/:id/done", salaryController.paid);
 
+router.get("/recalculate", salaryController.recalculate);
+
 module.exports = router;
