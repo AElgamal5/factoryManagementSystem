@@ -184,10 +184,23 @@ const getByID = async (req, res) => {
         .json(errorFormat(id, "No card with this id", "id", "params"));
     }
 
-    res.status(200).json({ data: doc });
+    const order = await Order.findById(doc.order._id)
+      .populate("models.color", "name code")
+      .populate("models.size");
+
+    const index = order.models.findIndex(
+      (obj) => obj._id.toString() === doc.modelIndex.toString()
+    );
+
+    res.status(200).json({
+      data: doc,
+      // color: order.models[index].color,
+      // size: order.models[index].size,
+    });
   } catch (error) {
     console.log("Error is in: ".bgRed, "card.getByID".bgYellow);
-    if (process.env.PRODUCTION === "false") console.log(error);
+    // if (process.env.PRODUCTION === "false")
+    console.log(error);
   }
 };
 
