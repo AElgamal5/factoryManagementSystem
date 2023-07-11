@@ -46,7 +46,7 @@ const createValidate = [
     .optional()
     .isNumeric()
     .withMessage("Price must be a number")
-    .isFloat({ min: 0.1, max: maxNo })
+    .isFloat({ min: 0.01, max: maxNo })
     .withMessage(`Price range form 0.1 to ${maxNo}`),
 
   check("note")
@@ -121,7 +121,7 @@ const updateValidate = [
     .optional()
     .isNumeric()
     .withMessage("Price must be a number")
-    .isFloat({ min: 0.1, max: maxNo })
+    .isFloat({ min: 0.01, max: maxNo })
     .withMessage(`Price range form 0.1 to ${maxNo}`),
 
   check("note")

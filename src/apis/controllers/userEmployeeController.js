@@ -366,6 +366,8 @@ const workAdding = async (req, res) => {
 
     await doc.save();
 
+    req.io.emit("assistantUpdated", { msg: "assistantUpdated" });
+
     res.status(200).json({ msg: "work added tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "userEmployee.workAdding".bgYellow);

@@ -14,7 +14,7 @@ const { errorFormat, idCheck } = require("../utils");
  * path: /api/model/
  */
 const create = async (req, res) => {
-  const { name, note, details, colors, sizes, image } = req.body;
+  const { name, note, details, colors, sizes, image, code } = req.body;
 
   try {
     for (let i = 0; i < colors.length; i++) {
@@ -62,6 +62,13 @@ const create = async (req, res) => {
       }
     }
 
+    const exist = await Model.findOne({ code });
+    if (exist) {
+      return res
+        .status(400)
+        .json(errorFormat(code, "This code is used", "code", "body"));
+    }
+
     //image checks
     let imageDocID;
     if (image) {
@@ -75,6 +82,7 @@ const create = async (req, res) => {
       colors,
       sizes,
       image: imageDocID,
+      code,
     });
 
     res.status(201).json({ data: model });
@@ -160,7 +168,7 @@ const deleteOne = async (req, res) => {
  */
 const updateProfile = async (req, res) => {
   const id = req.params.id;
-  const { name, note, details, colors, sizes, image } = req.body;
+  const { name, note, details, colors, sizes, image, code } = req.body;
 
   try {
     const model = await Model.findById(id);
@@ -229,6 +237,15 @@ const updateProfile = async (req, res) => {
       imageDocID = (await Image.create({ data: image }))._id;
     }
 
+    if (code) {
+      const exist = await Model.findOne({ code });
+      if (exist._id.toString() !== model._id.toString()) {
+        return res
+          .status(400)
+          .json(errorFormat(code, "This code is used", "code", "body"));
+      }
+    }
+
     await Model.findByIdAndUpdate(id, {
       name,
       note,
@@ -236,6 +253,7 @@ const updateProfile = async (req, res) => {
       colors,
       sizes,
       image: imageDocID,
+      code,
     });
 
     res.status(200).json({ msg: "Model profile updated tmam" });

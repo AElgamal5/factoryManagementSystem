@@ -14,6 +14,17 @@ const createValidate = [
     })
     .withMessage("Name length should be 3 to 200 characters"),
 
+  check("code")
+    .notEmpty()
+    .withMessage("Code is required")
+    .isString()
+    .withMessage("Code must be a String")
+    .isLength({
+      min: 1,
+      max: 200,
+    })
+    .withMessage("Code length should be 1 to 200 characters"),
+
   check("details")
     .optional()
     .isString()
@@ -69,6 +80,16 @@ const updateValidate = [
       max: 200,
     })
     .withMessage("Name length should be 3 to 200 characters"),
+
+  check("code")
+    .optional()
+    .isString()
+    .withMessage("Code must be a String")
+    .isLength({
+      min: 1,
+      max: 200,
+    })
+    .withMessage("Code length should be 1 to 200 characters"),
 
   check("details")
     .optional()

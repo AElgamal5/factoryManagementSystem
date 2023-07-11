@@ -27,6 +27,7 @@ const createValidate = [
     .withMessage("Role id must be 24 characters"),
 
   check("phoneNo")
+    .optional()
     .isNumeric()
     .withMessage("Phone number contain numbers only")
     .isLength({

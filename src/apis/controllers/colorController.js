@@ -1,4 +1,4 @@
-const { Color } = require("../models");
+const { Color, Image } = require("../models");
 const { errorFormat } = require("../utils");
 
 /*
@@ -6,12 +6,18 @@ const { errorFormat } = require("../utils");
  * path: /api/color/
  */
 const create = async (req, res) => {
-  const { name, code } = req.body;
+  const { name, code, image } = req.body;
 
   try {
+    let imageDocID;
+    if (image) {
+      imageDocID = (await Image.create({ data: image }))._id;
+    }
+
     const color = await Color.create({
       name,
       code,
+      image: imageDocID,
     });
 
     res.status(201).json({ data: color });
@@ -27,7 +33,7 @@ const create = async (req, res) => {
  */
 const getAll = async (req, res) => {
   try {
-    const colors = await Color.find();
+    const colors = await Color.find().populate("image");
 
     res.status(200).json({ data: colors });
   } catch (error) {
@@ -43,7 +49,7 @@ const getAll = async (req, res) => {
 const getByID = async (req, res) => {
   const id = req.params.id;
   try {
-    const color = await Color.findById(id);
+    const color = await Color.findById(id).populate("image");
 
     if (!color) {
       return res
