@@ -60,4 +60,18 @@ router.get("/client/:id", idValidation, orderController.getByClientID);
 
 router.get("/state/inProduction", orderController.getAllInProduction);
 
+router.patch(
+  "/:id/models/add",
+  idValidation,
+  orderMiddlewares.updateModelsValidate,
+  validationResult,
+  orderController.addToModels
+);
+
+router.patch(
+  "/:id/models/remove",
+  idValidation,
+  orderController.removeFromModel
+);
+
 module.exports = router;

@@ -1,4 +1,4 @@
-const { Order, Client, Color, Size, Model } = require("../models");
+const { Order, Client, Color, Size, Model, Card } = require("../models");
 const { errorFormat, idCheck } = require("../utils");
 
 /*
@@ -41,7 +41,9 @@ const getAll = async (req, res) => {
   try {
     const orders = await Order.find()
       .populate("client", "name")
-      .populate("models.id", "name");
+      .populate("models.id", "name")
+      .populate("models.color")
+      .populate("models.size");
 
     res.status(200).json({ data: orders });
   } catch (error) {
@@ -521,6 +523,227 @@ const getByClientID = async (req, res) => {
   }
 };
 
+/*
+ * method: PATCH
+ * path: /api/order/:id/models/add
+ */
+const addToModels = async (req, res) => {
+  const id = req.params.id;
+  const models = req.body.models;
+
+  try {
+    const order = await Order.findById(id);
+    if (!order) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "no order with this id", "id", "params"));
+    }
+
+    //checks
+    for (let i = 0; i < models.length; i++) {
+      if (!idCheck(models[i].id)) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              models[i].id,
+              "Not valid model id",
+              `models[${i}].id`,
+              "body"
+            )
+          );
+      }
+      if (!idCheck(models[i].color)) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              models[i].color,
+              "Not valid model color",
+              `models[${i}].color`,
+              "body"
+            )
+          );
+      }
+      if (!idCheck(models[i].size)) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              models[i].size,
+              "Not valid model size",
+              `models[${i}].size`,
+              "body"
+            )
+          );
+      }
+
+      //consumption check
+      const model = await Model.findOne({
+        _id: models[i].id,
+        "consumptions.colors": models[i].color,
+        "consumptions.sizes": models[i].size,
+      });
+      if (!model) {
+        return res
+          .status(404)
+          .json(
+            errorFormat(
+              models[i].id,
+              "no model with this data : id || color || size",
+              `models[${i}].id`,
+              "body"
+            )
+          );
+      }
+
+      //model, color & size check
+      const exist = await Order.findOne({
+        _id: id,
+        "models.id": models[i].id,
+        "models.color": models[i].color,
+        "models.size": models[i].size,
+      });
+      if (exist) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              models[i].id,
+              "The given combination exist before in this order",
+              `models[${i}].id`,
+              "body"
+            )
+          );
+      }
+
+      //code check
+      const codeExist = await Order.findOne({
+        _id: id,
+        "models.code": models[i].code,
+      });
+      if (codeExist) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              models[i].code,
+              "the code must be unique for every combination",
+              `models[${i}].code`,
+              "body"
+            )
+          );
+      }
+    }
+
+    for (let i = 0; i < models.length; i++) {
+      const model = await Model.findOne({
+        _id: models[i].id,
+        "consumptions.colors": models[i].color,
+        "consumptions.sizes": models[i].size,
+      });
+
+      for (let j = 0; j < model.consumptions.length; j++) {
+        const colorIndex = model.consumptions[j].colors.findIndex(
+          (color) => color.toString() === models[i].color
+        );
+
+        const sizeIndex = model.consumptions[j].sizes.findIndex(
+          (size) => size.toString() === models[i].size
+        );
+
+        if (colorIndex > -1 && sizeIndex > -1) {
+          const totalIndex = order.totalMaterialsRequired.findIndex(
+            (tot) =>
+              tot.id.toString() === model.consumptions[j].material.toString()
+          );
+
+          if (totalIndex > -1) {
+            order.totalMaterialsRequired[totalIndex].quantity +=
+              +model.consumptions[j].quantity * models[i].quantity;
+          } else {
+            order.totalMaterialsRequired.push({
+              id: model.consumptions[j].material,
+              quantity: +model.consumptions[j].quantity * models[i].quantity,
+            });
+          }
+        }
+      }
+
+      order.totalQuantity += models[i].quantity;
+
+      order.models.push({
+        id: models[i].id,
+        color: models[i].color,
+        size: models[i].size,
+        quantity: models[i].quantity,
+        code: models[i].code,
+      });
+    }
+
+    await order.save();
+
+    res.status(200).json({ msg: "Models added to order tmam" });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "order.addToModels".bgYellow);
+    if (process.env.PRODUCTION === "false") console.log(error);
+  }
+};
+
+/*
+ * method: PATCH
+ * path: /api/order/:id/models/remove
+ */
+const removeFromModel = async (req, res) => {
+  const id = req.params.id;
+  const index = req.body.index;
+
+  try {
+    const order = await Order.findById(id);
+    if (!order) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "no order with this id", "id", "params"));
+    }
+
+    if (!idCheck(index)) {
+      return res
+        .status(400)
+        .json(errorFormat(index, "Invalid index:id", "index", "body"));
+    }
+
+    const exist = order.models.findIndex((obj) => obj._id.toString() === index);
+    if (exist === -1) {
+      return res
+        .status(404)
+        .json(errorFormat(index, "Not exist index:id", "index", "body"));
+    }
+
+    const cardExist = await Card.findOne({ order: id, modelIndex: index });
+    if (cardExist) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(
+            index,
+            "There ara cards related to this combination",
+            "index",
+            "body"
+          )
+        );
+    }
+
+    order.models.pull(index);
+
+    await order.save();
+
+    res.status(200).json({ msg: "Models removed from order tmam" });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "order.removeFromModel".bgYellow);
+    if (process.env.PRODUCTION === "false") console.log(error);
+  }
+};
+
 module.exports = {
   create,
   getAll,
@@ -533,4 +756,6 @@ module.exports = {
   consumption,
   getByClientID,
   getAllInProduction,
+  addToModels,
+  removeFromModel,
 };

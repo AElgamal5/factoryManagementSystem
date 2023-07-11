@@ -1958,6 +1958,11 @@ const unconfirmedErrors = async (req, res) => {
   }
 };
 
+/*
+ * method: GET
+ * path: /api/card/order/:oid
+ */
+
 module.exports = {
   create,
   getAll,
