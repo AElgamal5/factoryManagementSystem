@@ -598,13 +598,14 @@ const addToModels = async (req, res) => {
       }
 
       //model, color & size check
-      const exist = await Order.findOne({
-        _id: id,
-        "models.id": models[i].id,
-        "models.color": models[i].color,
-        "models.size": models[i].size,
-      });
-      if (exist) {
+      const exist = order.models.findIndex(
+        (obj) =>
+          obj.id.toString() === models[i].id &&
+          obj.color.toString() === models[i].color &&
+          obj.size.toString() === models[i].size
+      );
+
+      if (exist !== -1) {
         return res
           .status(400)
           .json(
@@ -618,11 +619,10 @@ const addToModels = async (req, res) => {
       }
 
       //code check
-      const codeExist = await Order.findOne({
-        _id: id,
-        "models.code": models[i].code,
-      });
-      if (codeExist) {
+      const codeExist = order.models.findIndex(
+        (obj) => obj.code === models[i].code
+      );
+      if (codeExist !== -1) {
         return res
           .status(400)
           .json(
@@ -639,14 +639,16 @@ const addToModels = async (req, res) => {
     for (let i = 0; i < models.length; i++) {
       const model = await Model.findOne({
         _id: models[i].id,
-        "consumptions.colors": models[i].color,
-        "consumptions.sizes": models[i].size,
       });
 
       for (let j = 0; j < model.consumptions.length; j++) {
         const colorIndex = model.consumptions[j].colors.findIndex(
           (color) => color.toString() === models[i].color
         );
+
+        if (colorIndex === -1) {
+          continue;
+        }
 
         const sizeIndex = model.consumptions[j].sizes.findIndex(
           (size) => size.toString() === models[i].size
@@ -660,17 +662,17 @@ const addToModels = async (req, res) => {
 
           if (totalIndex > -1) {
             order.totalMaterialsRequired[totalIndex].quantity +=
-              +model.consumptions[j].quantity * models[i].quantity;
+              +model.consumptions[j].quantity * +models[i].quantity;
           } else {
             order.totalMaterialsRequired.push({
               id: model.consumptions[j].material,
-              quantity: +model.consumptions[j].quantity * models[i].quantity,
+              quantity: +model.consumptions[j].quantity * +models[i].quantity,
             });
           }
         }
       }
 
-      order.totalQuantity += models[i].quantity;
+      order.totalQuantity += +models[i].quantity;
 
       order.models.push({
         id: models[i].id,
@@ -711,7 +713,6 @@ const removeFromModel = async (req, res) => {
         .status(400)
         .json(errorFormat(index, "Invalid index:id", "index", "body"));
     }
-
     const exist = order.models.findIndex((obj) => obj._id.toString() === index);
     if (exist === -1) {
       return res
@@ -732,6 +733,37 @@ const removeFromModel = async (req, res) => {
           )
         );
     }
+
+    const model = await Model.findById(order.models[exist].id);
+
+    //update consumption
+    for (let j = 0; j < model.consumptions.length; j++) {
+      const colorIndex = model.consumptions[j].colors.findIndex(
+        (color) => color.toString() === order.models[exist].color
+      );
+
+      if (colorIndex === -1) {
+        continue;
+      }
+
+      const sizeIndex = model.consumptions[j].sizes.findIndex(
+        (size) => size.toString() === order.models[exist].size
+      );
+
+      if (colorIndex > -1 && sizeIndex > -1) {
+        const totalIndex = order.totalMaterialsRequired.findIndex(
+          (tot) =>
+            tot.id.toString() === model.consumptions[j].material.toString()
+        );
+
+        if (totalIndex > -1) {
+          order.totalMaterialsRequired[totalIndex].quantity -=
+            +model.consumptions[j].quantity * +order.models[exist].quantity;
+        }
+      }
+    }
+
+    order.totalQuantity -= +order.models[exist].quantity;
 
     order.models.pull(index);
 

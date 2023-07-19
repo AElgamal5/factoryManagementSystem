@@ -33,7 +33,7 @@ const create = async (req, res) => {
  */
 const getAll = async (req, res) => {
   try {
-    const colors = await Color.find().populate("image");
+    const colors = await Color.find();
 
     res.status(200).json({ data: colors });
   } catch (error) {
