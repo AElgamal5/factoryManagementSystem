@@ -721,6 +721,11 @@ const addTracking = async (req, res) => {
         .status(404)
         .json(errorFormat(id, "No card with this id", "id", "params"));
     }
+    if (card.done) {
+      return res
+        .status(400)
+        .json(errorFormat(id, "This card is finished", "id", "params"));
+    }
 
     //stage check
     if (!idCheck(stageID)) {
@@ -1047,6 +1052,57 @@ const addTracking = async (req, res) => {
       enteredByWork.todayCards++;
       enteredByWork.totalCards++;
       await enteredByWork.save();
+    }
+
+    //check if the card finished
+    let max = 0;
+    for (let i = 0; i < model.stages.length; i++) {
+      if (model.stages[i].priority > max) {
+        max = model.stages[i].priority;
+      }
+    }
+    if (max === currentPriority) {
+      const order = await Order.findById(card.order);
+      if (!order) {
+        return res
+          .status(404)
+          .json(
+            errorFormat(
+              card.order,
+              "Wrong card's order",
+              "card.order",
+              "others"
+            )
+          );
+      }
+
+      const producedIndex = order.models.findIndex(
+        (obj) => obj._id.toString() === card.modelIndex.toString()
+      );
+
+      if (producedIndex === -1) {
+        return res
+          .status(404)
+          .json(
+            errorFormat(
+              card.modelIndex,
+              "Wrong card's modelIndex",
+              "card.modelIndex",
+              "others"
+            )
+          );
+      }
+
+      order.models[producedIndex].produced += card.quantity;
+      await order.save();
+
+      card.history.push({
+        state: `Finished`,
+        type: "finish",
+        date: current,
+      });
+      card.done = true;
+      await card.save();
     }
 
     io.emit("addTracking", { msg: "addTracking", card, stage });
