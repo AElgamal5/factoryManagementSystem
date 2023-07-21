@@ -20,11 +20,16 @@ const cardSchema = new Schema(
 
     cutNumber: { type: Number },
 
+    boxNumber: { type: Number },
+
     details: { type: String },
+
+    done: { type: Boolean, default: false },
 
     history: [
       {
         state: { type: String },
+        type: { type: String },
         date: { type: Date },
       },
     ],
@@ -56,6 +61,8 @@ const cardSchema = new Schema(
 
             dateOut: { type: Date },
             verifiedBy: { type: mongoose.Types.ObjectId, ref: "Employee" },
+
+            modifyNumber: { type: Number, default: 0 },
           },
         ],
       },

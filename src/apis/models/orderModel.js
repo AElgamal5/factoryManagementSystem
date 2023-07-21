@@ -17,6 +17,8 @@ const orderSchema = new Schema(
       },
     ],
 
+    sequence: { type: Boolean, default: false },
+
     shipments: [{ type: mongoose.Types.ObjectId, ref: "Shipment" }],
 
     client: { type: mongoose.Types.ObjectId, ref: "Client" },
