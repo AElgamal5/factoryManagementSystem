@@ -7,6 +7,7 @@ const {
   Model,
   User,
   UserEmployee,
+  Work,
 } = require("../models");
 const { idCheck, errorFormat, currentTime } = require("../utils");
 
@@ -24,6 +25,7 @@ const create = async (req, res) => {
     startRange,
     endRange,
     cutNumber,
+    boxNumber,
   } = req.body;
 
   try {
@@ -55,10 +57,7 @@ const create = async (req, res) => {
           errorFormat(modelIndex, "Invalid model index", "modelIndex", "body")
         );
     }
-    const order = await Order.findOne({
-      _id: orderID,
-      "models._id": modelIndex,
-    });
+    const order = await Order.findById(orderID);
     if (!order) {
       return res
         .status(404)
@@ -97,6 +96,24 @@ const create = async (req, res) => {
         );
     }
 
+    //box number check
+    const boxNumberUsed = await Card.findOne({
+      done: false,
+      boxNumber: boxNumber,
+    });
+    if (boxNumberUsed) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(
+            boxNumber,
+            `The box number is use in card: ${boxNumberUsed.code}`,
+            "boxNumber",
+            "body"
+          )
+        );
+    }
+
     const card = await Card.create({
       code,
       order: orderID,
@@ -107,9 +124,14 @@ const create = async (req, res) => {
       startRange,
       endRange,
       cutNumber,
+      boxNumber,
     });
 
-    card.history.push({ state: "Created", date: currentTime() });
+    card.history.push({
+      state: "Card created",
+      type: "create",
+      date: currentTime(),
+    });
     await card.save();
 
     res.status(201).json({ data: card });
@@ -169,7 +191,7 @@ const getByID = async (req, res) => {
     const doc = await Card.findById(id)
       .populate("model", "name")
       .populate("order", "name")
-      .populate("tracking.stage", "name")
+      .populate("tracking.stage", "name stageErrors")
       .populate("tracking.employee", "name code")
       .populate("tracking.enteredBy", "name code")
       .populate("currentErrors", "name")
@@ -186,7 +208,7 @@ const getByID = async (req, res) => {
 
     const order = await Order.findById(doc.order._id)
       .populate("models.color", "name code")
-      .populate("models.size");
+      .populate("models.size", "code");
 
     const index = order.models.findIndex(
       (obj) => obj._id.toString() === doc.modelIndex.toString()
@@ -194,13 +216,12 @@ const getByID = async (req, res) => {
 
     res.status(200).json({
       data: doc,
-      // color: order.models[index].color,
-      // size: order.models[index].size,
+      color: order.models[index].color,
+      size: order.models[index].size,
     });
   } catch (error) {
     console.log("Error is in: ".bgRed, "card.getByID".bgYellow);
-    // if (process.env.PRODUCTION === "false")
-    console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
@@ -241,6 +262,7 @@ const update = async (req, res) => {
     startRange,
     endRange,
     cutNumber,
+    boxNumber,
   } = req.body;
 
   try {
@@ -275,22 +297,12 @@ const update = async (req, res) => {
 
     //check if the order has model
     if (orderID && modelIndex) {
-      const orderModel = await Order.findOne({
-        _id: orderID,
-        "models._id": modelIndex,
-      });
+      const orderModel = await Order.findById(orderID);
 
       if (!orderModel) {
         return res
           .status(404)
-          .json(
-            errorFormat(
-              orderID,
-              "No order with givin 'orderID || modelIndex'",
-              "orderID",
-              "body"
-            )
-          );
+          .json(errorFormat(orderID, "No order with this id", "order", "body"));
       }
       const index = orderModel.models.findIndex(
         (obj) => obj._id.toString() === modelIndex
@@ -381,7 +393,7 @@ const update = async (req, res) => {
     }
     if (
       (quantity || startRange || endRange) &&
-      card.endRange - card.startRange !== card.quantity
+      card.endRange - card.startRange + 1 !== card.quantity
     ) {
       return res
         .status(400)
@@ -404,7 +416,34 @@ const update = async (req, res) => {
       card.cutNumber = cutNumber;
     }
 
-    card.history.push({ state: "Updated", date: currentTime() });
+    if (boxNumber) {
+      const boxNumberUsed = await Card.findOne({
+        done: false,
+        boxNumber: boxNumber,
+      });
+      if (
+        boxNumberUsed &&
+        boxNumberUsed._id.toString() !== card._id.toString()
+      ) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              boxNumber,
+              `The box number is use in card: ${boxNumberUsed.code}`,
+              "boxNumber",
+              "body"
+            )
+          );
+      }
+      card.boxNumber = boxNumber;
+    }
+
+    card.history.push({
+      state: "Card profile updated",
+      type: "update",
+      date: currentTime(),
+    });
     await card.save();
 
     res.status(200).json({ msg: "Card updated tmam" });
@@ -418,6 +457,257 @@ const update = async (req, res) => {
  * method: PATCH
  * path: /api/card/:id/tracking/add
  */
+// const addTracking = async (req, res) => {
+//   const id = req.params.id;
+//   const { stage: stageID, employee: employeeID, enteredBy } = req.body;
+//   const io = req.io;
+
+//   try {
+//     //card check
+//     const card = await Card.findById(id);
+//     if (!card) {
+//       return res
+//         .status(404)
+//         .json(errorFormat(id, "No card with this id", "id", "params"));
+//     }
+
+//     //stage check
+//     if (!idCheck(stageID)) {
+//       return res
+//         .status(400)
+//         .json(errorFormat(stageID, "Invalid stage id", "stage", "body"));
+//     }
+//     const stage = await Stage.findById(stageID);
+//     if (!stage) {
+//       return res
+//         .status(404)
+//         .json(errorFormat(stageID, "No Stage with this id", "stage", "body"));
+//     }
+
+//     //check if the stage exists in tracking
+//     if (stage.type !== "quality") {
+//       const existIndex = card.tracking.findIndex(
+//         (obj) => obj.stage.toString() === stageID
+//       );
+//       if (existIndex !== -1) {
+//         return res
+//           .status(400)
+//           .json(
+//             errorFormat(
+//               stageID,
+//               "This stage had been tracked before",
+//               "stage",
+//               "body"
+//             )
+//           );
+//       }
+//     }
+
+//     //check if card.model have the givin stage
+//     const modelStage = await Model.findOne({
+//       _id: card.model,
+//       "stages.id": stageID,
+//     });
+//     if (!modelStage) {
+//       return res
+//         .status(400)
+//         .json(
+//           errorFormat(
+//             stageID,
+//             "This stage does not exist in card.model",
+//             "stage",
+//             "body"
+//           )
+//         );
+//     }
+
+//     //employee check
+//     if (!idCheck(employeeID)) {
+//       return res
+//         .status(400)
+//         .json(
+//           errorFormat(employeeID, "Invalid employee id", "employee", "body")
+//         );
+//     }
+//     const employee = await Employee.findById(employeeID);
+//     if (!employee) {
+//       return res
+//         .status(404)
+//         .json(
+//           errorFormat(
+//             employeeID,
+//             "No employee with this id",
+//             "employee",
+//             "body"
+//           )
+//         );
+//     }
+
+//     //enteredBy
+//     if (!idCheck(enteredBy)) {
+//       return res
+//         .status(400)
+//         .json(
+//           errorFormat(enteredBy, "Invalid enteredBy id", "enteredBy", "body")
+//         );
+//     }
+//     const user = await User.findById(enteredBy);
+//     if (!user) {
+//       return res
+//         .status(404)
+//         .json(
+//           errorFormat(enteredBy, "No user with this id", "enteredBy", "body")
+//         );
+//     }
+//     const userEmployee = await UserEmployee.findOne({ user: user._id });
+//     if (!userEmployee) {
+//       return res
+//         .status(404)
+//         .json(
+//           errorFormat(
+//             enteredBy,
+//             "No 'UserEmployee' doc related with this id",
+//             "enteredBy",
+//             "body"
+//           )
+//         );
+//     }
+//     const enteredByEmployee = await Employee.findById(userEmployee.employee);
+//     if (!enteredByEmployee) {
+//       return res
+//         .status(404)
+//         .json(
+//           errorFormat(
+//             enteredBy,
+//             "No 'Employee' doc related to this id",
+//             "enteredBy",
+//             "body"
+//           )
+//         );
+//     }
+
+//     const current = currentTime();
+
+//     let salary = await Salary.findOne({
+//       employee: employeeID,
+//       "date.month": current.getMonth() + 1,
+//       "date.year": current.getFullYear(),
+//     });
+
+//     //if not exist create it
+//     if (!salary) {
+//       salary = await Salary.create({
+//         employee: employeeID,
+//         date: {
+//           day: current.getDate(),
+//           month: current.getMonth() + 1,
+//           year: current.getFullYear(),
+//         },
+//       });
+//     }
+
+//     //update salary.totalWorkPerMonth array
+//     const workIndex = salary.totalWorkPerMonth.findIndex(
+//       (obj) => obj.stage.toString() === stageID
+//     );
+
+//     if (workIndex === -1) {
+//       salary.totalWorkPerMonth.push({
+//         stage: stageID,
+//         quantity: card.quantity,
+//       });
+//     } else {
+//       salary.totalWorkPerMonth[workIndex].quantity += card.quantity;
+//     }
+
+//     //check priceHistory
+//     const priceIndex = salary.priceHistory.findIndex(
+//       (obj) => obj.stage.toString() === stageID
+//     );
+//     if (priceIndex === -1) {
+//       salary.priceHistory.push({ stage: stageID, price: stage.price });
+//     }
+
+//     //update no. of pieces and costs
+//     if (current.getDate() === salary.date.day) {
+//       salary.todayPieces += card.quantity;
+//       salary.todayCost += card.quantity * stage.price;
+//     } else {
+//       salary.date.day = current.getDate();
+//       salary.todayPieces = card.quantity;
+//       salary.todayCost = card.quantity * stage.price;
+//     }
+//     salary.totalPieces += card.quantity;
+//     salary.totalCost += card.quantity * stage.price;
+
+//     //update salary.workDetails according to current day
+//     const dayIndex = salary.workDetails.findIndex(
+//       (obj) => obj.day === current.getDate()
+//     );
+//     if (dayIndex === -1) {
+//       salary.workDetails.push({
+//         day: current.getDate(),
+//         work: [
+//           {
+//             stage: stage._id,
+//             quantity: card.quantity,
+//           },
+//         ],
+//       });
+//     } else {
+//       const stageIndex = salary.workDetails[dayIndex].work.findIndex(
+//         (obj) => obj.stage.toString() === stage._id.toString()
+//       );
+
+//       if (stageIndex === -1) {
+//         salary.workDetails[dayIndex].work.push({
+//           stage: stage._id,
+//           quantity: card.quantity,
+//         });
+//       } else {
+//         salary.workDetails[dayIndex].work[stageIndex].quantity += card.quantity;
+//       }
+//     }
+//     await salary.save();
+
+//     card.tracking.push({
+//       stage: stageID,
+//       employee: employeeID,
+//       enteredBy: enteredByEmployee._id,
+//       dateOut: current,
+//     });
+
+//     card.history.push({
+//       state: `Stage: ${stage.name} has been tracked`,
+//       date: current,
+//     });
+
+//     //check if card is finished
+//     const lastStage = modelStage.stages[modelStage.stages.length - 1].id;
+//     if (lastStage.toString() === stageID) {
+//       //update order
+//       const order = await Order.findById(card.order);
+//       const orderIndex = order.models.findIndex(
+//         (obj) => obj.id.toString() === card.model.toString()
+//       );
+
+//       order.models[orderIndex].produced += card.quantity;
+//       await order.save();
+
+//       card.history.push({ state: `Finished`, date: current });
+//     }
+
+//     await card.save();
+
+//     io.emit("addTracking", { msg: "addTracking", card, stage });
+
+//     res.status(200).json({ msg: "Tracking added tmam" });
+//   } catch (error) {
+//     console.log("Error is in: ".bgRed, "card.addTracking".bgYellow);
+//     if (process.env.PRODUCTION === "false") console.log(error);
+//   }
+// };
+
 const addTracking = async (req, res) => {
   const id = req.params.id;
   const { stage: stageID, employee: employeeID, enteredBy } = req.body;
@@ -438,48 +728,105 @@ const addTracking = async (req, res) => {
         .status(400)
         .json(errorFormat(stageID, "Invalid stage id", "stage", "body"));
     }
-    const stage = await Stage.findById(stageID);
-    if (!stage) {
+    const model = await Model.findById(card.model).select("stages");
+    const stageIndex = model.stages.findIndex(
+      (obj) => obj.id.toString() === stageID
+    );
+    if (stageIndex === -1) {
       return res
         .status(404)
-        .json(errorFormat(stageID, "No Stage with this id", "stage", "body"));
+        .json(
+          errorFormat(
+            stageID,
+            "The card's model does not has this stage",
+            "stage",
+            "body"
+          )
+        );
     }
+    const currentPriority = model.stages[stageIndex].priority;
 
-    //check if the stage exists in tracking
-    if (stage.type !== "quality") {
-      const existIndex = card.tracking.findIndex(
-        (obj) => obj.stage.toString() === stageID
-      );
-      if (existIndex !== -1) {
-        return res
-          .status(400)
-          .json(
-            errorFormat(
-              stageID,
-              "This stage had been tracked before",
-              "stage",
-              "body"
-            )
-          );
-      }
-    }
-
-    //check if card.model have the givin stage
-    const modelStage = await Model.findOne({
-      _id: card.model,
-      "stages.id": stageID,
-    });
-    if (!modelStage) {
+    //check if the stage has been tracked before
+    const trackedIndex = card.tracking.findIndex(
+      (obj) => obj.stage.toString() === stageID
+    );
+    if (trackedIndex !== -1) {
       return res
         .status(400)
         .json(
           errorFormat(
             stageID,
-            "This stage does not exist in card.model",
+            "This stage has been tracked before",
             "stage",
             "body"
           )
         );
+    }
+
+    //check if the card has errors
+    if (card.currentErrors.length > 0) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(
+            id,
+            "This card has errors, please fix it first",
+            "id",
+            "params"
+          )
+        );
+    }
+
+    //sequence in stages checks
+    const order = await Order.findById(card.order).select("sequence");
+    if (order.sequence) {
+      //first tracked element
+      if (
+        card.tracking.length === 0 &&
+        model.stages[stageIndex].priority !== 1
+      ) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              stageID,
+              "Card must start with first stage",
+              "stage",
+              "body"
+            )
+          );
+      }
+
+      //not first element
+      if (card.tracking.length > 0) {
+        const lastStageIndex = model.stages.findIndex(
+          (obj) =>
+            obj.id.toString() ===
+            card.tracking[card.tracking.length - 1].stage.toString()
+        );
+
+        const lastPriority = model.stages[lastStageIndex].priority;
+
+        console.log("lastPriority", lastPriority);
+        console.log("currentPriority", currentPriority);
+
+        //check if last priority != given stage index or not greater by 1
+        if (
+          currentPriority !== lastPriority &&
+          currentPriority !== lastPriority + 1
+        ) {
+          return res
+            .status(400)
+            .json(
+              errorFormat(
+                stageID,
+                "Please enter stages in order",
+                "stage",
+                "body"
+              )
+            );
+        }
+      }
     }
 
     //employee check
@@ -504,7 +851,7 @@ const addTracking = async (req, res) => {
         );
     }
 
-    //enteredBy
+    //enteredBy checks
     if (!idCheck(enteredBy)) {
       return res
         .status(400)
@@ -512,76 +859,86 @@ const addTracking = async (req, res) => {
           errorFormat(enteredBy, "Invalid enteredBy id", "enteredBy", "body")
         );
     }
-    const user = await User.findById(enteredBy);
-    if (!user) {
-      return res
-        .status(404)
-        .json(
-          errorFormat(enteredBy, "No user with this id", "enteredBy", "body")
-        );
-    }
-    const userEmployee = await UserEmployee.findOne({ user: user._id });
-    if (!userEmployee) {
-      return res
-        .status(404)
-        .json(
-          errorFormat(
-            enteredBy,
-            "No 'UserEmployee' doc related with this id",
-            "enteredBy",
-            "body"
-          )
-        );
-    }
-    const enteredByEmployee = await Employee.findById(userEmployee.employee);
+    const enteredByEmployee = await Employee.findById(enteredBy);
     if (!enteredByEmployee) {
       return res
         .status(404)
         .json(
           errorFormat(
             enteredBy,
-            "No 'Employee' doc related to this id",
+            "No employee with this id",
             "enteredBy",
             "body"
           )
         );
     }
 
+    //get stage
+    const stage = await Stage.findById(stageID);
+
     const current = currentTime();
 
+    //get salary doc and if not exist create it
     let salary = await Salary.findOne({
       employee: employeeID,
-      "date.month": current.getMonth() + 1,
       "date.year": current.getFullYear(),
+      "date.month": current.getMonth() + 1,
     });
-
-    //if not exist create it
     if (!salary) {
       salary = await Salary.create({
         employee: employeeID,
         date: {
-          day: current.getDate(),
-          month: current.getMonth() + 1,
           year: current.getFullYear(),
+          month: current.getMonth() + 1,
+          day: current.getDate(),
         },
       });
     }
 
-    //update salary.totalWorkPerMonth array
-    const workIndex = salary.totalWorkPerMonth.findIndex(
+    //update salary.totalWorkPerMonth
+    const totalWorkIndex = salary.totalWorkPerMonth.findIndex(
       (obj) => obj.stage.toString() === stageID
     );
-
-    if (workIndex === -1) {
+    if (totalWorkIndex === -1) {
       salary.totalWorkPerMonth.push({
         stage: stageID,
         quantity: card.quantity,
+        NoOfErrors: 0,
       });
     } else {
-      salary.totalWorkPerMonth[workIndex].quantity += card.quantity;
+      salary.totalWorkPerMonth[totalWorkIndex].quantity += card.quantity;
     }
 
-    //check priceHistory
+    //update salary.workDetails
+    const dayIndex = salary.workDetails.findIndex(
+      (obj) => obj.day === current.getDate()
+    );
+    if (dayIndex === -1) {
+      salary.workDetails.push({
+        day: current.getDate(),
+        work: [
+          {
+            stage: stageID,
+            quantity: card.quantity,
+          },
+        ],
+      });
+    } else {
+      const stageIndex = salary.workDetails[dayIndex].work.findIndex(
+        (obj) => obj.stage.toString() === stageID
+      );
+
+      if (stageIndex === -1) {
+        salary.workDetails[dayIndex].work.push({
+          stage: stageID,
+          quantity: card.quantity,
+        });
+      } else {
+        salary.workDetails[dayIndex].work[stageIndex].quantity += card.quantity;
+      }
+    }
+
+    //check salary.priceHistory
     const priceIndex = salary.priceHistory.findIndex(
       (obj) => obj.stage.toString() === stageID
     );
@@ -601,64 +958,96 @@ const addTracking = async (req, res) => {
     salary.totalPieces += card.quantity;
     salary.totalCost += card.quantity * stage.price;
 
-    //update salary.workDetails according to current day
-    const dayIndex = salary.workDetails.findIndex(
-      (obj) => obj.day === current.getDate()
-    );
-    if (dayIndex === -1) {
-      salary.workDetails.push({
-        day: current.getDate(),
-        work: [
-          {
-            stage: stage._id,
-            quantity: card.quantity,
-          },
-        ],
-      });
-    } else {
-      const stageIndex = salary.workDetails[dayIndex].work.findIndex(
-        (obj) => obj.stage.toString() === stage._id.toString()
-      );
-
-      if (stageIndex === -1) {
-        salary.workDetails[dayIndex].work.push({
-          stage: stage._id,
-          quantity: card.quantity,
-        });
-      } else {
-        salary.workDetails[dayIndex].work[stageIndex].quantity += card.quantity;
-      }
-    }
     await salary.save();
 
+    //update card
     card.tracking.push({
       stage: stageID,
       employee: employeeID,
-      enteredBy: enteredByEmployee._id,
+      enteredBy: enteredBy,
       dateOut: current,
     });
-
     card.history.push({
-      state: `Stage: ${stage.name} has been tracked`,
+      state: `Stage ${stage.name} has been tracked`,
+      type: "track",
       date: current,
     });
-
-    //check if card is finished
-    const lastStage = modelStage.stages[modelStage.stages.length - 1].id;
-    if (lastStage.toString() === stageID) {
-      //update order
-      const order = await Order.findById(card.order);
-      const orderIndex = order.models.findIndex(
-        (obj) => obj.id.toString() === card.model.toString()
-      );
-
-      order.models[orderIndex].produced += card.quantity;
-      await order.save();
-
-      card.history.push({ state: `Finished`, date: current });
-    }
-
     await card.save();
+
+    //update work doc for employee
+    let employeeWork = await Work.findOne({
+      employee: employeeID,
+      "date.year": current.getFullYear(),
+      "date.month": current.getMonth() + 1,
+    });
+    if (!employeeWork) {
+      employeeWork = await Work.create({
+        employee: employeeID,
+        "date.year": current.getFullYear(),
+        "date.month": current.getMonth() + 1,
+        "date.day": current.getDate(),
+      });
+    }
+    const employeeWorkIndex = employeeWork.workHistory.findIndex(
+      (obj) => obj.day === current.getDate()
+    );
+    if (employeeWorkIndex === -1) {
+      employeeWork.workHistory.push({
+        day: current.getDate(),
+        cards: [{ card: card._id, date: current }],
+      });
+    } else {
+      employeeWork.workHistory[employeeWorkIndex].cards.push({
+        card: card._id,
+        date: current,
+      });
+    }
+    if (employeeWork.date.day !== current.getDate()) {
+      employeeWork.date.day = current.getDate();
+      employeeWork.todayCards = 0;
+    }
+    employeeWork.todayCards++;
+    employeeWork.totalCards++;
+    await employeeWork.save();
+
+    //update work doc for enteredBy
+    //incase quality checker the employeeID is the same of enteredBy
+    if (employeeID !== enteredBy) {
+      let enteredByWork = await Work.findOne({
+        employee: enteredBy,
+        "date.year": current.getFullYear(),
+        "date.month": current.getMonth() + 1,
+      });
+      if (!enteredByWork) {
+        enteredByWork = await Work.create({
+          employee: enteredBy,
+          "date.year": current.getFullYear(),
+          "date.month": current.getMonth() + 1,
+          "date.day": current.getDate(),
+        });
+      }
+      const enteredByWorkIndex = enteredByWork.workHistory.findIndex(
+        (obj) => obj.day === current.getDate()
+      );
+      if (enteredByWorkIndex === -1) {
+        enteredByWork.workHistory.push({
+          day: current.getDate(),
+          cards: [{ card: card._id, date: current }],
+        });
+      } else {
+        enteredByWork.workHistory[enteredByWorkIndex].cards.push({
+          card: card._id,
+          date: current,
+        });
+      }
+      if (enteredByWork.date.day !== current.getDate()) {
+        enteredByWork.date.day = current.getDate();
+        enteredByWork.todayCards = 0;
+      }
+      enteredByWork.todayCards++;
+      enteredByWork.totalCards++;
+      await enteredByWork.save();
+    }
 
     io.emit("addTracking", { msg: "addTracking", card, stage });
 
@@ -673,90 +1062,90 @@ const addTracking = async (req, res) => {
  * method: PATCH
  * path: /api/card/:id/tracking/remove
  */
-const removeTracking = async (req, res) => {
-  const id = req.params.id;
-  const trackingID = req.body.trackingID;
+// const removeTracking = async (req, res) => {
+//   const id = req.params.id;
+//   const trackingID = req.body.trackingID;
 
-  try {
-    //card check
-    const card = await Card.findById(id);
-    if (!card) {
-      return res
-        .status(404)
-        .json(errorFormat(id, "No card with this id", "id", "params"));
-    }
+//   try {
+//     //card check
+//     const card = await Card.findById(id);
+//     if (!card) {
+//       return res
+//         .status(404)
+//         .json(errorFormat(id, "No card with this id", "id", "params"));
+//     }
 
-    //check trackingID
-    if (!idCheck(trackingID)) {
-      return res
-        .status(400)
-        .json(
-          errorFormat(
-            trackingID,
-            "Invalid trackingID value",
-            "trackingID",
-            "body"
-          )
-        );
-    }
-    const trackingIndex = card.tracking.findIndex(
-      (obj) => obj._id.toString() === trackingID
-    );
-    if (trackingIndex === -1) {
-      return res
-        .status(404)
-        .json(
-          errorFormat(
-            trackingID,
-            "No tracking element with this id",
-            "trackingID",
-            "body"
-          )
-        );
-    }
+//     //check trackingID
+//     if (!idCheck(trackingID)) {
+//       return res
+//         .status(400)
+//         .json(
+//           errorFormat(
+//             trackingID,
+//             "Invalid trackingID value",
+//             "trackingID",
+//             "body"
+//           )
+//         );
+//     }
+//     const trackingIndex = card.tracking.findIndex(
+//       (obj) => obj._id.toString() === trackingID
+//     );
+//     if (trackingIndex === -1) {
+//       return res
+//         .status(404)
+//         .json(
+//           errorFormat(
+//             trackingID,
+//             "No tracking element with this id",
+//             "trackingID",
+//             "body"
+//           )
+//         );
+//     }
 
-    const current = currentTime();
+//     const current = currentTime();
 
-    const salary = await Salary.findOne({
-      employee: card.tracking[trackingIndex].employee,
-      "date.year": current.getFullYear(),
-      "date.month": current.getMonth() + 1,
-    });
-    //get object due to dateOut in card.tracking
-    const dayIndex = salary.workDetails.findIndex(
-      (obj) => obj.day === card.tracking[trackingIndex].dateOut.getDate()
-    );
-    const workIndex = salary.workDetails[dayIndex].work.findIndex(
-      (obj) =>
-        obj.stage.toString() === card.tracking[trackingIndex].stage.toString()
-    );
+//     const salary = await Salary.findOne({
+//       employee: card.tracking[trackingIndex].employee,
+//       "date.year": current.getFullYear(),
+//       "date.month": current.getMonth() + 1,
+//     });
+//     //get object due to dateOut in card.tracking
+//     const dayIndex = salary.workDetails.findIndex(
+//       (obj) => obj.day === card.tracking[trackingIndex].dateOut.getDate()
+//     );
+//     const workIndex = salary.workDetails[dayIndex].work.findIndex(
+//       (obj) =>
+//         obj.stage.toString() === card.tracking[trackingIndex].stage.toString()
+//     );
 
-    const stage = await Stage.findById(card.tracking[trackingIndex].stage);
+//     const stage = await Stage.findById(card.tracking[trackingIndex].stage);
 
-    //update salary
-    salary.workDetails[dayIndex].work[trackingIndex].quantity -= card.quantity;
-    salary.totalPieces -= card.quantity;
-    salary.totalCost -= card.quantity * stage.price;
-    if (card.tracking[trackingIndex].dateOut.getDate() === current.getDate()) {
-      salary.todayPieces -= card.quantity;
-      salary.todayCost -= card.quantity * stage.price;
-    }
-    await salary.save();
+//     //update salary
+//     salary.workDetails[dayIndex].work[trackingIndex].quantity -= card.quantity;
+//     salary.totalPieces -= card.quantity;
+//     salary.totalCost -= card.quantity * stage.price;
+//     if (card.tracking[trackingIndex].dateOut.getDate() === current.getDate()) {
+//       salary.todayPieces -= card.quantity;
+//       salary.todayCost -= card.quantity * stage.price;
+//     }
+//     await salary.save();
 
-    card.history.push({
-      state: `Removing ${stage.name}`,
-      date: currentTime(),
-    });
+//     card.history.push({
+//       state: `Removing ${stage.name}`,
+//       date: currentTime(),
+//     });
 
-    card.tracking.pull(trackingID);
-    await card.save();
+//     card.tracking.pull(trackingID);
+//     await card.save();
 
-    res.status(200).json({ msg: "Tracking removed tmam" });
-  } catch (error) {
-    console.log("Error is in: ".bgRed, "card.addTracking".bgYellow);
-    if (process.env.PRODUCTION === "false") console.log(error);
-  }
-};
+//     res.status(200).json({ msg: "Tracking removed tmam" });
+//   } catch (error) {
+//     console.log("Error is in: ".bgRed, "card.addTracking".bgYellow);
+//     if (process.env.PRODUCTION === "false") console.log(error);
+//   }
+// };
 
 /*
  * method: PATCH
@@ -1024,7 +1413,7 @@ const addError = async (req, res) => {
     }
 
     //pieceNo check
-    if (pieceNo < card.startRange || pieceNo > card.endRange) {
+    if (pieceNo !== 0 || pieceNo < card.startRange || pieceNo > card.endRange) {
       return res
         .status(400)
         .json(
@@ -1970,7 +2359,7 @@ module.exports = {
   deleteOne,
   update,
   addTracking,
-  removeTracking,
+  // removeTracking,
   addError,
   confirmError,
   getLast,

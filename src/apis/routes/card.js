@@ -41,11 +41,11 @@ router.patch(
   cardController.addTracking
 );
 
-router.patch(
-  "/:id/tracking/remove",
-  idValidation,
-  cardController.removeTracking
-);
+// router.patch(
+//   "/:id/tracking/remove",
+//   idValidation,
+//   cardController.removeTracking
+// );
 
 router.patch(
   "/:id/errors/add",

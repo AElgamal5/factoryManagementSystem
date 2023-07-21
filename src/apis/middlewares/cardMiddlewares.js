@@ -68,6 +68,14 @@ const createValidate = [
       max: 200,
     })
     .withMessage("Card's details length should be 3 to 200 characters"),
+
+  check("boxNumber")
+    .notEmpty()
+    .withMessage("Card's boxNumber is required")
+    .isNumeric()
+    .withMessage("Card's boxNumber must be a number")
+    .isInt({ min: 1, max: maxNo })
+    .withMessage(`Card's boxNumber range form 1 to ${maxNo}`),
 ];
 
 const updateValidate = [
@@ -122,6 +130,13 @@ const updateValidate = [
       max: 200,
     })
     .withMessage("Card's details length should be 3 to 200 characters"),
+
+  check("boxNumber")
+    .optional()
+    .isNumeric()
+    .withMessage("Card's boxNumber must be a number")
+    .isInt({ min: 1, max: maxNo })
+    .withMessage(`Card's boxNumber range form 1 to ${maxNo}`),
 ];
 
 const trackingValidate = [
