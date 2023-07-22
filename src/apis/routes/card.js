@@ -48,6 +48,14 @@ router.patch(
 // );
 
 router.patch(
+  "/:id/tracking/replace",
+  idValidation,
+  cardMiddlewares.trackingValidate,
+  validationResult,
+  cardController.replaceTracking
+);
+
+router.patch(
   "/:id/errors/add",
   idValidation,
   cardMiddlewares.addErrorsValidate,

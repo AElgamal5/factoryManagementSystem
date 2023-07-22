@@ -1205,6 +1205,375 @@ const addTracking = async (req, res) => {
 
 /*
  * method: PATCH
+ * path: /api/card/:id/tracking/replace
+ */
+const replaceTracking = async (req, res) => {
+  const id = req.params.id;
+  const { stage: stageID, employee: employeeID, enteredBy } = req.body;
+  const io = req.io;
+
+  try {
+    //card check
+    const card = await Card.findById(id);
+    if (!card) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "No card with this id", "id", "params"));
+    }
+    if (card.done) {
+      return res
+        .status(400)
+        .json(errorFormat(id, "This card is finished", "id", "params"));
+    }
+
+    //stage check
+    if (!idCheck(stageID)) {
+      return res
+        .status(400)
+        .json(errorFormat(stageID, "Invalid stage id", "stage", "body"));
+    }
+    const stage = await Stage.findById(stageID);
+    if (!stage) {
+      return res
+        .status(404)
+        .json(errorFormat(stageID, "No stage with this id", "stage", "body"));
+    }
+    //check if the stage not tracked
+    const trackingIndex = card.tracking.findIndex(
+      (obj) => obj.stage.toString() === stageID
+    );
+    if (trackingIndex === -1) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(
+            stageID,
+            "Can not replace untracked stage",
+            "stage",
+            "body"
+          )
+        );
+    }
+
+    //employee check
+    if (!idCheck(employeeID)) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(employeeID, "Invalid employee id", "employee", "body")
+        );
+    }
+    const employee = await Employee.findById(employeeID);
+    if (!employee) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(
+            employeeID,
+            "No employee with this id",
+            "employee",
+            "body"
+          )
+        );
+    }
+    //check if it with the same employee
+    if (card.tracking[trackingIndex].employee.toString() === employeeID) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(
+            employeeID,
+            "The given employee already tracked before",
+            "employee",
+            "body"
+          )
+        );
+    }
+
+    //enteredBy checks
+    if (!idCheck(enteredBy)) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(enteredBy, "Invalid enteredBy id", "enteredBy", "body")
+        );
+    }
+    const enteredByEmployee = await Employee.findById(enteredBy);
+    if (!enteredByEmployee) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(
+            enteredBy,
+            "No employee with this id",
+            "enteredBy",
+            "body"
+          )
+        );
+    }
+
+    const current = currentTime();
+    const storedTime = card.tracking[trackingIndex].dateOut;
+
+    //update salary for old employee in current time
+    //get salary doc and if not exist create it
+    let oldEmpSalary = await Salary.findOne({
+      employee: card.tracking[trackingIndex].employee,
+      "date.year": current.getFullYear(),
+      "date.month": current.getMonth() + 1,
+    });
+    if (!oldEmpSalary) {
+      oldEmpSalary = await Salary.create({
+        employee: card.tracking[trackingIndex].employee,
+        date: {
+          year: current.getFullYear(),
+          month: current.getMonth() + 1,
+          day: current.getDate(),
+        },
+      });
+    }
+
+    //update salary.totalWorkPerMonth
+    const oldTotalWorkIndex = oldEmpSalary.totalWorkPerMonth.findIndex(
+      (obj) => obj.stage.toString() === stageID
+    );
+    if (oldTotalWorkIndex === -1) {
+      oldEmpSalary.totalWorkPerMonth.push({
+        stage: stageID,
+        quantity: card.quantity * -1,
+        NoOfErrors: 0,
+      });
+    } else {
+      oldEmpSalary.totalWorkPerMonth[oldTotalWorkIndex].quantity -=
+        card.quantity;
+    }
+
+    //update salary.workDetails
+    const oldDayIndex = oldEmpSalary.workDetails.findIndex(
+      (obj) => obj.day === current.getDate()
+    );
+    if (oldDayIndex === -1) {
+      oldEmpSalary.workDetails.push({
+        day: current.getDate(),
+        work: [
+          {
+            stage: stageID,
+            quantity: card.quantity * -1,
+            NoOfErrors: 0,
+          },
+        ],
+      });
+    } else {
+      const oldStageIndex = oldEmpSalary.workDetails[
+        oldDayIndex
+      ].work.findIndex((obj) => obj.stage.toString() === stageID);
+
+      if (oldStageIndex === -1) {
+        oldEmpSalary.workDetails[oldDayIndex].work.push({
+          stage: stageID,
+          quantity: card.quantity * -1,
+          NoOfErrors: 0,
+        });
+      } else {
+        oldEmpSalary.workDetails[oldDayIndex].work[oldStageIndex].quantity -=
+          card.quantity;
+      }
+    }
+
+    //check salary.priceHistory
+    const oldPriceIndex = oldEmpSalary.priceHistory.findIndex(
+      (obj) => obj.stage.toString() === stageID
+    );
+    if (oldPriceIndex === -1) {
+      oldEmpSalary.priceHistory.push({ stage: stageID, price: stage.price });
+    }
+
+    //update no. of pieces and costs
+    if (current.getDate() === oldEmpSalary.date.day) {
+      oldEmpSalary.todayPieces -= card.quantity;
+      oldEmpSalary.todayCost -= card.quantity * stage.price;
+    } else {
+      oldEmpSalary.date.day = current.getDate();
+      oldEmpSalary.todayPieces = card.quantity * -1;
+      oldEmpSalary.todayCost = card.quantity * stage.price * -1;
+    }
+    oldEmpSalary.totalPieces -= card.quantity;
+    oldEmpSalary.totalCost -= card.quantity * stage.price;
+
+    await oldEmpSalary.save();
+
+    //update salary for new employee in current time
+    //get salary doc and if not exist create it
+    let newEmpSalary = await Salary.findOne({
+      employee: employeeID,
+      "date.year": current.getFullYear(),
+      "date.month": current.getMonth() + 1,
+    });
+    if (!newEmpSalary) {
+      newEmpSalary = await Salary.create({
+        employee: employeeID,
+        date: {
+          year: current.getFullYear(),
+          month: current.getMonth() + 1,
+          day: current.getDate(),
+        },
+      });
+    }
+
+    //update salary.totalWorkPerMonth
+    const newTotalWorkIndex = newEmpSalary.totalWorkPerMonth.findIndex(
+      (obj) => obj.stage.toString() === stageID
+    );
+    if (newTotalWorkIndex === -1) {
+      newEmpSalary.totalWorkPerMonth.push({
+        stage: stageID,
+        quantity: card.quantity,
+        NoOfErrors: 0,
+      });
+    } else {
+      newEmpSalary.totalWorkPerMonth[newTotalWorkIndex].quantity +=
+        card.quantity;
+    }
+
+    //update salary.workDetails
+    const newDayIndex = newEmpSalary.workDetails.findIndex(
+      (obj) => obj.day === current.getDate()
+    );
+    if (newDayIndex === -1) {
+      newEmpSalary.workDetails.push({
+        day: current.getDate(),
+        work: [
+          {
+            stage: stageID,
+            quantity: card.quantity,
+            NoOfErrors: 0,
+          },
+        ],
+      });
+    } else {
+      const newStageIndex = newEmpSalary.workDetails[
+        newDayIndex
+      ].work.findIndex((obj) => obj.stage.toString() === stageID);
+
+      if (newStageIndex === -1) {
+        newEmpSalary.workDetails[newDayIndex].work.push({
+          stage: stageID,
+          quantity: card.quantity,
+          NoOfErrors: 0,
+        });
+      } else {
+        newEmpSalary.workDetails[newDayIndex].work[newStageIndex].quantity +=
+          card.quantity;
+      }
+    }
+
+    //check salary.priceHistory
+    const newPriceIndex = newEmpSalary.priceHistory.findIndex(
+      (obj) => obj.stage.toString() === stageID
+    );
+    if (newPriceIndex === -1) {
+      newEmpSalary.priceHistory.push({ stage: stageID, price: stage.price });
+    }
+
+    //update no. of pieces and costs
+    if (current.getDate() === newEmpSalary.date.day) {
+      newEmpSalary.todayPieces += card.quantity;
+      newEmpSalary.todayCost += card.quantity * stage.price;
+    } else {
+      newEmpSalary.date.day = current.getDate();
+      newEmpSalary.todayPieces = card.quantity;
+      newEmpSalary.todayCost = card.quantity * stage.price;
+    }
+    newEmpSalary.totalPieces += card.quantity;
+    newEmpSalary.totalCost += card.quantity * stage.price;
+
+    await newEmpSalary.save();
+
+    //update work for old employee in stored time
+    const oldEmployeeWork = await Work.findOne({
+      employee: card.tracking[trackingIndex].employee,
+      "date.year": storedTime.getFullYear(),
+      "date.month": storedTime.getMonth() + 1,
+    });
+    if (oldEmployeeWork) {
+      const oldWorkHistoryIndex = oldEmployeeWork.workHistory.findIndex(
+        (obj) => obj.day === storedTime.getDate()
+      );
+      if (oldWorkHistoryIndex !== -1) {
+        const oldCardsIndex = oldEmployeeWork.workHistory[
+          oldWorkHistoryIndex
+        ].cards.findIndex(
+          (obj) =>
+            obj.card.toString() === id &&
+            obj.date.getTime() === storedTime.getTime()
+        );
+
+        if (oldCardsIndex !== -1) {
+          oldEmployeeWork.workHistory[oldWorkHistoryIndex].cards.pull(
+            oldEmployeeWork.workHistory[oldWorkHistoryIndex].cards[
+              oldCardsIndex
+            ]._id
+          );
+
+          if (storedTime.getDate() === current.getDate()) {
+            oldEmployeeWork.todayCards--;
+          }
+          oldEmployeeWork.totalCards--;
+
+          await oldEmployeeWork.save();
+        }
+      }
+    }
+
+    //update work for new employee in current time
+    let newEmployeeWork = await Work.findOne({
+      employee: employeeID,
+      "date.year": current.getFullYear(),
+      "date.month": current.getMonth() + 1,
+    });
+    if (!newEmployeeWork) {
+      newEmployeeWork = await Work.create({
+        employee: employeeID,
+        "date.year": current.getFullYear(),
+        "date.month": current.getMonth() + 1,
+        "date.day": current.getDate(),
+      });
+    }
+    const newEmployeeWorkIndex = newEmployeeWork.workHistory.findIndex(
+      (obj) => obj.day === current.getDate()
+    );
+    if (newEmployeeWorkIndex === -1) {
+      newEmployeeWork.workHistory.push({
+        day: current.getDate(),
+        cards: [{ card: card._id, date: current }],
+      });
+    } else {
+      newEmployeeWork.workHistory[newEmployeeWorkIndex].cards.push({
+        card: card._id,
+        date: current,
+      });
+    }
+    if (newEmployeeWork.date.day !== current.getDate()) {
+      newEmployeeWork.date.day = current.getDate();
+      newEmployeeWork.todayCards = 0;
+    }
+    newEmployeeWork.todayCards++;
+    newEmployeeWork.totalCards++;
+    await newEmployeeWork.save();
+
+    //update work for stored enteredBy in stored time
+
+    //update work for given enteredBy in current time
+
+    res.send("FOL inShaAllah");
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "card.replaceTracking".bgYellow);
+    if (process.env.PRODUCTION === "false") console.log(error);
+  }
+};
+
+/*
+ * method: PATCH
  * path: /api/card/:id/errors/add/check
  */
 const addErrorCheck = async (req, res) => {
@@ -2416,6 +2785,7 @@ module.exports = {
   update,
   addTracking,
   // removeTracking,
+  replaceTracking,
   addError,
   confirmError,
   getLast,
