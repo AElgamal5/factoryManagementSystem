@@ -973,7 +973,7 @@ const addTracking = async (req, res) => {
       dateOut: current,
     });
     card.history.push({
-      state: `Stage ${stage.name} has been tracked`,
+      state: `Stage '${stage.name}' has been tracked`,
       type: "track",
       date: current,
     });
@@ -1561,11 +1561,93 @@ const replaceTracking = async (req, res) => {
     newEmployeeWork.totalCards++;
     await newEmployeeWork.save();
 
-    //update work for stored enteredBy in stored time
+    //if not entered with the same person
+    if (enteredBy !== card.tracking[trackingIndex].enteredBy.toString()) {
+      //update work for old enteredBy in stored time
+      const oldEnteredByWork = await Work.findOne({
+        employee: card.tracking[trackingIndex].enteredBy,
+        "date.year": storedTime.getFullYear(),
+        "date.month": storedTime.getMonth() + 1,
+      });
+      if (oldEnteredByWork) {
+        const oldWorkHistoryIndex2 = oldEnteredByWork.workHistory.findIndex(
+          (obj) => obj.day === storedTime.getDate()
+        );
+        if (oldWorkHistoryIndex2 !== -1) {
+          const oldCardsIndex2 = oldEnteredByWork.workHistory[
+            oldWorkHistoryIndex2
+          ].cards.findIndex(
+            (obj) =>
+              obj.card.toString() === id &&
+              obj.date.getTime() === storedTime.getTime()
+          );
 
-    //update work for given enteredBy in current time
+          if (oldCardsIndex2 !== -1) {
+            oldEnteredByWork.workHistory[oldWorkHistoryIndex2].cards.pull(
+              oldEnteredByWork.workHistory[oldWorkHistoryIndex2].cards[
+                oldCardsIndex2
+              ]._id
+            );
 
-    res.send("FOL inShaAllah");
+            if (storedTime.getDate() === current.getDate()) {
+              oldEnteredByWork.todayCards--;
+            }
+            oldEnteredByWork.totalCards--;
+
+            await oldEnteredByWork.save();
+          }
+        }
+      }
+
+      //update work for new enteredBy in current time
+      let newEnteredByWork = await Work.findOne({
+        employee: employeeID,
+        "date.year": current.getFullYear(),
+        "date.month": current.getMonth() + 1,
+      });
+      if (!newEnteredByWork) {
+        newEnteredByWork = await Work.create({
+          employee: employeeID,
+          "date.year": current.getFullYear(),
+          "date.month": current.getMonth() + 1,
+          "date.day": current.getDate(),
+        });
+      }
+      const newEnteredByWorkIndex = newEnteredByWork.workHistory.findIndex(
+        (obj) => obj.day === current.getDate()
+      );
+      if (newEnteredByWorkIndex === -1) {
+        newEnteredByWork.workHistory.push({
+          day: current.getDate(),
+          cards: [{ card: card._id, date: current }],
+        });
+      } else {
+        newEnteredByWork.workHistory[newEnteredByWorkIndex].cards.push({
+          card: card._id,
+          date: current,
+        });
+      }
+      if (newEnteredByWork.date.day !== current.getDate()) {
+        newEnteredByWork.date.day = current.getDate();
+        newEnteredByWork.todayCards = 0;
+      }
+      newEnteredByWork.todayCards++;
+      newEnteredByWork.totalCards++;
+      await newEnteredByWork.save();
+    }
+
+    //update card history and tracking
+    card.tracking[trackingIndex].dateOut = current;
+    card.tracking[trackingIndex].employee = employeeID;
+    card.tracking[trackingIndex].enteredBy = enteredBy;
+    card.history.push({
+      state: `Stage '${stage.name}' has been replaced`,
+      type: "replace",
+      date: current,
+    });
+    await card.save();
+
+    res.status(200).json({ msg: "replace tracking tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "card.replaceTracking".bgYellow);
     if (process.env.PRODUCTION === "false") console.log(error);
