@@ -1,3 +1,4 @@
+const { model } = require("mongoose");
 const {
   Card,
   Salary,
@@ -119,6 +120,8 @@ const create = async (req, res) => {
       order: orderID,
       modelIndex,
       model: order.models[index].id,
+      color: order.models[index].color,
+      size: order.models[index].size,
       quantity,
       details,
       startRange,
@@ -191,6 +194,8 @@ const getByID = async (req, res) => {
     const doc = await Card.findById(id)
       .populate("model", "name")
       .populate("order", "name")
+      .populate("color", "name code")
+      .populate("size", "name code")
       .populate("tracking.stage", "name stageErrors")
       .populate("tracking.employee", "name code")
       .populate("tracking.enteredBy", "name code")
@@ -206,18 +211,18 @@ const getByID = async (req, res) => {
         .json(errorFormat(id, "No card with this id", "id", "params"));
     }
 
-    const order = await Order.findById(doc.order._id)
-      .populate("models.color", "name code")
-      .populate("models.size", "code");
+    // const order = await Order.findById(doc.order._id)
+    //   .populate("models.color", "name code")
+    //   .populate("models.size", "code");
 
-    const index = order.models.findIndex(
-      (obj) => obj._id.toString() === doc.modelIndex.toString()
-    );
+    // const index = order.models.findIndex(
+    //   (obj) => obj._id.toString() === doc.modelIndex.toString()
+    // );
 
     res.status(200).json({
       data: doc,
-      color: order.models[index].color,
-      size: order.models[index].size,
+      // color: order.models[index].color,
+      // size: order.models[index].size,
     });
   } catch (error) {
     console.log("Error is in: ".bgRed, "card.getByID".bgYellow);
@@ -323,6 +328,8 @@ const update = async (req, res) => {
       card.order = orderID;
       card.modelIndex = modelIndex;
       card.model = orderModel.models[index].id;
+      card.color = orderModel.models[index].code;
+      card.size = orderModel.models[index].size;
     } else if (orderID) {
       const orderModel = await Order.findOne({
         _id: orderID,
@@ -379,6 +386,8 @@ const update = async (req, res) => {
 
       card.modelIndex = modelIndex;
       card.model = orderModel.models[index].id;
+      card.color = orderModel.models[index].color;
+      card.size = orderModel.models[index].size;
     }
 
     //quantity , endRange & startRange checks
@@ -2862,8 +2871,84 @@ const unconfirmedErrors = async (req, res) => {
 
 /*
  * method: GET
- * path: /api/card/order/:oid
+ * path: /api/card/order/:oid/model/:mid/production
  */
+const productionForOrderAndModel = async (req, res) => {
+  const oid = req.params.oid;
+  const mid = req.params.mid;
+  try {
+    //order checks
+    if (!idCheck(oid)) {
+      return res
+        .status(400)
+        .json(errorFormat(oid, "Invalid order id", "oid", "params"));
+    }
+    const order = await Order.findById(oid);
+    if (!order) {
+      return res
+        .status(404)
+        .json(errorFormat(oid, "No order with this id", "oid", "params"));
+    }
+
+    //model checks
+    if (!idCheck(mid)) {
+      return res
+        .status(400)
+        .json(errorFormat(mid, "Invalid model id", "mid", "params"));
+    }
+    const model = await Model.findById(mid);
+    if (!model) {
+      return res
+        .status(404)
+        .json(errorFormat(mid, "No model with this id", "mid", "params"));
+    }
+    const index = order.models.findIndex((obj) => obj.id.toString() === mid);
+    if (index === -1) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(mid, "The order does not has this model", "mid", "params")
+        );
+    }
+
+    const cards = await Card.find({ model: mid, order: oid })
+      .populate("color", "name code")
+      .populate("size", "name")
+      .populate("tracking.stage", "name");
+
+    const data = cards.map((card) => {
+      let obj = {
+        code: card.code,
+        quantity: card.quantity,
+        boxNumber: card.boxNumber,
+        colorName: card.color.name,
+        colorCode: card.color.code,
+        size: card.size.name,
+        currentErrorsLength: card.cardErrors.length,
+        piecesGotErrors: card.cardErrors.length,
+        lastStage:
+          card.tracking.length > 0
+            ? card.tracking[card.tracking.length - 1].stage.name
+            : "Not started yet",
+        lastStageDate:
+          card.tracking.length > 0
+            ? card.tracking[card.tracking.length - 1].dateOut
+            : null,
+        done: card.done,
+      };
+
+      return obj;
+    });
+
+    res.status(200).json({ data });
+  } catch (error) {
+    console.log(
+      "Error is in: ".bgRed,
+      "card.productionForOrderAndModel".bgYellow
+    );
+    if (process.env.PRODUCTION === "false") console.log(error);
+  }
+};
 
 module.exports = {
   create,
@@ -2882,4 +2967,5 @@ module.exports = {
   repair,
   addErrorCheck,
   getAllForModelOrderWithErrors,
+  productionForOrderAndModel,
 };

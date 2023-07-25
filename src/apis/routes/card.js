@@ -102,4 +102,9 @@ router.patch(
   cardController.addErrorCheck
 );
 
+router.get(
+  "/order/:oid/model/:mid/production",
+  cardController.productionForOrderAndModel
+);
+
 module.exports = router;

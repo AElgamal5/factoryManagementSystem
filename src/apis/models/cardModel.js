@@ -26,6 +26,10 @@ const cardSchema = new Schema(
 
     done: { type: Boolean, default: false },
 
+    color: { type: mongoose.Types.ObjectId, ref: "Color" },
+
+    size: { type: mongoose.Types.ObjectId, ref: "Size" },
+
     history: [
       {
         state: { type: String },
