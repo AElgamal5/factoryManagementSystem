@@ -22,6 +22,7 @@ const workSchema = new Schema(
         cards: [
           {
             card: { type: mongoose.Types.ObjectId, ref: "Card" },
+            stage: { type: mongoose.Types.ObjectId, ref: "Stage" },
             date: { type: Date },
           },
         ],

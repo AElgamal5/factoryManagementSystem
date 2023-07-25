@@ -999,12 +999,13 @@ const addTracking = async (req, res) => {
     if (employeeWorkIndex === -1) {
       employeeWork.workHistory.push({
         day: current.getDate(),
-        cards: [{ card: card._id, date: current }],
+        cards: [{ card: card._id, date: current, stage: stageID }],
       });
     } else {
       employeeWork.workHistory[employeeWorkIndex].cards.push({
         card: card._id,
         date: current,
+        stage: stageID,
       });
     }
     if (employeeWork.date.day !== current.getDate()) {
@@ -1037,11 +1038,12 @@ const addTracking = async (req, res) => {
       if (enteredByWorkIndex === -1) {
         enteredByWork.workHistory.push({
           day: current.getDate(),
-          cards: [{ card: card._id, date: current }],
+          cards: [{ card: card._id, stage: stageID, date: current }],
         });
       } else {
         enteredByWork.workHistory[enteredByWorkIndex].cards.push({
           card: card._id,
+          stage: stageID,
           date: current,
         });
       }
@@ -1505,7 +1507,8 @@ const replaceTracking = async (req, res) => {
         ].cards.findIndex(
           (obj) =>
             obj.card.toString() === id &&
-            obj.date.getTime() === storedTime.getTime()
+            obj.date.getTime() === storedTime.getTime() &&
+            obj.stage.toString() === stageID
         );
 
         if (oldCardsIndex !== -1) {
@@ -1545,12 +1548,13 @@ const replaceTracking = async (req, res) => {
     if (newEmployeeWorkIndex === -1) {
       newEmployeeWork.workHistory.push({
         day: current.getDate(),
-        cards: [{ card: card._id, date: current }],
+        cards: [{ card: card._id, date: current, stage: stageID }],
       });
     } else {
       newEmployeeWork.workHistory[newEmployeeWorkIndex].cards.push({
         card: card._id,
         date: current,
+        stage: stageID,
       });
     }
     if (newEmployeeWork.date.day !== current.getDate()) {
@@ -1579,7 +1583,8 @@ const replaceTracking = async (req, res) => {
           ].cards.findIndex(
             (obj) =>
               obj.card.toString() === id &&
-              obj.date.getTime() === storedTime.getTime()
+              obj.date.getTime() === storedTime.getTime() &&
+              obj.stage.toString() === stageID
           );
 
           if (oldCardsIndex2 !== -1) {
@@ -1619,12 +1624,13 @@ const replaceTracking = async (req, res) => {
       if (newEnteredByWorkIndex === -1) {
         newEnteredByWork.workHistory.push({
           day: current.getDate(),
-          cards: [{ card: card._id, date: current }],
+          cards: [{ card: card._id, date: current, stage: stageID }],
         });
       } else {
         newEnteredByWork.workHistory[newEnteredByWorkIndex].cards.push({
           card: card._id,
           date: current,
+          stage: stageID,
         });
       }
       if (newEnteredByWork.date.day !== current.getDate()) {

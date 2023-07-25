@@ -428,7 +428,6 @@ const addStages = async (req, res) => {
 
   try {
     const model = await Model.findById(id);
-
     if (!model) {
       return res
         .status(404)
@@ -522,6 +521,84 @@ const removeStages = async (req, res) => {
     res.status(200).json({ msg: "Stages removed tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "model.removeStages".bgYellow);
+    if (process.env.PRODUCTION === "false") console.log(error);
+  }
+};
+
+/*
+ * method: PATCH
+ * path: /api/model/stages/add/:id
+ */
+const updateStages = async (req, res) => {
+  const id = req.params.id;
+
+  const stages = req.body.stages;
+
+  try {
+    const model = await Model.findById(id);
+    if (!model) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "No model with this id", "id", "params"));
+    }
+
+    //reset stages array
+    model.stages = [];
+
+    for (let i = 0; i < stages.length; i++) {
+      if (!idCheck(stages[i].id)) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              stages[i].id,
+              "Invalid stage id",
+              `stages[${i}].id`,
+              "body"
+            )
+          );
+      }
+      const stage = await Stage.findById(stages[i].id);
+      if (!stage) {
+        return res
+          .status(404)
+          .json(
+            errorFormat(
+              stages[i].id,
+              "No stage with this id",
+              `stages[${i}].id`,
+              "body"
+            )
+          );
+      }
+
+      const exist = model.stages.findIndex(
+        (obj) => obj.id.toString() === stages[i].id
+      );
+      if (exist !== -1) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              stages[i].id,
+              "This stage is repeated",
+              `stages[${i}].id`,
+              "body"
+            )
+          );
+      }
+
+      model.stages.push({
+        id: stages[i].id,
+        priority: stages[i].priority,
+      });
+    }
+
+    await model.save();
+
+    res.status(200).json({ msg: "Stages updated tmam" });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "model.updateStages".bgYellow);
     if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
@@ -915,6 +992,7 @@ module.exports = {
   // removeSizes,
   addStages,
   removeStages,
+  updateStages,
   // addMaterials,
   // removeMaterials,
   addConsumptions,

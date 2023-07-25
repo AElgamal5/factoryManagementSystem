@@ -60,6 +60,14 @@ router.patch(
   modelController.removeStages
 );
 
+router.patch(
+  "/stages/update/:id",
+  idValidation,
+  modelMiddlewares.addStagesValidation,
+  validationResult,
+  modelController.updateStages
+);
+
 // router.patch("/materials/add/:id", idValidation, modelController.addMaterials);
 
 // router.patch(
