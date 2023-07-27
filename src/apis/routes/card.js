@@ -94,13 +94,13 @@ router.get(
 //   cardController.unconfirmedErrors
 // );
 
-router.patch(
-  "/:id/errors/add/check",
-  idValidation,
-  cardMiddlewares.addErrorsValidate,
-  validationResult,
-  cardController.addErrorCheck
-);
+// router.patch(
+//   "/:id/errors/add/check",
+//   idValidation,
+//   cardMiddlewares.addErrorsValidate,
+//   validationResult,
+//   cardController.addErrorCheck
+// );
 
 router.get(
   "/order/:oid/model/:mid/production",

@@ -10,7 +10,7 @@ const salarySchema = new Schema(
       {
         stage: { type: mongoose.Types.ObjectId, ref: "Stage" },
         quantity: { type: Number, default: 0 },
-        NoOfErrors: { type: Number, default: 0 },
+        noOfErrors: { type: Number, default: 0 },
       },
     ],
 
@@ -29,7 +29,7 @@ const salarySchema = new Schema(
           {
             stage: { type: mongoose.Types.ObjectId, ref: "Stage" },
             quantity: { type: Number },
-            NoOfErrors: { type: Number, default: 0 },
+            noOfErrors: { type: Number, default: 0 },
           },
         ],
       },

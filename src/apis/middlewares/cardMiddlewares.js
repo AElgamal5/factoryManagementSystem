@@ -162,44 +162,88 @@ const trackingValidate = [
     .withMessage("Wrong enteredBy id"),
 ];
 
-const addErrorsValidate = [
-  check("pieceNo")
-    .notEmpty()
-    .withMessage("pieceNo is required")
-    .isInt({ min: 1, max: maxNo })
-    .withMessage(`pieceNo range between 1 and ${maxNo}`),
+// const addErrorsValidate = [
+//   check("pieceNo")
+//     .notEmpty()
+//     .withMessage("pieceNo is required")
+//     .isInt({ min: 1, max: maxNo })
+//     .withMessage(`pieceNo range between 1 and ${maxNo}`),
 
-  check("pieceErrors")
+//   check("pieceErrors")
+//     .notEmpty()
+//     .withMessage("pieceErrors is required")
+//     .isArray({ min: 1, max: 1000 })
+//     .withMessage(
+//       "pieceErrors must be an array with in range form 1 to 1000 elements"
+//     ),
+
+//   check("pieceErrors.*.stage")
+//     .notEmpty()
+//     .withMessage("stage is required")
+//     .isAlphanumeric()
+//     .isLength({ min: 24, max: 24 })
+//     .withMessage("Wrong stage id"),
+
+//   check("pieceErrors.*.description")
+//     .notEmpty()
+//     .withMessage("description is required")
+//     .isString()
+//     .withMessage("description must be string")
+//     .isLength({ min: 3 })
+//     .withMessage("description must be at least 3 characters")
+//     .isLength({ max: 300 })
+//     .withMessage("description must be at most 300 characters"),
+
+//   check("pieceErrors.*.enteredBy")
+//     .notEmpty()
+//     .withMessage("enteredBy is required")
+//     .isAlphanumeric()
+//     .isLength({ min: 24, max: 24 })
+//     .withMessage("Wrong enteredBy id"),
+// ];
+
+const addErrorsValidate = [
+  check("employee")
     .notEmpty()
-    .withMessage("pieceErrors is required")
-    .isArray({ min: 1, max: 1000 })
+    .withMessage("Employee is required")
+    .isAlphanumeric()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Wrong employee id"),
+
+  check("cardErrors")
+    .notEmpty()
+    .withMessage("Card's errors is required")
+    .isArray({ min: 1, max: 100 })
     .withMessage(
-      "pieceErrors must be an array with in range form 1 to 1000 elements"
+      "Card's errors must be an array with in range form 1 to 100 elements"
     ),
 
-  check("pieceErrors.*.stage")
+  check("cardErrors.*.stage")
     .notEmpty()
-    .withMessage("stage is required")
+    .withMessage("Stage is required")
     .isAlphanumeric()
     .isLength({ min: 24, max: 24 })
     .withMessage("Wrong stage id"),
 
-  check("pieceErrors.*.description")
+  check("cardErrors.*.description")
     .notEmpty()
-    .withMessage("description is required")
+    .withMessage("Description is required")
     .isString()
-    .withMessage("description must be string")
+    .withMessage("Description must be string")
     .isLength({ min: 3 })
-    .withMessage("description must be at least 3 characters")
+    .withMessage("Description must be at least 3 characters")
     .isLength({ max: 300 })
-    .withMessage("description must be at most 300 characters"),
+    .withMessage("Description must be at most 300 characters"),
 
-  check("pieceErrors.*.enteredBy")
+  check("cardErrors.*.pieces")
     .notEmpty()
-    .withMessage("enteredBy is required")
-    .isAlphanumeric()
-    .isLength({ min: 24, max: 24 })
-    .withMessage("Wrong enteredBy id"),
+    .withMessage("Pieces numbers is required")
+    .isArray({ min: 1, max: 100 })
+    .withMessage("Pieces numbers must be array with at least one element"),
+
+  check("cardErrors.*.pieces.*")
+    .isInt({ min: 0, max: maxNo })
+    .withMessage("Piece number must be integer in card's range"),
 ];
 
 const repairValidate = [

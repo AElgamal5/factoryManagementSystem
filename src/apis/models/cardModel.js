@@ -66,7 +66,7 @@ const cardSchema = new Schema(
             dateOut: { type: Date },
             verifiedBy: { type: mongoose.Types.ObjectId, ref: "Employee" },
 
-            modifyNumber: { type: Number, default: 0 },
+            // modifyNumber: { type: Number, default: 0 },
           },
         ],
       },
