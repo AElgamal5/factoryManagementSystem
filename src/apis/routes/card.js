@@ -63,12 +63,26 @@ router.patch(
   cardController.addError
 );
 
-router.patch(
+// router.patch(
+//   "/:id/errors/repair",
+//   idValidation,
+//   cardMiddlewares.repairValidate,
+//   validationResult,
+//   cardController.repair
+// );
+
+router.get(
   "/:id/errors/repair",
+  idValidation,
+  cardController.stagesNeedToRepair
+);
+
+router.patch(
+  "/:id/errors/repair/all",
   idValidation,
   cardMiddlewares.repairValidate,
   validationResult,
-  cardController.repair
+  cardController.repairAll
 );
 
 router.patch(

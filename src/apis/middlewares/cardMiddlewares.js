@@ -246,27 +246,58 @@ const addErrorsValidate = [
     .withMessage("Piece number must be integer in card's range"),
 ];
 
+// const repairValidate = [
+//   check("stage")
+//     .notEmpty()
+//     .withMessage("Stage is required")
+//     .isAlphanumeric()
+//     .isLength({ min: 24, max: 24 })
+//     .withMessage("Wrong stage id"),
+
+//   check("doneBy")
+//     .notEmpty()
+//     .withMessage("doneBy is required")
+//     .isAlphanumeric()
+//     .isLength({ min: 24, max: 24 })
+//     .withMessage("Wrong doneBy id"),
+
+//   check("enteredBy")
+//     .notEmpty()
+//     .withMessage("enteredBy is required")
+//     .isAlphanumeric()
+//     .isLength({ min: 24, max: 24 })
+//     .withMessage("Wrong enteredBy id"),
+// ];
+
 const repairValidate = [
-  check("stage")
-    .notEmpty()
-    .withMessage("Stage is required")
-    .isAlphanumeric()
-    .isLength({ min: 24, max: 24 })
-    .withMessage("Wrong stage id"),
-
-  check("doneBy")
-    .notEmpty()
-    .withMessage("doneBy is required")
-    .isAlphanumeric()
-    .isLength({ min: 24, max: 24 })
-    .withMessage("Wrong doneBy id"),
-
   check("enteredBy")
     .notEmpty()
     .withMessage("enteredBy is required")
     .isAlphanumeric()
     .isLength({ min: 24, max: 24 })
     .withMessage("Wrong enteredBy id"),
+
+  check("repairs")
+    .notEmpty()
+    .withMessage("Card's repairs is required")
+    .isArray({ min: 1, max: 100 })
+    .withMessage(
+      "Card's repairs must be an array with in range form 1 to 100 elements"
+    ),
+
+  check("repairs.*.stage")
+    .notEmpty()
+    .withMessage("Stage is required")
+    .isAlphanumeric()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Wrong stage id"),
+
+  check("repairs.*.employee")
+    .notEmpty()
+    .withMessage("Employee is required")
+    .isAlphanumeric()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Wrong employee id"),
 ];
 
 const confirmErrorsValidate = [

@@ -820,9 +820,6 @@ const addTracking = async (req, res) => {
 
         const lastPriority = model.stages[lastStageIndex].priority;
 
-        console.log("lastPriority", lastPriority);
-        console.log("currentPriority", currentPriority);
-
         //check if last priority != given stage index or not greater by 1
         if (
           currentPriority !== lastPriority &&
@@ -2398,7 +2395,6 @@ const addError = async (req, res) => {
     }
 
     const current = currentTime();
-    console.log("current:", current);
 
     for (let i = 0; i < cardErrors.length; i++) {
       const stage = await Stage.findById(cardErrors[i].stage);
@@ -2537,6 +2533,8 @@ const addError = async (req, res) => {
     });
     await card.save();
 
+    io.emit("errors", { msg: "errors", card, pieceNo });
+
     res.status(200).json({ msg: "Errors added tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "card.addError".bgYellow);
@@ -2548,154 +2546,485 @@ const addError = async (req, res) => {
  * method: PATCH
  * path: /api/card/:id/errors/repair
  */
-const repair = async (req, res) => {
+// const repair = async (req, res) => {
+//   const id = req.params.id;
+//   const { stage: stageID, doneBy: doneByID, enteredBy: enteredByID } = req.body;
+//   const io = req.io;
+
+//   try {
+//     //card check
+//     const card = await Card.findById(id);
+//     if (!card) {
+//       return res
+//         .status(404)
+//         .json(errorFormat(id, "No card with this id", "id", "params"));
+//     }
+//     if (card.done) {
+//       return res
+//         .status(400)
+//         .json(errorFormat(id, "This card is finished", "id", "params"));
+//     }
+
+//     //stage checks
+//     if (!idCheck(stageID)) {
+//       return res
+//         .status(400)
+//         .json(errorFormat(stageID, "Invalid stage ID", "stage", "body"));
+//     }
+//     const stage = await Stage.findById(stageID);
+//     if (!stage) {
+//       return res
+//         .status(404)
+//         .json(errorFormat(stageID, "No stage with this id", "stage", "body"));
+//     }
+//     const modelStage = await Model.findOne({
+//       _id: card.model,
+//       "stages.id": stageID,
+//     });
+//     if (!modelStage) {
+//       return res
+//         .status(400)
+//         .json(
+//           errorFormat(
+//             stageID,
+//             "This stage does not exist in card model",
+//             "stage",
+//             "body"
+//           )
+//         );
+//     }
+//     const trackingIndex = card.tracking.findIndex(
+//       (obj) => obj.stage.toString() === stageID
+//     );
+//     if (trackingIndex === -1) {
+//       return res
+//         .status(400)
+//         .json(
+//           errorFormat(stageID, "can't repair untracked stage", "stage", "body")
+//         );
+//     }
+//     const currentErrorsIndex = card.currentErrors.findIndex(
+//       (obj) => obj.toString() === stageID
+//     );
+//     if (currentErrorsIndex === -1) {
+//       return res
+//         .status(400)
+//         .json(
+//           errorFormat(
+//             stageID,
+//             "Can not repair stage has no errors",
+//             "stage",
+//             "body"
+//           )
+//         );
+//     }
+
+//     //doneBy checks
+//     if (!idCheck(doneByID)) {
+//       return res
+//         .status(400)
+//         .json(errorFormat(doneByID, "Invalid employee ID", "doneBy", "body"));
+//     }
+//     const doneByEmployee = await Employee.findById(doneByID);
+//     if (!doneByEmployee) {
+//       return res
+//         .status(400)
+//         .json(
+//           errorFormat(doneByID, "No employee with this ID", "doneBy", "body")
+//         );
+//     }
+
+//     //enteredBy checks
+//     if (!idCheck(enteredByID)) {
+//       return res
+//         .status(400)
+//         .json(errorFormat(enteredByID, "Invalid user ID", "enteredBy", "body"));
+//     }
+//     const user = await User.findById(enteredByID);
+//     if (!user) {
+//       return res
+//         .status(404)
+//         .json(
+//           errorFormat(enteredByID, "No user with this ID", "enteredBy", "body")
+//         );
+//     }
+//     const userEmployee = await UserEmployee.findOne({ user: enteredByID });
+//     if (!userEmployee) {
+//       return res
+//         .status(404)
+//         .json(
+//           errorFormat(
+//             enteredByID,
+//             "No 'UserEmployee' doc related to this id",
+//             "enteredBy",
+//             "body"
+//           )
+//         );
+//     }
+//     const enteredByEmployee = await Employee.findById(userEmployee.employee);
+//     if (!enteredByEmployee) {
+//       return res
+//         .status(404)
+//         .json(
+//           errorFormat(
+//             enteredByID,
+//             "No 'User' doc related to this ID",
+//             "enteredByID",
+//             "body"
+//           )
+//         );
+//     }
+
+//     const current = currentTime();
+
+//     for (let i = 0; i < card.cardErrors.length; i++) {
+//       for (let j = 0; j < card.cardErrors[i].pieceErrors.length; j++) {
+//         if (card.cardErrors[i].pieceErrors[j].stage.toString() === stageID) {
+//           card.cardErrors[i].pieceErrors[j].doneBy = doneByID;
+//           card.cardErrors[i].pieceErrors[j].enteredBy = enteredByEmployee._id;
+//           card.cardErrors[i].pieceErrors[j].doneIn = current;
+//         }
+//       }
+//     }
+
+//     card.history.push({
+//       state: `Errors in stage ${stage.name} has been done by ${enteredByEmployee.name}`,
+//       date: current,
+//     });
+
+//     await card.save();
+
+//     io.emit("repairs", { msg: "repairs", card, stage });
+
+//     res.status(200).json({ msg: "Error repaired tmam" });
+//   } catch (error) {
+//     console.log("Error is in: ".bgRed, "card.repair".bgYellow);
+//     if (process.env.PRODUCTION === "false") console.log(error);
+//   }
+// };
+
+/*
+ * method: GET
+ * path: /api/card/:id/errors/repair
+ */
+const stagesNeedToRepair = async (req, res) => {
   const id = req.params.id;
-  const { stage: stageID, doneBy: doneByID, enteredBy: enteredByID } = req.body;
+
+  try {
+    const card = await Card.findById(id)
+      .populate("tracking.stage", "name code")
+      .populate("tracking.employee", "name code")
+      .select("tracking currentErrors");
+    if (!card) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "No card with this id", "id", "params"));
+    }
+    if (card.done) {
+      return res
+        .status(400)
+        .json(errorFormat(id, "This card is finished", "id", "params"));
+    }
+
+    let data = [];
+
+    for (let i = 0; i < card.currentErrors.length; i++) {
+      const index = card.tracking.findIndex(
+        (obj) => obj.stage._id.toString() === card.currentErrors[i].toString()
+      );
+
+      if (index === -1) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              card.currentErrors[i].toString(),
+              "Not tracked stage",
+              `card.currentErrors[${i}]`,
+              "others"
+            )
+          );
+      }
+
+      data.push({
+        stage: card.tracking[index].stage,
+        employee: card.tracking[index].employee,
+      });
+    }
+
+    res.status(200).json({ data });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "card.stagesNeedToRepair".bgYellow);
+    if (process.env.PRODUCTION === "false") console.log(error);
+  }
+};
+
+/*
+ * method: PATCH
+ * path: /api/card/:id/errors/repair/all
+ */
+const repairAll = async (req, res) => {
+  const id = req.params.id;
+  const { repairs, enteredBy: enteredByID } = req.body;
   const io = req.io;
 
   try {
-    //card check
     const card = await Card.findById(id);
     if (!card) {
       return res
         .status(404)
         .json(errorFormat(id, "No card with this id", "id", "params"));
     }
-
-    //stage checks
-    if (!idCheck(stageID)) {
+    if (card.done) {
       return res
         .status(400)
-        .json(errorFormat(stageID, "Invalid stage ID", "stage", "body"));
-    }
-    const stage = await Stage.findById(stageID);
-    if (!stage) {
-      return res
-        .status(404)
-        .json(errorFormat(stageID, "No stage with this id", "stage", "body"));
-    }
-    const modelStage = await Model.findOne({
-      _id: card.model,
-      "stages.id": stageID,
-    });
-    if (!modelStage) {
-      return res
-        .status(400)
-        .json(
-          errorFormat(
-            stageID,
-            "This stage does not exist in card model",
-            "stage",
-            "body"
-          )
-        );
-    }
-    const trackingIndex = card.tracking.findIndex(
-      (obj) => obj.stage.toString() === stageID
-    );
-    if (trackingIndex === -1) {
-      return res
-        .status(400)
-        .json(
-          errorFormat(stageID, "can't repair untracked stage", "stage", "body")
-        );
-    }
-    const currentErrorsIndex = card.currentErrors.findIndex(
-      (obj) => obj.toString() === stageID
-    );
-    if (currentErrorsIndex === -1) {
-      return res
-        .status(400)
-        .json(
-          errorFormat(
-            stageID,
-            "Can not repair stage has no errors",
-            "stage",
-            "body"
-          )
-        );
-    }
-
-    //doneBy checks
-    if (!idCheck(doneByID)) {
-      return res
-        .status(400)
-        .json(errorFormat(doneByID, "Invalid employee ID", "doneBy", "body"));
-    }
-    const doneByEmployee = await Employee.findById(doneByID);
-    if (!doneByEmployee) {
-      return res
-        .status(400)
-        .json(
-          errorFormat(doneByID, "No employee with this ID", "doneBy", "body")
-        );
+        .json(errorFormat(id, "This card is finished", "id", "params"));
     }
 
     //enteredBy checks
     if (!idCheck(enteredByID)) {
       return res
         .status(400)
-        .json(errorFormat(enteredByID, "Invalid user ID", "enteredBy", "body"));
-    }
-    const user = await User.findById(enteredByID);
-    if (!user) {
-      return res
-        .status(404)
         .json(
-          errorFormat(enteredByID, "No user with this ID", "enteredBy", "body")
+          errorFormat(enteredByID, "Invalid employee ID", "enteredBy", "body")
         );
     }
-    const userEmployee = await UserEmployee.findOne({ user: enteredByID });
-    if (!userEmployee) {
+    const enteredBy = await Employee.findById(enteredByID);
+    if (!enteredBy) {
       return res
         .status(404)
         .json(
           errorFormat(
             enteredByID,
-            "No 'UserEmployee' doc related to this id",
+            "No employee with this ID",
             "enteredBy",
             "body"
           )
         );
     }
-    const enteredByEmployee = await Employee.findById(userEmployee.employee);
-    if (!enteredByEmployee) {
-      return res
-        .status(404)
-        .json(
-          errorFormat(
-            enteredByID,
-            "No 'User' doc related to this ID",
-            "enteredByID",
-            "body"
-          )
-        );
+
+    //duplicates stages checks
+    const seen = new Set();
+    repairs.some((repair) => {
+      if (seen.size === seen.add(repair.stage).size) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              "repairs[]",
+              "There are duplicates values",
+              "repairs[]",
+              "body"
+            )
+          );
+      }
+    });
+    seen.clear();
+
+    //repairs checks
+    for (let i = 0; i < repairs.length; i++) {
+      //repairs[i].stage checks
+      if (!idCheck(repairs[i].stage)) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              repairs[i].stage,
+              "Invalid stage ID",
+              `repairs[${i}].stage`,
+              "body"
+            )
+          );
+      }
+      const stage = await Stage.findById(repairs[i].stage);
+      if (!stage) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              repairs[i].stage,
+              "No stage with this ID",
+              `repairs[${i}].stage`,
+              "body"
+            )
+          );
+      }
+      const trackingIndex = card.tracking.findIndex(
+        (obj) => obj.stage.toString() === repairs[i].stage
+      );
+      if (trackingIndex === -1) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              repairs[i].stage,
+              "Not tracked stage",
+              `repairs[${i}].stage`,
+              "body"
+            )
+          );
+      }
+      const currentErrorsIndex = card.currentErrors.findIndex(
+        (obj) => obj.toString() === repairs[i].stage
+      );
+      if (currentErrorsIndex === -1) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              repairs[i].stage,
+              "No errors with this stage",
+              `repairs[${i}].stage`,
+              "body"
+            )
+          );
+      }
+
+      //repairs[i].employee checks
+      if (!idCheck(repairs[i].employee)) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              repairs[i].employee,
+              "Invalid employee ID",
+              `repairs[${i}].employee`,
+              "body"
+            )
+          );
+      }
+      const employee = await Employee.findById(repairs[i].employee);
+      if (!employee) {
+        return res
+          .status(404)
+          .json(
+            errorFormat(
+              repairs[i].employee,
+              "No employee with this ID",
+              `repairs[${i}].employee`,
+              "body"
+            )
+          );
+      }
     }
 
     const current = currentTime();
 
-    for (let i = 0; i < card.cardErrors.length; i++) {
-      for (let j = 0; j < card.cardErrors[i].pieceErrors.length; j++) {
-        if (card.cardErrors[i].pieceErrors[j].stage.toString() === stageID) {
-          card.cardErrors[i].pieceErrors[j].doneBy = doneByID;
-          card.cardErrors[i].pieceErrors[j].enteredBy = enteredByEmployee._id;
-          card.cardErrors[i].pieceErrors[j].doneIn = current;
+    for (let i = 0; i < repairs.length; i++) {
+      //update card.cardErrors
+      for (let j = 0; j < card.cardErrors.length; j++) {
+        for (let k = 0; k < card.cardErrors[j].pieceErrors.length; k++) {
+          if (
+            card.cardErrors[j].pieceErrors[k].stage.toString() ===
+            repairs[i].stage
+          ) {
+            card.cardErrors[j].pieceErrors[k].enteredBy = enteredByID;
+            card.cardErrors[j].pieceErrors[k].doneBy = repairs[i].employee;
+            card.cardErrors[j].pieceErrors[k].doneIn = current;
+
+            //update employee work doc if he is different from the tracked one
+            const trackingIndex = card.tracking.findIndex(
+              (obj) => obj.stage.toString() === repairs[i].stage
+            );
+            if (
+              card.tracking[trackingIndex].employee.toString() !==
+              repairs[i].employee
+            ) {
+              let employeeWork = await Work.findOne({
+                employee: repairs[i].employee,
+                "date.year": current.getFullYear(),
+                "date.month": current.getMonth() + 1,
+              });
+              if (!employeeWork) {
+                employeeWork = await Work.create({
+                  employee: repairs[i].employee,
+                  "date.year": current.getFullYear(),
+                  "date.month": current.getMonth() + 1,
+                  "date.day": current.getDate(),
+                });
+              }
+              const employeeWorkIndex = employeeWork.workHistory.findIndex(
+                (obj) => obj.day === current.getDate()
+              );
+              if (employeeWorkIndex === -1) {
+                employeeWork.workHistory.push({
+                  day: current.getDate(),
+                  cards: [{ card: id, date: current, stage: repairs[i].stage }],
+                });
+              } else {
+                employeeWork.workHistory[employeeWorkIndex].cards.push({
+                  card: id,
+                  date: current,
+                  stage: repairs[i].stage,
+                });
+              }
+              if (employeeWork.date.day !== current.getDate()) {
+                employeeWork.date.day = current.getDate();
+                employeeWork.todayCards = 0;
+              }
+              employeeWork.todayCards++;
+              employeeWork.totalCards++;
+              await employeeWork.save();
+            }
+          }
         }
       }
     }
 
+    //update enteredBy work doc if he is different from the tracked one
+    const workBefore = card.tracking.findIndex(
+      (obj) => obj.enteredBy.toString() === enteredByID
+    );
+    if (workBefore === -1) {
+      let enteredByWork = await Work.findOne({
+        employee: enteredByID,
+        "date.year": current.getFullYear(),
+        "date.month": current.getMonth() + 1,
+      });
+      if (!enteredByWork) {
+        enteredByWork = await Work.create({
+          employee: enteredByID,
+          "date.year": current.getFullYear(),
+          "date.month": current.getMonth() + 1,
+          "date.day": current.getDate(),
+        });
+      }
+      const enteredByWorkIndex = enteredByWork.workHistory.findIndex(
+        (obj) => obj.day === current.getDate()
+      );
+      if (enteredByWorkIndex === -1) {
+        enteredByWork.workHistory.push({
+          day: current.getDate(),
+          cards: [{ card: id, date: current }],
+        });
+      } else {
+        enteredByWork.workHistory[enteredByWorkIndex].cards.push({
+          card: id,
+          date: current,
+        });
+      }
+      if (enteredByWork.date.day !== current.getDate()) {
+        enteredByWork.date.day = current.getDate();
+        enteredByWork.todayCards = 0;
+      }
+      enteredByWork.todayCards++;
+      enteredByWork.totalCards++;
+      await enteredByWork.save();
+    }
+
     card.history.push({
-      state: `Errors in stage ${stage.name} has been done by ${enteredByEmployee.name}`,
+      state: `Errors has been repaired`,
+      type: "repair",
       date: current,
     });
 
     await card.save();
 
-    io.emit("repairs", { msg: "repairs", card, stage });
+    io.emit("repairs", { msg: "repairs", card });
 
     res.status(200).json({ msg: "Error repaired tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "card.repair".bgYellow);
+    console.log("Error is in: ".bgRed, "card.stagesNeedToRepair".bgYellow);
     if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
@@ -3220,7 +3549,9 @@ module.exports = {
   getLast,
   getAllForModelOrder,
   unconfirmedErrors,
-  repair,
+  // repair,
+  stagesNeedToRepair,
+  repairAll,
   // addErrorCheck,
   getAllForModelOrderWithErrors,
   productionForOrderAndModel,
