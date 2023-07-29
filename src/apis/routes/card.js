@@ -85,12 +85,20 @@ router.patch(
   cardController.repairAll
 );
 
+// router.patch(
+//   "/:id/errors/confirm",
+//   idValidation,
+//   cardMiddlewares.confirmErrorsValidate,
+//   validationResult,
+//   cardController.confirmError
+// );
+
 router.patch(
-  "/:id/errors/confirm",
+  "/:id/errors/confirm/all",
   idValidation,
   cardMiddlewares.confirmErrorsValidate,
   validationResult,
-  cardController.confirmError
+  cardController.confirmAll
 );
 
 router.get("/last/:num", cardController.getLast);

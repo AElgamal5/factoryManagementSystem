@@ -300,20 +300,42 @@ const repairValidate = [
     .withMessage("Wrong employee id"),
 ];
 
-const confirmErrorsValidate = [
-  check("stage")
-    .notEmpty()
-    .withMessage("stage is required")
-    .isAlphanumeric()
-    .isLength({ min: 24, max: 24 })
-    .withMessage("Wrong stage id"),
+// const confirmErrorsValidate = [
+//   check("stage")
+//     .notEmpty()
+//     .withMessage("stage is required")
+//     .isAlphanumeric()
+//     .isLength({ min: 24, max: 24 })
+//     .withMessage("Wrong stage id"),
 
+//   check("verifiedBy")
+//     .notEmpty()
+//     .withMessage("verifiedBy is required")
+//     .isAlphanumeric()
+//     .isLength({ min: 24, max: 24 })
+//     .withMessage("Wrong verifiedBy id"),
+// ];
+
+const confirmErrorsValidate = [
   check("verifiedBy")
     .notEmpty()
-    .withMessage("verifiedBy is required")
+    .withMessage("VerifiedBy is required")
     .isAlphanumeric()
     .isLength({ min: 24, max: 24 })
     .withMessage("Wrong verifiedBy id"),
+
+  check("stages")
+    .notEmpty()
+    .withMessage("Card's stages is required")
+    .isArray({ min: 1, max: 100 })
+    .withMessage(
+      "Card's stages must be an array with in range form 1 to 100 elements"
+    ),
+
+  check("stages.*")
+    .isAlphanumeric()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Wrong stage id"),
 ];
 
 module.exports = {
