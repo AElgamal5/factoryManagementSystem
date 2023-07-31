@@ -62,6 +62,7 @@ const {
   userEmployee,
   card,
   salary,
+  work,
 } = require("./apis/routes");
 app.use("/api/employee", employee);
 app.use("/api/supplier", supplier);
@@ -87,6 +88,7 @@ app.use("/api/auth", auth);
 app.use("/api/userEmployee", userEmployee);
 app.use("/api/card", card);
 app.use("/api/salary", salary);
+app.use("/api/work", work);
 
 //migration
 const userMigrate = require("./apis/utils/userMigration");

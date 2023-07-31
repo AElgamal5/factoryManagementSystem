@@ -23,4 +23,5 @@ module.exports = {
   userEmployee: require("./userEmployee"),
   card: require("./card"),
   salary: require("./salary"),
+  work: require("./work"),
 };
