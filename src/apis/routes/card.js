@@ -137,4 +137,12 @@ router.patch(
   cardController.addGlobalError
 );
 
+router.patch(
+  "/:id/errors/global/confirm",
+  idValidation,
+  cardMiddlewares.verifyGlobalError,
+  validationResult,
+  cardController.confirmGlobalError
+);
+
 module.exports = router;

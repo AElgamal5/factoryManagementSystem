@@ -1112,7 +1112,14 @@ const addTracking = async (req, res) => {
       await card.save();
     }
 
-    io.emit("addTracking", { msg: "addTracking", card, stage });
+    io.emit("addTracking", {
+      cardID: card._id,
+      cardCode: card.code,
+      cardDone: card.done,
+      lastStageName: stage.name,
+      lastStageType: stage.type,
+      lastStageDate: current,
+    });
 
     res.status(200).json({ msg: "Tracking added tmam" });
   } catch (error) {
@@ -2533,7 +2540,12 @@ const addError = async (req, res) => {
     });
     await card.save();
 
-    io.emit("errors", { msg: "errors", card });
+    io.emit("errors", {
+      cardID: card._id,
+      cardCode: card.code,
+      currentErrorsLength: card.currentErrors.length,
+      pieceErrors: card.cardErrors.length,
+    });
 
     res.status(200).json({ msg: "Errors added tmam" });
   } catch (error) {
@@ -3606,7 +3618,11 @@ const confirmAll = async (req, res) => {
 
     await card.save();
 
-    io.emit("errorConfirm", { msg: "errorConfirm", card });
+    io.emit("errorConfirm", {
+      cardID: card._id,
+      cardCode: card.code,
+      currentErrorsLength: card.currentErrors.length,
+    });
 
     res.status(200).json({ msg: "Error confirmed tmam" });
   } catch (error) {
@@ -4054,11 +4070,55 @@ const confirmGlobalError = async (req, res) => {
         );
     }
 
-    // card.history.push({
-    //   state: ,
-    //   type: "addGlobalError",
-    //   date: current,
-    // });
+    const current = currentTime();
+
+    //update work doc for verifyBy if not the
+    if (card.globalErrors[index].addedBy.toString() !== verifyBy) {
+      let employeeWork = await Work.findOne({
+        employee: verifyBy,
+        "date.year": current.getFullYear(),
+        "date.month": current.getMonth() + 1,
+      });
+      if (!employeeWork) {
+        employeeWork = await Work.create({
+          employee: verifyBy,
+          "date.year": current.getFullYear(),
+          "date.month": current.getMonth() + 1,
+          "date.day": current.getDate(),
+        });
+      }
+      const employeeWorkIndex = employeeWork.workHistory.findIndex(
+        (obj) => obj.day === current.getDate()
+      );
+      if (employeeWorkIndex === -1) {
+        employeeWork.workHistory.push({
+          day: current.getDate(),
+          cards: [{ card: card._id, date: current }],
+        });
+      } else {
+        employeeWork.workHistory[employeeWorkIndex].cards.push({
+          card: card._id,
+          date: current,
+        });
+      }
+      if (employeeWork.date.day !== current.getDate()) {
+        employeeWork.date.day = current.getDate();
+        employeeWork.todayCards = 0;
+      }
+      employeeWork.todayCards++;
+      employeeWork.totalCards++;
+      await employeeWork.save();
+    }
+
+    //update card.globalErrors
+    card.globalErrors[index].verifiedBy = verifyBy;
+    card.globalErrors[index].dateOut = current;
+
+    card.history.push({
+      state: `Error: ${card.globalErrors[index].description} has been confirmed `,
+      type: "confirmGlobalError",
+      date: current,
+    });
 
     await card.save();
 
