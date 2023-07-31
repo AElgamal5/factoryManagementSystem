@@ -129,4 +129,12 @@ router.get(
   cardController.productionForOrderAndModel
 );
 
+router.patch(
+  "/:id/errors/global/add",
+  idValidation,
+  cardMiddlewares.addGlobalErrorValidate,
+  validationResult,
+  cardController.addGlobalError
+);
+
 module.exports = router;

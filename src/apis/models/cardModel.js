@@ -71,6 +71,18 @@ const cardSchema = new Schema(
         ],
       },
     ],
+
+    globalErrors: [
+      {
+        pieceNo: { type: Number },
+        description: { type: String },
+        addedBy: { type: mongoose.Types.ObjectId, ref: "Employee" },
+        dateIn: { type: Date },
+
+        dateOut: { type: Date },
+        verifiedBy: { type: mongoose.Types.ObjectId, ref: "Employee" },
+      },
+    ],
   },
   { timestamps: true }
 );

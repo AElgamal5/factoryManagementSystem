@@ -338,6 +338,46 @@ const confirmErrorsValidate = [
     .withMessage("Wrong stage id"),
 ];
 
+const addGlobalErrorValidate = [
+  check("pieceNo")
+    .optional()
+    .isInt({ min: 1, max: maxNo })
+    .withMessage(`pieceNo range between 1 and ${maxNo}`),
+
+  check("description")
+    .notEmpty()
+    .withMessage("description is required")
+    .isString()
+    .withMessage("description must be string")
+    .isLength({ min: 3 })
+    .withMessage("description must be at least 3 characters")
+    .isLength({ max: 300 })
+    .withMessage("description must be at most 300 characters"),
+
+  check("addedBy")
+    .notEmpty()
+    .withMessage("addedBy is required")
+    .isAlphanumeric()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Wrong addedBy id"),
+];
+
+const verifyGlobalError = [
+  check("verifyBy")
+    .notEmpty()
+    .withMessage("verifyBy is required")
+    .isAlphanumeric()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Wrong verifyBy id"),
+
+  check("globalErrorIndex")
+    .notEmpty()
+    .withMessage("globalErrorIndex is required")
+    .isAlphanumeric()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Wrong globalErrorIndex id"),
+];
+
 module.exports = {
   createValidate,
   updateValidate,
@@ -345,4 +385,6 @@ module.exports = {
   addErrorsValidate,
   confirmErrorsValidate,
   repairValidate,
+  addGlobalErrorValidate,
+  verifyGlobalError,
 };

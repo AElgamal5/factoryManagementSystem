@@ -5,8 +5,6 @@ const {
   Stage,
   Order,
   Model,
-  User,
-  UserEmployee,
   Work,
 } = require("../models");
 const { idCheck, errorFormat, currentTime } = require("../utils");
@@ -3796,21 +3794,26 @@ const productionForOrderAndModel = async (req, res) => {
     const cards = await Card.find({ model: mid, order: oid })
       .populate("color", "name code")
       .populate("size", "name")
-      .populate("tracking.stage", "name");
+      .populate("tracking.stage", "name type");
 
     const data = cards.map((card) => {
       let obj = {
+        cardID: card._id,
         code: card.code,
         quantity: card.quantity,
         boxNumber: card.boxNumber,
         colorName: card.color.name,
         colorCode: card.color.code,
         size: card.size.name,
-        currentErrorsLength: card.cardErrors.length,
+        currentErrorsLength: card.currentErrors.length,
         piecesGotErrors: card.cardErrors.length,
         lastStage:
           card.tracking.length > 0
             ? card.tracking[card.tracking.length - 1].stage.name
+            : "Not started yet",
+        lastStageType:
+          card.tracking.length > 0
+            ? card.tracking[card.tracking.length - 1].stage.type
             : "Not started yet",
         lastStageDate:
           card.tracking.length > 0
@@ -3828,6 +3831,242 @@ const productionForOrderAndModel = async (req, res) => {
       "Error is in: ".bgRed,
       "card.productionForOrderAndModel".bgYellow
     );
+    if (process.env.PRODUCTION === "false") console.log(error);
+  }
+};
+
+/*
+ * method: PATCH
+ * path: /api/card/:id/errors/global/add
+ */
+const addGlobalError = async (req, res) => {
+  const id = req.params.id;
+  const { pieceNo, description, addedBy } = req.body;
+  const io = req.io;
+
+  try {
+    //card checks
+    const card = await Card.findById(id);
+    if (!card) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "No card with this id", "id", "params"));
+    }
+    if (card.done) {
+      return res
+        .status(400)
+        .json(errorFormat(id, "This card is finished", "id", "params"));
+    }
+
+    //pieceNo check
+    if (pieceNo && (card.startRange > pieceNo || card.endRange < pieceNo)) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(
+            pieceNo,
+            `Piece number must be in range ${card.startRange}:${card.endRange}`,
+            "pieceNo",
+            "body"
+          )
+        );
+    }
+
+    //addedBy checks
+    if (!idCheck(addedBy)) {
+      return res
+        .status(400)
+        .json(errorFormat(addedBy, "Invalid employee id", "addedBy", "body"));
+    }
+    const employee = await Employee.findById(addedBy);
+    if (!employee) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(addedBy, "No employee with this id", "addedBy", "body")
+        );
+    }
+
+    //error repetition check
+    let exist;
+    if (pieceNo) {
+      exist = card.globalErrors.findIndex(
+        (obj) =>
+          obj.description === description.trim() && obj.pieceNo === pieceNo
+      );
+    } else {
+      exist = card.globalErrors.findIndex(
+        (obj) => obj.description === description.trim() && obj.pieceNo === 0
+      );
+    }
+    if (exist !== -1) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(
+            description,
+            "This error is exist before",
+            "description",
+            "body"
+          )
+        );
+    }
+
+    const current = currentTime();
+
+    //update card.globalError
+    card.globalErrors.push({
+      pieceNo: pieceNo ? +pieceNo : 0,
+      addedBy,
+      dateIn: current,
+      description: description.trim(),
+    });
+
+    card.history.push({
+      state: "Global errors added to card",
+      type: "addGlobalError",
+      date: current,
+    });
+
+    await card.save();
+
+    //update work doc for employee
+    let employeeWork = await Work.findOne({
+      employee: addedBy,
+      "date.year": current.getFullYear(),
+      "date.month": current.getMonth() + 1,
+    });
+    if (!employeeWork) {
+      employeeWork = await Work.create({
+        employee: addedBy,
+        "date.year": current.getFullYear(),
+        "date.month": current.getMonth() + 1,
+        "date.day": current.getDate(),
+      });
+    }
+    const employeeWorkIndex = employeeWork.workHistory.findIndex(
+      (obj) => obj.day === current.getDate()
+    );
+    if (employeeWorkIndex === -1) {
+      employeeWork.workHistory.push({
+        day: current.getDate(),
+        cards: [{ card: card._id, date: current }],
+      });
+    } else {
+      employeeWork.workHistory[employeeWorkIndex].cards.push({
+        card: card._id,
+        date: current,
+      });
+    }
+    if (employeeWork.date.day !== current.getDate()) {
+      employeeWork.date.day = current.getDate();
+      employeeWork.todayCards = 0;
+    }
+    employeeWork.todayCards++;
+    employeeWork.totalCards++;
+    await employeeWork.save();
+
+    io.emit("addGlobalError", { msg: "addGlobalError", card });
+
+    res.status(200).json({ msg: "add global errors tmam" });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "card.addGlobalError".bgYellow);
+    if (process.env.PRODUCTION === "false") console.log(error);
+  }
+};
+
+/*
+ * method: PATCH
+ * path: /api/card/:id/errors/global/confirm
+ */
+const confirmGlobalError = async (req, res) => {
+  const id = req.params.id;
+  const { verifyBy, globalErrorIndex } = req.body;
+  const io = req.io;
+
+  try {
+    //card checks
+    const card = await Card.findById(id);
+    if (!card) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "No card with this id", "id", "params"));
+    }
+    if (card.done) {
+      return res
+        .status(400)
+        .json(errorFormat(id, "This card is finished", "id", "params"));
+    }
+
+    //verifyBy checks
+    if (!idCheck(verifyBy)) {
+      return res
+        .status(400)
+        .json(errorFormat(verifyBy, "Invalid employee id", "verifyBy", "body"));
+    }
+    const employee = await Employee.findById(verifyBy);
+    if (!employee) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(verifyBy, "No employee with this ID", "verifyBy", "body")
+        );
+    }
+
+    //globalErrorIndex checks
+    if (!idCheck(globalErrorIndex)) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(
+            globalErrorIndex,
+            "Invalid globalErrorIndex ID",
+            "globalErrorIndex",
+            "body"
+          )
+        );
+    }
+    const index = card.globalErrors.findIndex(
+      (obj) => obj._id.toString() === globalErrorIndex
+    );
+    if (index === -1) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(
+            globalErrorIndex,
+            "Global error index not found",
+            "globalErrorIndex",
+            "body"
+          )
+        );
+    }
+    if (card.globalErrors[index].verifiedBy) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(
+            globalErrorIndex,
+            "This error has been confirmed",
+            "globalErrorIndex",
+            "body"
+          )
+        );
+    }
+
+    // card.history.push({
+    //   state: ,
+    //   type: "addGlobalError",
+    //   date: current,
+    // });
+
+    await card.save();
+
+    io.emit("confirmGlobalError", { msg: "confirmGlobalError", card });
+
+    res.status(200).json({ msg: "confirm global errors tmam" });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "card.confirmGlobalError".bgYellow);
     if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
@@ -3853,4 +4092,6 @@ module.exports = {
   // addErrorCheck,
   getAllForModelOrderWithErrors,
   productionForOrderAndModel,
+  addGlobalError,
+  confirmGlobalError,
 };
