@@ -22,7 +22,9 @@ const getAllForEmployee = async (req, res) => {
 
     const docs = await Salary.find({ employee: eid })
       .sort({ createAt: -1 })
-      .populate("totalWorkPerMonth.stage", "name rate");
+      .populate("totalWorkPerMonth.stage", "name rate")
+      .populate("workDetails.work.stage", "name rate")
+      .populate("workDetails.work.stage", "name rate");
 
     let costs = [];
 

@@ -23,7 +23,8 @@ const getAllForEmployee = async (req, res) => {
     const docs = await Work.find({ employee: eid })
       .sort({ createAt: -1 })
       .populate("workHistory.cards.card", "name code")
-      .populate("workHistory.cards.stage", "name code");
+      .populate("workHistory.cards.stage", "name code")
+      .populate("workHistory.cards.card", "code cutNumber");
 
     return res.status(200).json({ data: docs });
   } catch (error) {
