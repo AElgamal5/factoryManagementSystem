@@ -1433,7 +1433,6 @@ const replaceTracking = async (req, res) => {
         },
       });
     }
-
     //update salary.totalWorkPerMonth
     const newTotalWorkIndex = newEmpSalary.totalWorkPerMonth.findIndex(
       (obj) => obj.stage.toString() === stageID
@@ -2984,45 +2983,45 @@ const repairAll = async (req, res) => {
     }
 
     //update enteredBy work doc if he is different from the tracked one
-    const workBefore = card.tracking.findIndex(
-      (obj) => obj.enteredBy.toString() === enteredByID
-    );
-    if (workBefore === -1) {
-      let enteredByWork = await Work.findOne({
+    // const workBefore = card.tracking.findIndex(
+    //   (obj) => obj.enteredBy.toString() === enteredByID
+    // );
+    // if (workBefore === -1) {
+    let enteredByWork = await Work.findOne({
+      employee: enteredByID,
+      "date.year": current.getFullYear(),
+      "date.month": current.getMonth() + 1,
+    });
+    if (!enteredByWork) {
+      enteredByWork = await Work.create({
         employee: enteredByID,
         "date.year": current.getFullYear(),
         "date.month": current.getMonth() + 1,
+        "date.day": current.getDate(),
       });
-      if (!enteredByWork) {
-        enteredByWork = await Work.create({
-          employee: enteredByID,
-          "date.year": current.getFullYear(),
-          "date.month": current.getMonth() + 1,
-          "date.day": current.getDate(),
-        });
-      }
-      const enteredByWorkIndex = enteredByWork.workHistory.findIndex(
-        (obj) => obj.day === current.getDate()
-      );
-      if (enteredByWorkIndex === -1) {
-        enteredByWork.workHistory.push({
-          day: current.getDate(),
-          cards: [{ card: id, date: current }],
-        });
-      } else {
-        enteredByWork.workHistory[enteredByWorkIndex].cards.push({
-          card: id,
-          date: current,
-        });
-      }
-      if (enteredByWork.date.day !== current.getDate()) {
-        enteredByWork.date.day = current.getDate();
-        enteredByWork.todayCards = 0;
-      }
-      enteredByWork.todayCards++;
-      enteredByWork.totalCards++;
-      await enteredByWork.save();
     }
+    const enteredByWorkIndex = enteredByWork.workHistory.findIndex(
+      (obj) => obj.day === current.getDate()
+    );
+    if (enteredByWorkIndex === -1) {
+      enteredByWork.workHistory.push({
+        day: current.getDate(),
+        cards: [{ card: id, date: current }],
+      });
+    } else {
+      enteredByWork.workHistory[enteredByWorkIndex].cards.push({
+        card: id,
+        date: current,
+      });
+    }
+    if (enteredByWork.date.day !== current.getDate()) {
+      enteredByWork.date.day = current.getDate();
+      enteredByWork.todayCards = 0;
+    }
+    enteredByWork.todayCards++;
+    enteredByWork.totalCards++;
+    await enteredByWork.save();
+    // }
 
     card.history.push({
       state: `Errors has been repaired`,
@@ -4131,6 +4130,47 @@ const confirmGlobalError = async (req, res) => {
   }
 };
 
+/*
+ * method: PATCH
+ * path: /api/card/:id/stage/:sid/isTracked
+ */
+const isTracked = async (req, res) => {
+  const id = req.params.id;
+  const sid = req.params.sid;
+  try {
+    //card check
+    const card = await Card.findById(id);
+    if (!card) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "No card with this id", "id", "params"));
+    }
+
+    if (!idCheck(sid)) {
+      return res
+        .status(400)
+        .json(errorFormat(sid, "Invalid stage id", "sid", "params"));
+    }
+    const stageDoc = await Stage.findById(sid);
+    if (!stageDoc) {
+      return res
+        .status(404)
+        .json(errorFormat(sid, "No stage with this id", "sid", "body"));
+    }
+    const index = card.tracking.findIndex(
+      (obj) => obj.stage.toString() === sid
+    );
+    if (index === -1) {
+      return res.status(200).json({ tracked: false });
+    } else {
+      return res.status(200).json({ tracked: true });
+    }
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "card.isTracked".bgYellow);
+    if (process.env.PRODUCTION === "false") console.log(error);
+  }
+};
+
 module.exports = {
   create,
   getAll,
@@ -4154,4 +4194,5 @@ module.exports = {
   productionForOrderAndModel,
   addGlobalError,
   confirmGlobalError,
+  isTracked,
 };

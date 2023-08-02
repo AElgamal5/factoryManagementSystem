@@ -145,4 +145,6 @@ router.patch(
   cardController.confirmGlobalError
 );
 
+router.get("/:id/stage/:sid/isTracked", idValidation, cardController.isTracked);
+
 module.exports = router;

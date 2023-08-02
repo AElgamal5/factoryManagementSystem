@@ -590,7 +590,7 @@ const addToModels = async (req, res) => {
           .json(
             errorFormat(
               models[i].id,
-              "no model with this data : id || color || size",
+              "No data found in consumption with this color or size",
               `models[${i}].id`,
               "body"
             )

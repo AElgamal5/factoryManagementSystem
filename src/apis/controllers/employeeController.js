@@ -31,11 +31,15 @@ const create = async (req, res) => {
     }
 
     //check if the phoneNo exist & uniqueness
-    exist = await Employee.findOne({ phoneNo });
-    if (exist) {
-      return res
-        .status(400)
-        .json(errorFormat(phoneNo, "This phoneNo is used", "phoneNo", "body"));
+    if (phoneNo) {
+      exist = await Employee.findOne({ phoneNo });
+      if (exist) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(phoneNo, "This phoneNo is used", "phoneNo", "body")
+          );
+      }
     }
 
     //check NID existence & uniqueness if given
@@ -67,7 +71,8 @@ const create = async (req, res) => {
     res.status(201).json({ data: employee });
   } catch (error) {
     console.log("Error is in: ".bgRed, "employee.create".bgYellow);
-    if (process.env.PRODUCTION === "false") console.log(error);
+    // if (process.env.PRODUCTION === "false")
+    console.log(error);
   }
 };
 

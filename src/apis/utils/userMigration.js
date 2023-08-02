@@ -1,5 +1,5 @@
 const bcrypt = require("bcrypt");
-const { User, UserRole } = require("../models");
+const { User, UserRole, Employee, Role, UserEmployee } = require("../models");
 
 const userMigrate = async () => {
   let userRole = await UserRole.findOne({ number: 0 });
@@ -36,15 +36,33 @@ const userMigrate = async () => {
     });
   }
 
-  const existUser = await User.findOne({ code: "0" });
+  let existUser = await User.findOne({ code: "0" });
   if (!existUser) {
     const hashedPass = await bcrypt.hash("12345!wW", 10);
-    await User.create({
+    existUser = await User.create({
       name: "Admin",
       role: userRole._id,
       code: "0",
       password: hashedPass,
     });
+  }
+
+  let role = await Role.findOne({ number: 0 });
+  if (!role) {
+    role = await Role.create({ number: 0, title: "Super Admin" });
+  }
+
+  let employee = await Employee.findOne({ code: 0 });
+  if (!employee) {
+    await Employee.create({ name: "Super Admin", code: 0, role: role._id });
+  }
+
+  let userEmployee = await UserEmployee.findOne({
+    user: existUser._id,
+    employee: employee._id,
+  });
+  if (!userEmployee) {
+    await UserEmployee.create({ user: existUser._id, employee: employee._id });
   }
 
   userRole = await UserRole.findOne({ number: 1 });
