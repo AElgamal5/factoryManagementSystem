@@ -200,9 +200,12 @@ const getByID = async (req, res) => {
       .populate("tracking.enteredBy", "name code")
       .populate("currentErrors", "name")
       .populate("cardErrors.pieceErrors.stage", "name")
+      .populate("cardErrors.pieceErrors.addedBy", "name code")
       .populate("cardErrors.pieceErrors.enteredBy", "name code")
       .populate("cardErrors.pieceErrors.doneBy", "name code")
-      .populate("cardErrors.pieceErrors.verifiedBy", "name code");
+      .populate("cardErrors.pieceErrors.verifiedBy", "name code")
+      .populate("globalErrors.addedBy", "name code")
+      .populate("globalErrors.addedBy", "name code");
 
     if (!doc) {
       return res
@@ -787,6 +790,22 @@ const addTracking = async (req, res) => {
             "params"
           )
         );
+    }
+
+    //check if there unrepaird global errors
+    for (let i = 0; i < card.globalErrors.length; i++) {
+      if (!card.globalErrors[i].verifiedBy) {
+        return res
+          .status(400)
+          .json(
+            errorFormat(
+              id,
+              "This card has errors, please fix it first",
+              "id",
+              "params"
+            )
+          );
+      }
     }
 
     //sequence in stages checks
@@ -2579,12 +2598,20 @@ const addError = async (req, res) => {
     employeeWork.totalCards++;
     await employeeWork.save();
 
+    let globalErrorLength = 0;
+    for (let i = 0; i < card.globalErrors.length; i++) {
+      if (!card.globalErrors[i].verifiedBy) {
+        globalErrorLength++;
+      }
+    }
+
     io.emit("errors", {
       cardID: card._id,
       cardCode: card.code,
       currentErrorsLength: card.currentErrors.length,
       pieceErrors: card.cardErrors.length,
       date: current,
+      globalErrorLength: globalErrorLength,
     });
 
     res.status(200).json({ msg: "Errors added tmam" });
@@ -3669,11 +3696,19 @@ const confirmAll = async (req, res) => {
 
     await card.save();
 
+    let globalErrorLength = 0;
+    for (let i = 0; i < card.globalErrors.length; i++) {
+      if (!card.globalErrors[i].verifiedBy) {
+        globalErrorLength++;
+      }
+    }
+
     io.emit("errorConfirm", {
       cardID: card._id,
       cardCode: card.code,
       currentErrorsLength: card.currentErrors.length,
       date: current,
+      globalErrorLength: globalErrorLength,
     });
 
     res.status(200).json({ msg: "Error confirmed tmam" });
@@ -4034,7 +4069,21 @@ const addGlobalError = async (req, res) => {
     employeeWork.totalCards++;
     await employeeWork.save();
 
-    io.emit("addGlobalError", { msg: "addGlobalError", card });
+    let globalErrorLength = 0;
+    for (let i = 0; i < card.globalErrors.length; i++) {
+      if (!card.globalErrors[i].verifiedBy) {
+        globalErrorLength++;
+      }
+    }
+
+    io.emit("errors", {
+      cardID: card._id,
+      cardCode: card.code,
+      currentErrorsLength: card.currentErrors.length,
+      pieceErrors: card.cardErrors.length,
+      date: current,
+      globalErrorLength: globalErrorLength,
+    });
 
     res.status(200).json({ msg: "add global errors tmam" });
   } catch (error) {
@@ -4174,7 +4223,20 @@ const confirmGlobalError = async (req, res) => {
 
     await card.save();
 
-    io.emit("confirmGlobalError", { msg: "confirmGlobalError", card });
+    let globalErrorLength = 0;
+    for (let i = 0; i < card.globalErrors.length; i++) {
+      if (!card.globalErrors[i].verifiedBy) {
+        globalErrorLength++;
+      }
+    }
+
+    io.emit("errorConfirm", {
+      cardID: card._id,
+      cardCode: card.code,
+      currentErrorsLength: card.currentErrors.length,
+      date: current,
+      globalErrorLength: globalErrorLength,
+    });
 
     res.status(200).json({ msg: "confirm global errors tmam" });
   } catch (error) {
