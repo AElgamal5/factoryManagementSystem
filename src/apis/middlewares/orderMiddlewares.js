@@ -157,9 +157,18 @@ const updateClientMaterialsValidate = [
   //   .withMessage(`Wrong date format`),
 ];
 
+const sequenceValidate = [
+  check("sequence")
+    .notEmpty()
+    .withMessage("Sequence is required")
+    .isBoolean()
+    .withMessage("Sequence must be boolean"),
+];
+
 module.exports = {
   createValidate,
   updateValidate,
   updateModelsValidate,
   updateClientMaterialsValidate,
+  sequenceValidate,
 };

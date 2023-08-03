@@ -776,6 +776,46 @@ const removeFromModel = async (req, res) => {
   }
 };
 
+/*
+ * method: PATCH
+ * path: /api/order/:id/sequence
+ */
+const sequenceUpdate = async (req, res) => {
+  const id = req.params.id;
+  const sequence = req.body.sequence;
+  try {
+    //order check
+    const order = await Order.findById(id);
+    if (!order) {
+      return res
+        .status(404)
+        .json(errorFormat(id, "No order with this id", "id", "params"));
+    }
+
+    //sequence check
+    if (order.sequence === sequence) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(
+            sequence,
+            `Order's sequence is already ${order.sequence}`,
+            "sequence",
+            "body"
+          )
+        );
+    }
+
+    order.sequence = sequence;
+    await order.save();
+
+    return res.status(200).json({ msg: "sequence updated tmam" });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "order.sequenceUpdate".bgYellow);
+    if (process.env.PRODUCTION === "false") console.log(error);
+  }
+};
+
 module.exports = {
   create,
   getAll,
@@ -790,4 +830,5 @@ module.exports = {
   getAllInProduction,
   addToModels,
   removeFromModel,
+  sequenceUpdate,
 };

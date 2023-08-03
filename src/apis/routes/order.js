@@ -74,4 +74,6 @@ router.patch(
   orderController.removeFromModel
 );
 
+router.patch("/:id/sequence", idValidation, orderController.sequenceUpdate);
+
 module.exports = router;
