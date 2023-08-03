@@ -3900,6 +3900,13 @@ const productionForOrderAndModel = async (req, res) => {
       .populate("tracking.stage", "name type");
 
     const data = cards.map((card) => {
+      let globalErrorLength = 0;
+      for (let i = 0; i < card.globalErrors.length; i++) {
+        if (!card.globalErrors[i].verifiedBy) {
+          globalErrorLength++;
+        }
+      }
+
       let obj = {
         cardID: card._id,
         code: card.code,
@@ -3923,6 +3930,7 @@ const productionForOrderAndModel = async (req, res) => {
             ? card.tracking[card.tracking.length - 1].dateOut
             : null,
         done: card.done,
+        globalErrorLength: globalErrorLength,
       };
 
       return obj;
