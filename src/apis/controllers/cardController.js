@@ -2584,6 +2584,7 @@ const addError = async (req, res) => {
       cardCode: card.code,
       currentErrorsLength: card.currentErrors.length,
       pieceErrors: card.cardErrors.length,
+      date: current,
     });
 
     res.status(200).json({ msg: "Errors added tmam" });
@@ -3672,6 +3673,7 @@ const confirmAll = async (req, res) => {
       cardID: card._id,
       cardCode: card.code,
       currentErrorsLength: card.currentErrors.length,
+      date: current,
     });
 
     res.status(200).json({ msg: "Error confirmed tmam" });

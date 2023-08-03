@@ -54,7 +54,11 @@ const userMigrate = async () => {
 
   let employee = await Employee.findOne({ code: 0 });
   if (!employee) {
-    await Employee.create({ name: "Super Admin", code: 0, role: role._id });
+    employee = await Employee.create({
+      name: "Super Admin",
+      code: 0,
+      role: role._id,
+    });
   }
 
   let userEmployee = await UserEmployee.findOne({
