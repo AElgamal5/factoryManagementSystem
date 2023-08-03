@@ -715,7 +715,6 @@ const update = async (req, res) => {
 //     if (process.env.PRODUCTION === "false") console.log(error);
 //   }
 // };
-
 const addTracking = async (req, res) => {
   const id = req.params.id;
   const { stage: stageID, employee: employeeID, enteredBy } = req.body;
@@ -1004,13 +1003,14 @@ const addTracking = async (req, res) => {
     if (employeeWorkIndex === -1) {
       employeeWork.workHistory.push({
         day: current.getDate(),
-        cards: [{ card: card._id, date: current, stage: stageID }],
+        cards: [{ card: card._id, date: current, stage: stageID, type: 1 }],
       });
     } else {
       employeeWork.workHistory[employeeWorkIndex].cards.push({
         card: card._id,
         date: current,
         stage: stageID,
+        type: 1,
       });
     }
     if (employeeWork.date.day !== current.getDate()) {
@@ -1043,13 +1043,14 @@ const addTracking = async (req, res) => {
       if (enteredByWorkIndex === -1) {
         enteredByWork.workHistory.push({
           day: current.getDate(),
-          cards: [{ card: card._id, stage: stageID, date: current }],
+          cards: [{ card: card._id, stage: stageID, date: current, type: 1 }],
         });
       } else {
         enteredByWork.workHistory[enteredByWorkIndex].cards.push({
           card: card._id,
           stage: stageID,
           date: current,
+          type: 1,
         });
       }
       if (enteredByWork.date.day !== current.getDate()) {
@@ -1559,13 +1560,14 @@ const replaceTracking = async (req, res) => {
     if (newEmployeeWorkIndex === -1) {
       newEmployeeWork.workHistory.push({
         day: current.getDate(),
-        cards: [{ card: card._id, date: current, stage: stageID }],
+        cards: [{ card: card._id, date: current, stage: stageID, type: 1 }],
       });
     } else {
       newEmployeeWork.workHistory[newEmployeeWorkIndex].cards.push({
         card: card._id,
         date: current,
         stage: stageID,
+        type: 1,
       });
     }
     if (newEmployeeWork.date.day !== current.getDate()) {
@@ -1617,13 +1619,13 @@ const replaceTracking = async (req, res) => {
 
       //update work for new enteredBy in current time
       let newEnteredByWork = await Work.findOne({
-        employee: employeeID,
+        employee: enteredBy,
         "date.year": current.getFullYear(),
         "date.month": current.getMonth() + 1,
       });
       if (!newEnteredByWork) {
         newEnteredByWork = await Work.create({
-          employee: employeeID,
+          employee: enteredBy,
           "date.year": current.getFullYear(),
           "date.month": current.getMonth() + 1,
           "date.day": current.getDate(),
@@ -1635,13 +1637,14 @@ const replaceTracking = async (req, res) => {
       if (newEnteredByWorkIndex === -1) {
         newEnteredByWork.workHistory.push({
           day: current.getDate(),
-          cards: [{ card: card._id, date: current, stage: stageID }],
+          cards: [{ card: card._id, date: current, stage: stageID, type: 1 }],
         });
       } else {
         newEnteredByWork.workHistory[newEnteredByWorkIndex].cards.push({
           card: card._id,
           date: current,
           stage: stageID,
+          type: 1,
         });
       }
       if (newEnteredByWork.date.day !== current.getDate()) {
@@ -2539,6 +2542,43 @@ const addError = async (req, res) => {
     });
     await card.save();
 
+    //update work doc for employee
+    let employeeWork = await Work.findOne({
+      employee: employee,
+      "date.year": current.getFullYear(),
+      "date.month": current.getMonth() + 1,
+    });
+    if (!employeeWork) {
+      employeeWork = await Work.create({
+        employee: employee,
+        "date.year": current.getFullYear(),
+        "date.month": current.getMonth() + 1,
+        "date.day": current.getDate(),
+      });
+    }
+    const employeeWorkIndex = employeeWork.workHistory.findIndex(
+      (obj) => obj.day === current.getDate()
+    );
+    if (employeeWorkIndex === -1) {
+      employeeWork.workHistory.push({
+        day: current.getDate(),
+        cards: [{ card: card._id, date: current, type: 2 }],
+      });
+    } else {
+      employeeWork.workHistory[employeeWorkIndex].cards.push({
+        card: card._id,
+        date: current,
+        type: 2,
+      });
+    }
+    if (employeeWork.date.day !== current.getDate()) {
+      employeeWork.date.day = current.getDate();
+      employeeWork.todayCards = 0;
+    }
+    employeeWork.todayCards++;
+    employeeWork.totalCards++;
+    await employeeWork.save();
+
     io.emit("errors", {
       cardID: card._id,
       cardCode: card.code,
@@ -2934,52 +2974,61 @@ const repairAll = async (req, res) => {
             card.cardErrors[j].pieceErrors[k].doneIn = current;
 
             //update employee work doc if he is different from the tracked one
-            const trackingIndex = card.tracking.findIndex(
-              (obj) => obj.stage.toString() === repairs[i].stage
-            );
-            if (
-              card.tracking[trackingIndex].employee.toString() !==
-              repairs[i].employee
-            ) {
-              let employeeWork = await Work.findOne({
-                employee: repairs[i].employee,
-                "date.year": current.getFullYear(),
-                "date.month": current.getMonth() + 1,
-              });
-              if (!employeeWork) {
-                employeeWork = await Work.create({
-                  employee: repairs[i].employee,
-                  "date.year": current.getFullYear(),
-                  "date.month": current.getMonth() + 1,
-                  "date.day": current.getDate(),
-                });
-              }
-              const employeeWorkIndex = employeeWork.workHistory.findIndex(
-                (obj) => obj.day === current.getDate()
-              );
-              if (employeeWorkIndex === -1) {
-                employeeWork.workHistory.push({
-                  day: current.getDate(),
-                  cards: [{ card: id, date: current, stage: repairs[i].stage }],
-                });
-              } else {
-                employeeWork.workHistory[employeeWorkIndex].cards.push({
-                  card: id,
-                  date: current,
-                  stage: repairs[i].stage,
-                });
-              }
-              if (employeeWork.date.day !== current.getDate()) {
-                employeeWork.date.day = current.getDate();
-                employeeWork.todayCards = 0;
-              }
-              employeeWork.todayCards++;
-              employeeWork.totalCards++;
-              await employeeWork.save();
-            }
+            // const trackingIndex = card.tracking.findIndex(
+            //   (obj) => obj.stage.toString() === repairs[i].stage
+            // );
+            // if (
+            //   card.tracking[trackingIndex].employee.toString() !==
+            //   repairs[i].employee
+            // ) {
+
+            // }
           }
         }
       }
+      let employeeWork = await Work.findOne({
+        employee: repairs[i].employee,
+        "date.year": current.getFullYear(),
+        "date.month": current.getMonth() + 1,
+      });
+      if (!employeeWork) {
+        employeeWork = await Work.create({
+          employee: repairs[i].employee,
+          "date.year": current.getFullYear(),
+          "date.month": current.getMonth() + 1,
+          "date.day": current.getDate(),
+        });
+      }
+      const employeeWorkIndex = employeeWork.workHistory.findIndex(
+        (obj) => obj.day === current.getDate()
+      );
+      if (employeeWorkIndex === -1) {
+        employeeWork.workHistory.push({
+          day: current.getDate(),
+          cards: [
+            {
+              card: id,
+              date: current,
+              stage: repairs[i].stage,
+              type: 3,
+            },
+          ],
+        });
+      } else {
+        employeeWork.workHistory[employeeWorkIndex].cards.push({
+          card: id,
+          date: current,
+          stage: repairs[i].stage,
+          type: 3,
+        });
+      }
+      if (employeeWork.date.day !== current.getDate()) {
+        employeeWork.date.day = current.getDate();
+        employeeWork.todayCards = 0;
+      }
+      employeeWork.todayCards++;
+      employeeWork.totalCards++;
+      await employeeWork.save();
     }
 
     //update enteredBy work doc if he is different from the tracked one
@@ -3006,12 +3055,13 @@ const repairAll = async (req, res) => {
     if (enteredByWorkIndex === -1) {
       enteredByWork.workHistory.push({
         day: current.getDate(),
-        cards: [{ card: id, date: current }],
+        cards: [{ card: id, date: current, type: 3 }],
       });
     } else {
       enteredByWork.workHistory[enteredByWorkIndex].cards.push({
         card: id,
         date: current,
+        type: 3,
       });
     }
     if (enteredByWork.date.day !== current.getDate()) {
@@ -3035,7 +3085,7 @@ const repairAll = async (req, res) => {
 
     res.status(200).json({ msg: "Error repaired tmam" });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "card.stagesNeedToRepair".bgYellow);
+    console.log("Error is in: ".bgRed, "card.repairAll".bgYellow);
     if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
@@ -3437,7 +3487,7 @@ const confirmAll = async (req, res) => {
     const current = currentTime();
 
     let occurrence = new Array(stages.length).fill(0);
-    let addedByIsVerifiedBy = true;
+    // let addedByIsVerifiedBy = true;
     let doneBys = new Array(stages.length);
 
     //update card.cardErrors && card.currentErrors
@@ -3467,12 +3517,12 @@ const confirmAll = async (req, res) => {
         card.cardErrors[j].pieceErrors[stageIndex].verifiedBy = verifiedByID;
         card.cardErrors[j].pieceErrors[stageIndex].dateOut = current;
 
-        if (
-          card.cardErrors[j].pieceErrors[stageIndex].addedBy.toString() ===
-          verifiedByID
-        ) {
-          addedByIsVerifiedBy = false;
-        }
+        // if (
+        //   card.cardErrors[j].pieceErrors[stageIndex].addedBy.toString() ===
+        //   verifiedByID
+        // ) {
+        //   addedByIsVerifiedBy = false;
+        // }
 
         occurrence[i]++;
       }
@@ -3572,42 +3622,43 @@ const confirmAll = async (req, res) => {
     }
 
     //update verifiedBy work doc
-    if (!addedByIsVerifiedBy) {
-      let employeeWork = await Work.findOne({
+    // if (!addedByIsVerifiedBy) {
+    let employeeWork = await Work.findOne({
+      employee: verifiedByID,
+      "date.year": current.getFullYear(),
+      "date.month": current.getMonth() + 1,
+    });
+    if (!employeeWork) {
+      employeeWork = await Work.create({
         employee: verifiedByID,
         "date.year": current.getFullYear(),
         "date.month": current.getMonth() + 1,
+        "date.day": current.getDate(),
       });
-      if (!employeeWork) {
-        employeeWork = await Work.create({
-          employee: verifiedByID,
-          "date.year": current.getFullYear(),
-          "date.month": current.getMonth() + 1,
-          "date.day": current.getDate(),
-        });
-      }
-      const employeeWorkIndex = employeeWork.workHistory.findIndex(
-        (obj) => obj.day === current.getDate()
-      );
-      if (employeeWorkIndex === -1) {
-        employeeWork.workHistory.push({
-          day: current.getDate(),
-          cards: [{ card: id, date: current }],
-        });
-      } else {
-        employeeWork.workHistory[employeeWorkIndex].cards.push({
-          card: card._id,
-          date: current,
-        });
-      }
-      if (employeeWork.date.day !== current.getDate()) {
-        employeeWork.date.day = current.getDate();
-        employeeWork.todayCards = 0;
-      }
-      employeeWork.todayCards++;
-      employeeWork.totalCards++;
-      await employeeWork.save();
     }
+    const employeeWorkIndex = employeeWork.workHistory.findIndex(
+      (obj) => obj.day === current.getDate()
+    );
+    if (employeeWorkIndex === -1) {
+      employeeWork.workHistory.push({
+        day: current.getDate(),
+        cards: [{ card: id, date: current, type: 4 }],
+      });
+    } else {
+      employeeWork.workHistory[employeeWorkIndex].cards.push({
+        card: card._id,
+        date: current,
+        type: 4,
+      });
+    }
+    if (employeeWork.date.day !== current.getDate()) {
+      employeeWork.date.day = current.getDate();
+      employeeWork.todayCards = 0;
+    }
+    employeeWork.todayCards++;
+    employeeWork.totalCards++;
+    await employeeWork.save();
+    // }
 
     card.history.push({
       state: `Errors has been verified`,
