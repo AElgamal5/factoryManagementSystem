@@ -22,6 +22,11 @@ io.on("connection", (socket) => {
     io.emit("message", data); // Broadcast the message to all connected clients
   });
 
+  socket.on("error_late", (data) => {
+    console.log("Received message:", data);
+    io.emit("error_late", data); // Broadcast the message to all connected clients
+  });
+
   socket.on("disconnect", () => {
     console.log("A user disconnected");
   });

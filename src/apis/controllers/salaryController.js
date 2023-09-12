@@ -22,9 +22,9 @@ const getAllForEmployee = async (req, res) => {
 
     const docs = await Salary.find({ employee: eid })
       .sort({ createAt: -1 })
-      .populate("totalWorkPerMonth.stage", "name rate")
-      .populate("workDetails.work.stage", "name rate")
-      .populate("workDetails.work.stage", "name rate");
+      .populate("totalWorkPerMonth.stage", "name rate price")
+      .populate("workDetails.work.stage", "name rate price")
+      .populate("workDetails.work.stage", "name rate price");
 
     let costs = [];
 
@@ -61,6 +61,18 @@ const paid = async (req, res) => {
       return res
         .status(404)
         .json(errorFormat(id, "No salary with this id", "id", "params"));
+    }
+    if (salary.state) {
+      res
+        .status(400)
+        .json(
+          errorFormat(
+            salary.state,
+            "Salary aleardy paid",
+            "salary.state",
+            "others"
+          )
+        );
     }
 
     salary.state = true;
@@ -111,32 +123,51 @@ const recalculate = async (req, res) => {
         salaries[i].todayCost = todayCost;
 
         salaries[i].priceHistory = [];
-
-        let totalCost = 0;
-        for (let j = 0; j < salaries[i].totalWorkPerMonth.length; j++) {
-          const stage = await Stage.findById(
-            salaries[i].totalWorkPerMonth[j].stage
-          );
-
-          totalCost += salaries[i].totalWorkPerMonth[j].quantity * stage.price;
-
-          salaries[i].priceHistory.push({
-            stage: stage._id,
-            price: stage.price,
-          });
-        }
-        salaries[i].totalCost = totalCost;
       }
 
+      let totalCost = 0;
+      for (let j = 0; j < salaries[i].totalWorkPerMonth.length; j++) {
+        const stage = await Stage.findById(
+          salaries[i].totalWorkPerMonth[j].stage
+        );
+
+        totalCost += salaries[i].totalWorkPerMonth[j].quantity * stage.price;
+
+        salaries[i].priceHistory.push({
+          stage: stage._id,
+          price: stage.price,
+        });
+      }
+      salaries[i].totalCost = totalCost;
       await salaries[i].save();
     }
 
     res.status(200).json({ msg: "salaries recalculated tmam" });
   } catch (error) {
     console.log("Error is in: ".bgRed, "salary.recalculate".bgYellow);
-    // if (process.env.PRODUCTION === "false")
-    console.log(error);
+    if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
 
-module.exports = { getAllForEmployee, paid, recalculate };
+/*
+ * method: GET
+ * path: /api/Salary/all
+ */
+const salaryForAll = async (req, res) => {
+  try {
+    const current = currentTime();
+
+    const docs = await Salary.find({
+      "date.year": current.getFullYear(),
+      "date.month": current.getMonth() + 1,
+    })
+      .populate("employee", "name code")
+      .populate("totalWorkPerMonth.stage", "rate");
+    res.status(200).json({ data: docs });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "salary.salaryForAll".bgYellow);
+    if (process.env.PRODUCTION === "false") console.log(error);
+  }
+};
+
+module.exports = { getAllForEmployee, paid, recalculate, salaryForAll };

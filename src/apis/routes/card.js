@@ -147,9 +147,4 @@ router.patch(
 
 router.get("/:id/stage/:sid/isTracked", idValidation, cardController.isTracked);
 
-router.get(
-  "/order/:oid/model/:mid/codes",
-  cardController.codesForOrderAndModel
-);
-
 module.exports = router;

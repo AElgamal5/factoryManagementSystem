@@ -191,7 +191,7 @@ const addConsumptionsValidation = [
   check("consumptions.*.quantity")
     .notEmpty()
     .withMessage("material's quantity is required")
-    .isFloat({ min: 0.1 })
+    .isFloat({ min: 0.001 })
     .withMessage("material's quantity minimum is 0.1")
     .isFloat({ max: maxNo })
     .withMessage(`material's quantity maximum is ${maxNo}`),

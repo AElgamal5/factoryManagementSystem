@@ -1139,6 +1139,7 @@ const addTracking = async (req, res) => {
       lastStageName: stage.name,
       lastStageType: stage.type,
       lastStageDate: current,
+      trackingLength: card.tracking.length,
     });
 
     res.status(200).json({ msg: "Tracking added tmam" });
@@ -3931,6 +3932,7 @@ const productionForOrderAndModel = async (req, res) => {
             : null,
         done: card.done,
         globalErrorLength: globalErrorLength,
+        trackingLength: card.tracking.length,
       };
 
       return obj;
@@ -4294,57 +4296,6 @@ const isTracked = async (req, res) => {
   }
 };
 
-/*
- * method: GET
- * path: /api/card/order/:oid/model/:mid/codes
- */
-const codesForOrderAndModel = async (req, res) => {
-  const oid = req.params.oid;
-  const mid = req.params.mid;
-  try {
-    //order checks
-    if (!idCheck(oid)) {
-      return res
-        .status(400)
-        .json(errorFormat(oid, "Invalid order id", "oid", "params"));
-    }
-    const order = await Order.findById(oid);
-    if (!order) {
-      return res
-        .status(404)
-        .json(errorFormat(oid, "No order with this id", "oid", "params"));
-    }
-
-    //model checks
-    if (!idCheck(mid)) {
-      return res
-        .status(400)
-        .json(errorFormat(mid, "Invalid model id", "mid", "params"));
-    }
-    const model = await Model.findById(mid);
-    if (!model) {
-      return res
-        .status(404)
-        .json(errorFormat(mid, "No model with this id", "mid", "params"));
-    }
-    const index = order.models.findIndex((obj) => obj.id.toString() === mid);
-    if (index === -1) {
-      return res
-        .status(400)
-        .json(
-          errorFormat(mid, "The order does not has this model", "mid", "params")
-        );
-    }
-
-    const cards = await Card.find({ model: mid, order: oid }).select("code");
-
-    res.status(200).json({ data: cards });
-  } catch (error) {
-    console.log("Error is in: ".bgRed, "card.codesForOrderAndModel".bgYellow);
-    if (process.env.PRODUCTION === "false") console.log(error);
-  }
-};
-
 module.exports = {
   create,
   getAll,
@@ -4369,5 +4320,4 @@ module.exports = {
   addGlobalError,
   confirmGlobalError,
   isTracked,
-  codesForOrderAndModel,
 };
