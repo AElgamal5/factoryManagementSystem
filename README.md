@@ -1,2 +1,1 @@
-# storage-system-APIs
-storage management system APIs using nodeJS
+# Factory Management System - APIs
