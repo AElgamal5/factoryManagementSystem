@@ -170,4 +170,104 @@ const salaryForAll = async (req, res) => {
   }
 };
 
-module.exports = { getAllForEmployee, paid, recalculate, salaryForAll };
+/*
+ * method: GET
+ * path: /api/Salary/summary
+ */
+const summary = async (req, res) => {
+  try {
+    const current = currentTime();
+
+    const docs = await Salary.find({
+      "date.year": current.getFullYear(),
+      "date.month": current.getMonth() + 1,
+    })
+      .populate("employee", "name code")
+      .populate("totalWorkPerMonth.stage", "rate")
+      .populate("workDetails.work.stage", "name rate");
+
+    // return res.status(200).json({ data: docs });
+
+    const result = docs.map((doc) => {
+      let monthWorkRate = 0;
+      let monthErrorRate = 0;
+      let totalErrors = 0;
+
+      for (let i = 0; i < doc.totalWorkPerMonth.length; i++) {
+        let den = doc.totalWorkPerMonth[i].stage.rate * 8 * 26;
+        let workNum = doc.totalWorkPerMonth[i].quantity;
+        let errorNum = doc.totalWorkPerMonth[i].noOfErrors;
+
+        monthWorkRate += workNum / den;
+        monthErrorRate += errorNum / den;
+        totalErrors += errorNum;
+      }
+
+      let todayErrors = 0;
+      let todayWorkRate = 0;
+      let todayErrorRate = 0;
+
+      if (
+        doc.workDetails[doc.workDetails.length - 1].day === current.getDate()
+      ) {
+        for (
+          let i = 0;
+          i < doc.workDetails[doc.workDetails.length - 1].work.length;
+          i++
+        ) {
+          todayErrors +=
+            doc.workDetails[doc.workDetails.length - 1].work[i].noOfErrors;
+
+          todayWorkRate +=
+            doc.workDetails[doc.workDetails.length - 1].work[i].quantity /
+            (doc.workDetails[doc.workDetails.length - 1].work[i].stage.rate *
+              8);
+
+          todayErrorRate +=
+            doc.workDetails[doc.workDetails.length - 1].work[i].noOfErrors /
+            (doc.workDetails[doc.workDetails.length - 1].work[i].stage.rate *
+              8);
+        }
+      }
+
+      let obj = {
+        employeeId: doc.employee._id,
+        employeeName: doc.employee.name,
+        employeeCode: doc.employee.code,
+        totalPieces: doc.totalPieces,
+        totalCost: doc.totalCost.toFixed(2),
+        totalErrors,
+
+        todayPieces: doc.date.day !== current.getDate() ? 0 : doc.todayPieces,
+        todayCost:
+          doc.date.day !== current.getDate() ? 0 : doc.todayCost.toFixed(2),
+        todayErrors,
+
+        monthWorkRate: `${(monthWorkRate * 100).toFixed(2)}%`,
+        monthErrorRate: `${(monthErrorRate * 100).toFixed(2)}%`,
+
+        todayWorkRate: `${(todayWorkRate * 100).toFixed(2)}%`,
+        todayErrorRate: `${(todayErrorRate * 100).toFixed(2)}%`,
+
+        todayDetails:
+          doc.date.day !== current.getDate()
+            ? []
+            : doc.workDetails[doc.workDetails.length - 1].work,
+      };
+      return obj;
+    });
+
+    res.status(200).json({ data: result });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "salary.summary".bgYellow);
+    if (process.env.PRODUCTION === "false") console.log(error);
+  }
+};
+
+module.exports = {
+  getAllForEmployee,
+  paid,
+  recalculate,
+  salaryForAll,
+  summary,
+};

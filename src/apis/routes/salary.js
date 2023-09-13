@@ -15,4 +15,6 @@ router.get("/recalculate", salaryController.recalculate);
 
 router.get("/all", salaryController.salaryForAll);
 
+router.get("/summary", salaryController.summary);
+
 module.exports = router;

@@ -4296,6 +4296,47 @@ const isTracked = async (req, res) => {
   }
 };
 
+/*
+ * method: GET
+ * path: /api/card/code/:code
+ */
+const getByCode = async (req, res) => {
+  const code = req.params.code;
+  const modelID = req.body.model;
+  const orderID = req.body.order;
+
+  try {
+    //model check
+    if (!idCheck(modelID)) {
+      return res
+        .status(400)
+        .json(errorFormat(modelID, "Invalid model id", "model", "body"));
+    }
+    //order check
+    if (!idCheck(orderID)) {
+      return res
+        .status(400)
+        .json(errorFormat(orderID, "Invalid order id", "order", "body"));
+    }
+
+    const card = await Card.findOne({
+      code,
+      model: modelID,
+      order: orderID,
+    });
+    if (!card) {
+      return res
+        .status(400)
+        .json(errorFormat(code, `No card with code: ${code}`, "code", "body"));
+    }
+
+    res.status(200).json({ data: card });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "card.getByCode".bgYellow);
+    if (process.env.PRODUCTION === "false") console.log(error);
+  }
+};
+
 module.exports = {
   create,
   getAll,
@@ -4320,4 +4361,5 @@ module.exports = {
   addGlobalError,
   confirmGlobalError,
   isTracked,
+  getByCode,
 };
