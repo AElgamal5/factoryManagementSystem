@@ -243,11 +243,11 @@ const summary = async (req, res) => {
           doc.date.day !== current.getDate() ? 0 : doc.todayCost.toFixed(2),
         todayErrors,
 
-        monthWorkRate: `${(monthWorkRate * 100).toFixed(2)}%`,
-        monthErrorRate: `${(monthErrorRate * 100).toFixed(2)}%`,
+        monthWorkRate: (monthWorkRate * 100).toFixed(2),
+        monthErrorRate: (monthErrorRate * 100).toFixed(2),
 
-        todayWorkRate: `${(todayWorkRate * 100).toFixed(2)}%`,
-        todayErrorRate: `${(todayErrorRate * 100).toFixed(2)}%`,
+        todayWorkRate: (todayWorkRate * 100).toFixed(2),
+        todayErrorRate: (todayErrorRate * 100).toFixed(2),
 
         todayDetails:
           doc.date.day !== current.getDate()
