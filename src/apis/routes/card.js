@@ -21,7 +21,7 @@ router.post(
 
 router.get("/", cardController.getAll);
 
-router.get("/code/:code", cardController.getByCode);
+router.post("/code/:code", cardController.getByCode);
 
 router.get("/:id", idValidation, cardController.getByID);
 

@@ -4297,7 +4297,7 @@ const isTracked = async (req, res) => {
 };
 
 /*
- * method: GET
+ * method: POST
  * path: /api/card/code/:code
  */
 const getByCode = async (req, res) => {
