@@ -3804,7 +3804,7 @@ const getAllForModelOrderWithErrors = async (req, res) => {
     const docs = await Card.find({
       order: oid,
       model: mid,
-      cardErrors: { $exists: true, $ne: [] },
+      currentErrors: { $exists: true, $ne: [] },
     }).populate("currentErrors", "name code");
 
     res.status(200).json({ data: docs });
