@@ -6,6 +6,7 @@ const {
   Order,
   Model,
   Work,
+  StageEmployee,
 } = require("../models");
 const { idCheck, errorFormat, currentTime } = require("../utils");
 
@@ -270,6 +271,7 @@ const update = async (req, res) => {
     endRange,
     cutNumber,
     boxNumber,
+    done,
   } = req.body;
 
   try {
@@ -448,6 +450,10 @@ const update = async (req, res) => {
           );
       }
       card.boxNumber = boxNumber;
+    }
+
+    if (done) {
+      card.done = done;
     }
 
     card.history.push({
@@ -873,6 +879,43 @@ const addTracking = async (req, res) => {
           errorFormat(
             employeeID,
             "No employee with this id",
+            "employee",
+            "body"
+          )
+        );
+    }
+
+    //check if the employee is assigned to stage
+    const stageEmployee = await StageEmployee.findOne({
+      order: card.order,
+      model: card.model,
+      stage: stageID,
+    });
+    if (!stageEmployee) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(
+            employeeID,
+            "This employee is not assigned to the stage",
+            "employee",
+            "body"
+          )
+        );
+    }
+    const stageEmployeeIndex = stageEmployee.employees.findIndex(
+      (obj) => obj.employee.toString() === employeeID && !obj.out
+    );
+    if (
+      stageEmployeeIndex === -1 ||
+      stageEmployee.employees[stageEmployeeIndex].out
+    ) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(
+            employeeID,
+            "This employee is not assigned to the stage",
             "employee",
             "body"
           )
@@ -1319,6 +1362,43 @@ const replaceTracking = async (req, res) => {
           errorFormat(
             employeeID,
             "The given employee already tracked before",
+            "employee",
+            "body"
+          )
+        );
+    }
+
+    //check if the employee is assigned to stage
+    const stageEmployee = await StageEmployee.findOne({
+      order: card.order,
+      model: card.model,
+      stage: stageID,
+    });
+    if (!stageEmployee) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(
+            employeeID,
+            "This employee is not assigned to the stage",
+            "employee",
+            "body"
+          )
+        );
+    }
+    const stageEmployeeIndex = stageEmployee.employees.findIndex(
+      (obj) => obj.employee.toString() === employeeID && !obj.out
+    );
+    if (
+      stageEmployeeIndex === -1 ||
+      stageEmployee.employees[stageEmployeeIndex].out
+    ) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(
+            employeeID,
+            "This employee is not assigned to the stage",
             "employee",
             "body"
           )
@@ -2983,6 +3063,43 @@ const repairAll = async (req, res) => {
               "No employee with this ID",
               `repairs[${i}].employee`,
               "body"
+            )
+          );
+      }
+
+      //check if the employee is assigned to stage
+      const stageEmployee = await StageEmployee.findOne({
+        order: card.order,
+        model: card.model,
+        stage: stage._id,
+      });
+      if (!stageEmployee) {
+        return res
+          .status(404)
+          .json(
+            errorFormat(
+              employee._id,
+              "This employee is not assigned to the stage",
+              "employee",
+              "other"
+            )
+          );
+      }
+      const stageEmployeeIndex = stageEmployee.employees.findIndex(
+        (obj) => obj.employee.toString() === employee._id.toString() && !obj.out
+      );
+      if (
+        stageEmployeeIndex === -1 ||
+        stageEmployee.employees[stageEmployeeIndex].out
+      ) {
+        return res
+          .status(404)
+          .json(
+            errorFormat(
+              employee._id,
+              "This employee is not assigned to the stage",
+              "employee",
+              "other"
             )
           );
       }

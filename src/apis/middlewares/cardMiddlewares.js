@@ -137,6 +137,11 @@ const updateValidate = [
     .withMessage("Card's boxNumber must be a number")
     .isInt({ min: 1, max: maxNo })
     .withMessage(`Card's boxNumber range form 1 to ${maxNo}`),
+
+  check("done")
+    .optional()
+    .isBoolean()
+    .withMessage("Card's done must be a boolean"),
 ];
 
 const trackingValidate = [
