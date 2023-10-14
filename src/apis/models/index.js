@@ -27,4 +27,5 @@ module.exports = {
   Card: require("./cardModel"),
   Work: require("./workModel"),
   StageEmployee: require("./stageEmployeeModel"),
+  StageStatics: require("./stageStaticsModel"),
 };

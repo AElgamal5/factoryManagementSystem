@@ -22,8 +22,9 @@ const stageStaticsSchema = new Schema(
       {
         employee: { type: mongoose.Types.ObjectId, ref: "Employee" },
         card: { type: mongoose.Types.ObjectId, ref: "Card" },
-        date: { type: Date },
         type: { type: Number }, // 1: track, 2:addError, 3:repairError & 4:confirm
+        quantity: { type: Number },
+        date: { type: Date },
       },
     ],
 

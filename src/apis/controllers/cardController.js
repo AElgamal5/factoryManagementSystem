@@ -731,7 +731,7 @@ const addTracking = async (req, res) => {
 
   try {
     //card check
-    const card = await Card.findById(id);
+    const card = await Card.findById(id).populate("tracking.stage", "type");
     if (!card) {
       return res
         .status(404)
@@ -749,9 +749,11 @@ const addTracking = async (req, res) => {
         .status(400)
         .json(errorFormat(stageID, "Invalid stage id", "stage", "body"));
     }
-    const model = await Model.findById(card.model).select("stages");
+    const model = await Model.findById(card.model)
+      .select("stages")
+      .populate("stages.id", "type");
     const stageIndex = model.stages.findIndex(
-      (obj) => obj.id.toString() === stageID
+      (obj) => obj.id._id.toString() === stageID
     );
     if (stageIndex === -1) {
       return res
@@ -765,11 +767,10 @@ const addTracking = async (req, res) => {
           )
         );
     }
-    const currentPriority = model.stages[stageIndex].priority;
 
     //check if the stage has been tracked before
     const trackedIndex = card.tracking.findIndex(
-      (obj) => obj.stage.toString() === stageID
+      (obj) => obj.stage._id.toString() === stageID
     );
     if (trackedIndex !== -1) {
       return res
@@ -798,7 +799,7 @@ const addTracking = async (req, res) => {
         );
     }
 
-    //check if there unrepaird global errors
+    //check if there un-repaired global errors
     for (let i = 0; i < card.globalErrors.length; i++) {
       if (!card.globalErrors[i].verifiedBy) {
         return res
@@ -814,51 +815,69 @@ const addTracking = async (req, res) => {
       }
     }
 
-    //sequence in stages checks
-    const order = await Order.findById(card.order).select("sequence");
-    if (order.sequence) {
-      //first tracked element
-      if (
-        card.tracking.length === 0 &&
-        model.stages[stageIndex].priority !== 1
-      ) {
-        return res
-          .status(400)
-          .json(
-            errorFormat(
-              stageID,
-              "Card must start with first stage",
-              "stage",
-              "body"
-            )
+    //get stage
+    const stage = await Stage.findById(stageID);
+
+    //sequence in stages checks and make preparations out of sequence
+    if (stage.type !== "preparations") {
+      const order = await Order.findById(card.order).select("sequence");
+      //if sequence activated
+      if (order.sequence) {
+        let lastNotPrep = -1;
+        //get last not preparation index
+        for (let i = card.tracking.length - 1; i > -1; i--) {
+          if (card.tracking[i].stage.type !== "preparations") {
+            lastNotPrep = card.tracking[i].stage._id;
+            break;
+          }
+        }
+        //get first not preparation index and check
+        if (lastNotPrep === -1) {
+          const firstNotPrepIndex = model.stages.findIndex(
+            (obj) => obj.id.type !== "preparations"
           );
-      }
+          if (model.stages[firstNotPrepIndex].id._id.toString() !== stageID) {
+            return res
+              .status(400)
+              .json(
+                errorFormat(
+                  stageID,
+                  "Please start with first stage",
+                  "stage",
+                  "body"
+                )
+              );
+          }
+        }
+        //get next not preparation index and check
+        else {
+          let lastNotPrepIndex = -1;
+          for (let i = 0; i < model.stages.length; i++) {
+            if (model.stages[i].id._id.toString() === lastNotPrep.toString()) {
+              lastNotPrepIndex = i;
+              break;
+            }
+          }
 
-      //not first element
-      if (card.tracking.length > 0) {
-        const lastStageIndex = model.stages.findIndex(
-          (obj) =>
-            obj.id.toString() ===
-            card.tracking[card.tracking.length - 1].stage.toString()
-        );
-
-        const lastPriority = model.stages[lastStageIndex].priority;
-
-        //check if last priority != given stage index or not greater by 1
-        if (
-          currentPriority !== lastPriority &&
-          currentPriority !== lastPriority + 1
-        ) {
-          return res
-            .status(400)
-            .json(
-              errorFormat(
-                stageID,
-                "Please enter stages in order",
-                "stage",
-                "body"
-              )
-            );
+          let nextNotPrepIndex = -1;
+          for (let i = lastNotPrepIndex + 1; i < model.stages.length; i++) {
+            if (model.stages.id.type !== "preparations") {
+              nextNotPrepIndex = i;
+              break;
+            }
+          }
+          if (model.stages[nextNotPrepIndex].id._id.toString() !== stageID) {
+            return res
+              .status(400)
+              .json(
+                errorFormat(
+                  stageID,
+                  "Please track stages in order",
+                  "stage",
+                  "body"
+                )
+              );
+          }
         }
       }
     }
@@ -944,9 +963,6 @@ const addTracking = async (req, res) => {
         );
     }
 
-    //get stage
-    const stage = await Stage.findById(stageID);
-
     const current = currentTime();
 
     //get salary doc and if not exist create it
@@ -991,6 +1007,7 @@ const addTracking = async (req, res) => {
           {
             stage: stageID,
             quantity: card.quantity,
+            noOfErrors: 0,
           },
         ],
       });
@@ -1003,6 +1020,7 @@ const addTracking = async (req, res) => {
         salary.workDetails[dayIndex].work.push({
           stage: stageID,
           quantity: card.quantity,
+          noOfErrors: 0,
         });
       } else {
         salary.workDetails[dayIndex].work[stageIndex].quantity += card.quantity;
@@ -1125,13 +1143,7 @@ const addTracking = async (req, res) => {
     }
 
     //check if the card finished
-    let max = 0;
-    for (let i = 0; i < model.stages.length; i++) {
-      if (model.stages[i].priority > max) {
-        max = model.stages[i].priority;
-      }
-    }
-    if (max === currentPriority) {
+    if (model.stages.length === card.tracking.length) {
       const order = await Order.findById(card.order);
       if (!order) {
         return res
