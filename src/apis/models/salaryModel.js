@@ -18,9 +18,15 @@ const salarySchema = new Schema(
 
     totalCost: { type: Number, default: 0 },
 
+    totalIdle: { type: Number, default: 0 },
+
     todayPieces: { type: Number, default: 0 },
 
     todayCost: { type: Number, default: 0 },
+
+    todayIdle: { type: Number, default: 0 },
+
+    idle: { type: Boolean, default: false },
 
     workDetails: [
       {
@@ -49,6 +55,23 @@ const salarySchema = new Schema(
       {
         stage: { type: mongoose.Types.ObjectId, ref: "Stage" },
         price: { type: Number },
+      },
+    ],
+
+    idleDetails: [
+      {
+        day: { type: Number },
+        idles: [
+          {
+            start: { type: Date },
+            reason: { type: String },
+            addedBy: { type: mongoose.Types.ObjectId, ref: "Employee" },
+
+            end: { type: Date },
+            doneBy: { type: mongoose.Types.ObjectId, ref: "Employee" },
+            minus: { type: Number },
+          },
+        ],
       },
     ],
   },

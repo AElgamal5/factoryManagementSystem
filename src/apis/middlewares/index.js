@@ -24,4 +24,5 @@ module.exports = {
   imageValidate: require("./imageValidate"),
   userEmployeeMiddlewares: require("./userEmployeeMiddlewares"),
   cardMiddlewares: require("./cardMiddlewares"),
+  salaryMiddlewares: require("./salaryMiddlewares"),
 };

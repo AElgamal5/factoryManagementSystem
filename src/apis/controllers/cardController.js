@@ -982,6 +982,14 @@ const addTracking = async (req, res) => {
       });
     }
 
+    if (salary.idle) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(employeeID, "This employee is Idle", "employee", "body")
+        );
+    }
+
     //update salary.totalWorkPerMonth
     const totalWorkIndex = salary.totalWorkPerMonth.findIndex(
       (obj) => obj.stage.toString() === stageID

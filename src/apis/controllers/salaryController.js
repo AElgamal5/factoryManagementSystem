@@ -24,7 +24,9 @@ const getAllForEmployee = async (req, res) => {
       .sort({ createAt: -1 })
       .populate("totalWorkPerMonth.stage", "name rate price")
       .populate("workDetails.work.stage", "name rate price")
-      .populate("workDetails.work.stage", "name rate price");
+      .populate("workDetails.work.stage", "name rate price")
+      .populate("idleDetails.idles.addedBy", "name code")
+      .populate("idleDetails.idles.doneBy", "name code");
 
     let costs = [];
 
@@ -68,7 +70,7 @@ const paid = async (req, res) => {
         .json(
           errorFormat(
             salary.state,
-            "Salary aleardy paid",
+            "Salary already paid",
             "salary.state",
             "others"
           )
@@ -264,10 +266,222 @@ const summary = async (req, res) => {
   }
 };
 
+/*
+ * method: POST
+ * path: /api/Salary/idle/add
+ */
+const addIdleToEmp = async (req, res) => {
+  const { employee: empID, reason, addedBy } = req.body;
+
+  try {
+    const current = currentTime();
+
+    //data validation
+    if (!reason || reason.length === 0) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(reason, "Ideal reason is required", "reason", "body")
+        );
+    }
+    if (!idCheck(empID)) {
+      return res
+        .status(400)
+        .json(errorFormat(empID, "No valid employee ID", "employee", "body"));
+    }
+    if (!idCheck(addedBy)) {
+      return res
+        .status(400)
+        .json(errorFormat(addedBy, "No valid addedBy ID", "addedBy", "body"));
+    }
+
+    //get or create salaryDoc for emp
+    let salaryDoc = await Salary.findOne({
+      employee: empID,
+      "date.year": current.getFullYear(),
+      "date.month": current.getMonth() + 1,
+    });
+    if (!salaryDoc) {
+      const empDoc = await Employee.findById(empID);
+      if (!empDoc) {
+        return res
+          .status(404)
+          .json(
+            errorFormat(empID, "No Employee with this ID", "employee", "body")
+          );
+      }
+      salaryDoc = await Salary.create({
+        employee: empID,
+        "date.year": current.getFullYear(),
+        "date.month": current.getMonth() + 1,
+        "date.day": current.getDate(),
+      });
+    }
+
+    const addedByDoc = await Employee.findById(addedBy);
+    if (!addedByDoc) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(addedBy, "No employee with this ID", "addedBy", "body")
+        );
+    }
+
+    //check if the employee is already idle
+    if (salaryDoc.idle) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(
+            empID,
+            "This employee is already ideal",
+            "employee",
+            "body"
+          )
+        );
+    }
+
+    //get idleDetails index
+    const idleDetailsIndex = salaryDoc.idleDetails.findIndex(
+      (obj) => obj.day === current.getDate()
+    );
+    if (idleDetailsIndex === -1) {
+      salaryDoc.idleDetails.push({
+        day: current.getDate(),
+        idles: [{ start: current, reason, addedBy }],
+      });
+    } else {
+      salaryDoc.idleDetails[idleDetailsIndex].idles.push({
+        start: current,
+        reason,
+        addedBy,
+      });
+    }
+
+    salaryDoc.idle = true;
+
+    await salaryDoc.save();
+
+    res.status(200).json({ msg: "Idle is added tmam" });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "salary.addIdleToEmp".bgYellow);
+    if (process.env.PRODUCTION === "false") console.log(error);
+  }
+};
+
+/*
+ * method: POST
+ * path: /api/Salary/idle/remove
+ */
+const removeIdleFromEmp = async (req, res) => {
+  const { employee: empID, doneBy, minus } = req.body;
+
+  try {
+    const current = currentTime();
+
+    //data validation
+    if (!idCheck(empID)) {
+      return res
+        .status(400)
+        .json(errorFormat(empID, "No valid employee ID", "employee", "body"));
+    }
+    if (!idCheck(doneBy)) {
+      return res
+        .status(400)
+        .json(errorFormat(doneBy, "No valid doneBy ID", "doneBy", "body"));
+    }
+
+    //get or create salaryDoc for emp
+    let salaryDoc = await Salary.findOne({
+      employee: empID,
+      "date.year": current.getFullYear(),
+      "date.month": current.getMonth() + 1,
+    });
+    if (!salaryDoc) {
+      res
+        .status(404)
+        .json(
+          errorFormat(empID, "This employee is not Idle", "employee", "body")
+        );
+    }
+
+    const doneByDoc = await Employee.findById(doneBy);
+    if (!doneByDoc) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(doneBy, "No employee with this ID", "doneBy", "body")
+        );
+    }
+
+    //check if the employee is already idle
+    if (!salaryDoc.idle) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(empID, "This employee is not ideal", "employee", "body")
+        );
+    }
+
+    const idleIndex = salaryDoc.idleDetails[
+      salaryDoc.idleDetails.length - 1
+    ].idles.findIndex((obj) => !obj.doneBy && !obj.end);
+
+    if (idleIndex === -1) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(empID, "This employee is not ideal", "employee", "body")
+        );
+    }
+
+    salaryDoc.idleDetails[salaryDoc.idleDetails.length - 1].idles[
+      idleIndex
+    ].doneBy = doneBy;
+    salaryDoc.idleDetails[salaryDoc.idleDetails.length - 1].idles[
+      idleIndex
+    ].end = current;
+
+    if (minus) {
+      salaryDoc.idleDetails[salaryDoc.idleDetails.length - 1].idles[
+        idleIndex
+      ].minus = minus;
+    } else {
+      minus = 0;
+    }
+
+    const diff =
+      salaryDoc.idleDetails[salaryDoc.idleDetails.length - 1].idles[idleIndex]
+        .end -
+      salaryDoc.idleDetails[salaryDoc.idleDetails.length - 1].idles[idleIndex]
+        .start;
+
+    const diffInMinutes = Math.round((diff - minus) / 60000);
+
+    if (salaryDoc.date.day !== current.getDate()) {
+      salaryDoc.date.day = current.getDate();
+      salaryDoc.todayIdle = 0;
+    }
+    salaryDoc.todayIdle += diffInMinutes;
+    salaryDoc.totalIdle += diffInMinutes;
+
+    salaryDoc.idle = false;
+
+    await salaryDoc.save();
+
+    res.status(200).json({ msg: "Idle is removed tmam" });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "salary.removeIdleFromEmp".bgYellow);
+    if (process.env.PRODUCTION === "false") console.log(error);
+  }
+};
+
 module.exports = {
   getAllForEmployee,
   paid,
   recalculate,
   salaryForAll,
   summary,
+  addIdleToEmp,
+  removeIdleFromEmp,
 };
