@@ -1429,6 +1429,8 @@ const replaceTracking = async (req, res) => {
         );
     }
 
+    const current = currentTime();
+
     //get salary doc and if not exist create it
     let salaryCheck = await Salary.findOne({
       employee: employeeID,
@@ -1465,7 +1467,6 @@ const replaceTracking = async (req, res) => {
         );
     }
 
-    const current = currentTime();
     const storedTime = card.tracking[trackingIndex].dateOut;
 
     //update salary for old employee in current time

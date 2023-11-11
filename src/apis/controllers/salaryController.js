@@ -267,7 +267,7 @@ const summary = async (req, res) => {
 };
 
 /*
- * method: POST
+ * method: PATCH
  * path: /api/Salary/idle/add
  */
 const addIdleToEmp = async (req, res) => {
@@ -370,7 +370,7 @@ const addIdleToEmp = async (req, res) => {
 };
 
 /*
- * method: POST
+ * method: PATCH
  * path: /api/Salary/idle/remove
  */
 const removeIdleFromEmp = async (req, res) => {
@@ -477,6 +477,42 @@ const removeIdleFromEmp = async (req, res) => {
   }
 };
 
+/*
+ * method: GET
+ * path: /api/Salary/idle/check/:id
+ */
+const idleCheck = async (req, res) => {
+  const { id: empID } = req.params;
+
+  try {
+    const current = currentTime();
+
+    //data validation
+    if (!idCheck(empID)) {
+      return res
+        .status(400)
+        .json(errorFormat(empID, "No valid employee ID", "employee", "body"));
+    }
+
+    //get or create salaryDoc for emp
+    let salaryDoc = await Salary.findOne({
+      employee: empID,
+      "date.year": current.getFullYear(),
+      "date.month": current.getMonth() + 1,
+    });
+    if (!salaryDoc || !salaryDoc.idle) {
+      res
+        .status(200)
+        .json({ msg: "This employee not in idle mode", idle: false });
+    } else {
+      res.status(200).json({ msg: "This employee in idle mode", idle: true });
+    }
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "salary.idleCheck".bgYellow);
+    if (process.env.PRODUCTION === "false") console.log(error);
+  }
+};
+
 module.exports = {
   getAllForEmployee,
   paid,
@@ -485,4 +521,5 @@ module.exports = {
   summary,
   addIdleToEmp,
   removeIdleFromEmp,
+  idleCheck,
 };

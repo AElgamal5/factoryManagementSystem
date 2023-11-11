@@ -35,4 +35,6 @@ router.patch(
   salaryController.removeIdleFromEmp
 );
 
+router.get("/idle/check/:id", salaryController.idleCheck);
+
 module.exports = router;
