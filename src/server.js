@@ -3,6 +3,7 @@ const http = require("http");
 const socketIO = require("socket.io");
 const cors = require("cors");
 const mongoose = require("mongoose");
+const cron = require("node-cron");
 require("colors");
 require("dotenv").config();
 
@@ -123,4 +124,50 @@ const userMigrate = require("./apis/utils/userMigration");
 //test API
 app.get("/", (req, res) => {
   res.json({ msg: "بسم الله الرحمن الرحيم" });
+});
+
+//close all open idle times at 4.15 PM UTC+2
+const { Salary } = require("./apis/models");
+cron.schedule("15 16 * * *", async () => {
+  const current = new Date();
+  const docs = await Salary.find({
+    "date.year": current.getFullYear(),
+    "date.month": current.getMonth() + 1,
+    idle: true,
+  });
+  for (let i = 0; i < docs.length; i++) {
+    const idleIndex = docs[i].idleDetails[
+      docs[i].idleDetails.length - 1
+    ].idles.findIndex((obj) => !obj.doneBy && !obj.end);
+
+    if (idleIndex === -1) {
+      continue;
+    }
+
+    docs[i].idleDetails[docs[i].idleDetails.length - 1].idles[
+      idleIndex
+    ].doneBy = doneBy;
+    docs[i].idleDetails[docs[i].idleDetails.length - 1].idles[idleIndex].end =
+      current;
+
+    let minus = 0;
+
+    const diff =
+      docs[i].idleDetails[docs[i].idleDetails.length - 1].idles[idleIndex].end -
+      docs[i].idleDetails[docs[i].idleDetails.length - 1].idles[idleIndex]
+        .start;
+
+    const diffInMinutes = Math.round((diff - minus) / 60000);
+
+    if (docs[i].date.day !== current.getDate()) {
+      docs[i].date.day = current.getDate();
+      docs[i].todayIdle = 0;
+    }
+    docs[i].todayIdle += diffInMinutes;
+    docs[i].totalIdle += diffInMinutes;
+
+    docs[i].idle = false;
+
+    await docs[i].save();
+  }
 });

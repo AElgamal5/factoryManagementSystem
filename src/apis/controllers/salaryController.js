@@ -188,10 +188,9 @@ const summary = async (req, res) => {
       .populate("totalWorkPerMonth.stage", "rate")
       .populate("workDetails.work.stage", "name rate");
 
-    // return res.status(200).json({ data: docs });
-
     const result = docs.map((doc) => {
       let monthWorkRate = 0;
+      let monthWorkRateWithIdle = 0;
       let monthErrorRate = 0;
       let totalErrors = 0;
 
@@ -201,6 +200,7 @@ const summary = async (req, res) => {
         let errorNum = doc.totalWorkPerMonth[i].noOfErrors;
 
         monthWorkRate += workNum / den;
+        monthWorkRateWithIdle += workNum / (den - doc.totalIdle / 60);
         monthErrorRate += errorNum / den;
         totalErrors += errorNum;
       }
@@ -238,6 +238,9 @@ const summary = async (req, res) => {
         employeeCode: doc.employee.code,
         totalPieces: doc.totalPieces,
         totalCost: doc.totalCost.toFixed(2),
+        totalIdle: doc.totalIdle || 0,
+        todayIdle: doc.todayIdle || 0,
+        idle: doc.idle,
         totalErrors,
 
         todayPieces: doc.date.day !== current.getDate() ? 0 : doc.todayPieces,
