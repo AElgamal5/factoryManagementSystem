@@ -508,7 +508,15 @@ const idleCheck = async (req, res) => {
         .status(200)
         .json({ msg: "This employee not in idle mode", idle: false });
     } else {
-      res.status(200).json({ msg: "This employee in idle mode", idle: true });
+      const start =
+        salaryDoc.idleDetails[salaryDoc.idleDetails.length - 1].idles[
+          salaryDoc.idleDetails[salaryDoc.idleDetails.length - 1].idles.length -
+            1
+        ].start;
+
+      res
+        .status(200)
+        .json({ msg: "This employee in idle mode", idle: true, start });
     }
   } catch (error) {
     console.log("Error is in: ".bgRed, "salary.idleCheck".bgYellow);
