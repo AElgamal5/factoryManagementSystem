@@ -99,8 +99,13 @@ const create = async (req, res) => {
     const boxNumberUsed = await Card.findOne({
       done: false,
       boxNumber: boxNumber,
-    });
-    if (boxNumberUsed) {
+    }).populate("tracking.stage", "type");
+
+    const finishIndex = boxNumberUsed.tracking.findIndex(
+      (obj) => obj.stage.type === "finishing"
+    );
+
+    if (finishIndex === -1) {
       return res
         .status(400)
         .json(
@@ -981,7 +986,6 @@ const addTracking = async (req, res) => {
         },
       });
     }
-
     if (salary.idle) {
       return res
         .status(400)
@@ -1422,6 +1426,20 @@ const replaceTracking = async (req, res) => {
             "employee",
             "body"
           )
+        );
+    }
+
+    //get salary doc and if not exist create it
+    let salaryCheck = await Salary.findOne({
+      employee: employeeID,
+      "date.year": current.getFullYear(),
+      "date.month": current.getMonth() + 1,
+    });
+    if (salaryCheck && salaryCheck.idle) {
+      return res
+        .status(400)
+        .json(
+          errorFormat(employeeID, "This employee is Idle", "employee", "body")
         );
     }
 

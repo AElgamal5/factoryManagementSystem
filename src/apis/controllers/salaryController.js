@@ -374,7 +374,8 @@ const addIdleToEmp = async (req, res) => {
  * path: /api/Salary/idle/remove
  */
 const removeIdleFromEmp = async (req, res) => {
-  const { employee: empID, doneBy, minus } = req.body;
+  const { employee: empID, doneBy } = req.body;
+  let { minus } = req.body;
 
   try {
     const current = currentTime();
