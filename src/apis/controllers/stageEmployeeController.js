@@ -262,7 +262,7 @@ const removeEmployee = async (req, res) => {
     }
 
     const exist = stageEmployeeDoc.employees.findIndex(
-      (obj) => obj.employee.toString() === employeeID
+      (obj) => obj.employee.toString() === employeeID && !obj.out
     );
     if (exist === -1) {
       return res
