@@ -4586,10 +4586,9 @@ const statics = async (req, res) => {
         totalTrack: 0,
         totalError: 0,
         track: [],
+        error: [],
       });
     }
-
-    console.log("result.length", result.length);
 
     //all cards with the givin model and order
     const cards = await Card.find({
@@ -4598,6 +4597,7 @@ const statics = async (req, res) => {
     }).populate("tracking.stage", "name");
 
     for (let i = 0; i < cards.length; i++) {
+      //card.tracking
       for (let j = 0; j < cards[i].tracking.length; j++) {
         const trackDate = new Date(cards[i].tracking[j].dateOut);
         if (
@@ -4621,6 +4621,40 @@ const statics = async (req, res) => {
             }
             temp[trackHour] += cards[i].quantity;
             result[stageIndex].track = temp;
+          }
+        }
+      }
+      //card.cardErrors
+      for (let j = 0; j < cards[i].cardErrors.length; j++) {
+        for (let k = 0; k < cards[i].cardErrors[j].pieceErrors.length; k++) {
+          console.log(cards[i].cardErrors[j].pieceErrors[k].dateIn);
+          const addedDate = new Date(
+            cards[i].cardErrors[j].pieceErrors[k].dateIn
+          );
+
+          if (
+            givenDate.getDate() === addedDate.getDate() &&
+            givenDate.getMonth() === addedDate.getMonth() &&
+            givenDate.getFullYear() === addedDate.getFullYear()
+          ) {
+            const stageIndex = result.findIndex((obj) => {
+              return (
+                obj.stageID ===
+                cards[i].cardErrors[j].pieceErrors[k].stage.toString()
+              );
+            });
+            if (stageIndex !== -1) {
+              console.log("1".repeat(30));
+              result[stageIndex].totalError += 1;
+
+              const addHour = addedDate.getHours();
+              let temp = result[stageIndex].error;
+              if (!temp[addHour]) {
+                temp[addHour] = 0;
+              }
+              temp[addHour] += 1;
+              result[stageIndex].error = temp;
+            }
           }
         }
       }
