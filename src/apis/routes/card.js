@@ -149,4 +149,6 @@ router.patch(
 
 router.get("/:id/stage/:sid/isTracked", idValidation, cardController.isTracked);
 
+router.get("/order/:oid/model/:mid/date/:date", cardController.statics);
+
 module.exports = router;

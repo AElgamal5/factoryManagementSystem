@@ -7,6 +7,7 @@ const {
   Model,
   Work,
   StageEmployee,
+  StageStatics,
 } = require("../models");
 const { idCheck, errorFormat, currentTime } = require("../utils");
 
@@ -1198,6 +1199,63 @@ const addTracking = async (req, res) => {
       card.done = true;
       await card.save();
     }
+
+    // //stage statics
+    // let stageStaticsDoc = await StageStatics.findOne({
+    //   stage: stageID,
+    //   order: card.order,
+    //   model: card.model,
+    //   "date.year": current.getFullYear(),
+    //   "date.month": current.getMonth() + 1,
+    // });
+    // if (!stageStaticsDoc) {
+    //   stageStaticsDoc = await StageStatics.create({
+    //     stage: stageID,
+    //     order: card.order,
+    //     model: card.model,
+    //     "date.year": current.getFullYear(),
+    //     "date.month": current.getMonth() + 1,
+    //     "date.day": current.getDate(),
+    //   });
+    // }
+    // //add employee to stageStatics.employees array if not exist
+    // const employeeIndex = stageStaticsDoc.employees.findIndex(
+    //   (obj) => obj.toString() === employeeID
+    // );
+    // if (employeeIndex === -1) {
+    //   stageStaticsDoc.employees.push(employeeID);
+    // }
+    // //add obj to StageStatics.details
+    // stageStaticsDoc.details.push({
+    //   employee: employeeID,
+    //   card: card._id,
+    //   type: 1, // 1: track, 2:addError, 3:repairError & 4:confirm
+    //   quantity: card.quantity,
+    //   date: current,
+    // });
+    // //update StageStatics.overView
+    // const detailsDayIndex = stageStaticsDoc.overView.findIndex(
+    //   (obj) => obj.day === current.getDate(``)
+    // );
+    // if (detailsDayIndex === -1) {
+    //   const currentHour = current.getHours();
+
+    //   let track = [];
+    //   track[currentHour - 6 - 2] = card.quantity;
+
+    //   stageStaticsDoc.overView.push({
+    //     day: current.getDate(),
+    //     track,
+    //     errors: [],
+    //   });
+    // } else {
+    //   let track = stageStaticsDoc.overView[detailsDayIndex].track;
+    //   const currentHour = current.getHours();
+    //   track[currentHour - 6 - 2] = track[currentHour - 6 - 2] + card.quantity;
+    //   stageStaticsDoc.overView[detailsDayIndex].track = track;
+    // }
+    // stageStaticsDoc.totalQuantity += card.quantity;
+    // await stageStaticsDoc.save();
 
     io.emit("addTracking", {
       cardID: card._id,
@@ -4493,6 +4551,93 @@ const getByCode = async (req, res) => {
   }
 };
 
+/*
+ * method: GET
+ * path: /api/card/order/:oid/model/:mid/date/:date
+ */
+const statics = async (req, res) => {
+  const { oid, mid, date } = req.params;
+  try {
+    if (!idCheck(oid)) {
+      res
+        .status(400)
+        .json(errorFormat(oid, "Invalid order ID", "oid", "params"));
+    }
+    if (!idCheck(mid)) {
+      res
+        .status(400)
+        .json(errorFormat(mid, "Invalid order ID", "mid", "params"));
+    }
+
+    const givenDate = new Date(date);
+
+    //get all stages of the givin model
+    const modelDoc = await Model.findById(mid).populate(
+      "stages.id",
+      "name type"
+    );
+
+    let result = [];
+    for (let i = 0; i < modelDoc.stages.length; i++) {
+      result.push({
+        stageID: modelDoc.stages[i].id._id.toString(),
+        stageName: modelDoc.stages[i].id.name,
+        stageType: modelDoc.stages[i].id.type,
+        totalTrack: 0,
+        totalError: 0,
+        track: [],
+      });
+    }
+
+    console.log("result.length", result.length);
+
+    //all cards with the givin model and order
+    const cards = await Card.find({
+      order: oid,
+      model: mid,
+    }).populate("tracking.stage", "name");
+
+    for (let i = 0; i < cards.length; i++) {
+      for (let j = 0; j < cards[i].tracking.length; j++) {
+        const trackDate = new Date(cards[i].tracking[j].dateOut);
+        if (
+          givenDate.getDate() === trackDate.getDate() &&
+          givenDate.getMonth() === trackDate.getMonth() &&
+          givenDate.getFullYear() === trackDate.getFullYear()
+        ) {
+          const stageIndex = result.findIndex((obj) => {
+            return (
+              obj.stageID.toString() ===
+              cards[i].tracking[j].stage._id.toString()
+            );
+          });
+          if (stageIndex !== -1) {
+            result[stageIndex].totalTrack += cards[i].quantity;
+
+            const trackHour = trackDate.getHours();
+            let temp = result[stageIndex].track;
+            if (!temp[trackHour]) {
+              temp[trackHour] = 0;
+            }
+            temp[trackHour] += cards[i].quantity;
+            result[stageIndex].track = temp;
+          }
+        }
+      }
+    }
+
+    return res.json({ result });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "card.statics".bgYellow);
+    if (process.env.PRODUCTION === "false") console.log(error);
+  }
+};
+
+/*
+ * method: GET
+ * path: /api/card/order/:oid/model/:mid/modelIndex/:modelIndex
+ */
+
 module.exports = {
   create,
   getAll,
@@ -4518,4 +4663,5 @@ module.exports = {
   confirmGlobalError,
   isTracked,
   getByCode,
+  statics,
 };

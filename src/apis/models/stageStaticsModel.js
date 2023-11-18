@@ -16,15 +16,23 @@ const stageStaticsSchema = new Schema(
 
     totalErrors: { type: Number, default: 0 },
 
-    totalIdleTime: { type: Number, default: 0 },
+    // totalIdleTime: { type: Number, default: 0 },
 
     details: [
       {
         employee: { type: mongoose.Types.ObjectId, ref: "Employee" },
         card: { type: mongoose.Types.ObjectId, ref: "Card" },
-        type: { type: Number }, // 1: track, 2:addError, 3:repairError & 4:confirm
+        type: { type: Number }, // 1: track,,2:replace, 3:addError, 4:repairError & 5:confirm
         quantity: { type: Number },
         date: { type: Date },
+      },
+    ],
+
+    overView: [
+      {
+        day: { type: Number },
+        track: [],
+        faults: [],
       },
     ],
 
