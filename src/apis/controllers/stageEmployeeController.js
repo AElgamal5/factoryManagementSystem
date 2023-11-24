@@ -383,7 +383,7 @@ const details = async (req, res) => {
 
     if (!stageEmployeeDoc) {
       return res
-        .status(404)
+        .status(200)
         .json(
           errorFormat(stageID, "No details for this stage", "sid", "params")
         );
