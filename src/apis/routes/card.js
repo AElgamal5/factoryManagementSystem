@@ -151,4 +151,6 @@ router.get("/:id/stage/:sid/isTracked", idValidation, cardController.isTracked);
 
 router.get("/order/:oid/model/:mid/date/:date", cardController.statics);
 
+router.get("/order/:oid/model/:mid/dateBounds", cardController.dateBounds);
+
 module.exports = router;

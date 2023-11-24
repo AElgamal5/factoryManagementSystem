@@ -102,9 +102,11 @@ const create = async (req, res) => {
       boxNumber: boxNumber,
     }).populate("tracking.stage", "type");
 
-    const finishIndex = boxNumberUsed.tracking.findIndex(
-      (obj) => obj.stage.type === "finishing"
-    );
+    if (boxNumberUsed) {
+      const finishIndex = boxNumberUsed.tracking.findIndex(
+        (obj) => obj.stage.type === "finishing"
+      );
+    }
 
     if (finishIndex === -1) {
       return res
@@ -4669,8 +4671,198 @@ const statics = async (req, res) => {
 
 /*
  * method: GET
- * path: /api/card/order/:oid/model/:mid/modelIndex/:modelIndex
+ * path: /api/card/order/:oid/model/:mid/dateBounds
  */
+const dateBounds = async (req, res) => {
+  const { oid, mid } = req.params;
+  try {
+    //data checks
+    if (!idCheck(oid)) {
+      res
+        .status(400)
+        .json(errorFormat(oid, "Invalid order ID", "oid", "params"));
+    }
+    if (!idCheck(mid)) {
+      res
+        .status(400)
+        .json(errorFormat(mid, "Invalid order ID", "mid", "params"));
+    }
+
+    //get data from oid and mid
+    const order = await Order.findById(oid)
+      .populate("models.color", "name code")
+      .populate("models.size", "name");
+
+    if (!order) {
+      return res
+        .status(404)
+        .json(errorFormat(oid, "No order with this ID", "oid", "params"));
+    }
+
+    let models = [];
+    for (let i = 0; i < order.models.length; i++) {
+      if (order.models[i].id.toString() === mid) {
+        models.push(order.models[i]);
+      }
+    }
+
+    if (models.length === 0) {
+      return res
+        .status(404)
+        .json(
+          errorFormat(
+            mid,
+            "The givin order does not have this model",
+            "mid",
+            "params"
+          )
+        );
+    }
+
+    const model = await Model.findById(mid).populate("stages.id", "type name");
+    if (!model) {
+      return res
+        .status(404)
+        .json(errorFormat(mid, "No model with this id", "mid", "params"));
+    }
+
+    let stages = [];
+    //get start and end stages of each group
+    // stages[stages.length] = model.stages[0];
+    for (let i = 0; i < model.stages.length; i++) {
+      if (model.stages[i].id.type === "quality" && stages.length < 6) {
+        // stages[stages.length] = model.stages[i - 1].id._id;
+        stages[stages.length] = model.stages[i - 1];
+        // stages[stages.length] = model.stages[i + 1].id._id;
+        stages[stages.length] = model.stages[i + 1];
+      }
+    }
+    stages.pop();
+
+    // return res.json({ stages });
+
+    let result = [];
+
+    //get cards for each model and order combination
+    for (let i = 0; i < models.length; i++) {
+      let dates = new Array(6);
+      let g1 = 0;
+      let g2 = 0;
+      let g3 = 0;
+      const cardDocs = await Card.find({
+        order: oid,
+        model: mid,
+        modelIndex: models[i]._id.toString(),
+      }).select(["-history", "-cardErrors", "-currentErrors"]);
+
+      for (let j = 0; j < cardDocs.length; j++) {
+        if (cardDocs[j].tracking.length > 0) {
+          //get start date of first group
+          if (!dates[0]) {
+            dates[0] = cardDocs[j].tracking[0].dateOut;
+          } else if (dates[0] > cardDocs[j].tracking[0].dateOut) {
+            dates[0] = cardDocs[j].tracking[0].dateOut;
+          }
+
+          for (let k = 0; k < cardDocs[j].tracking.length; k++) {
+            //get end date of first group
+            if (
+              cardDocs[j].tracking[k].stage.toString() ===
+              stages[0].id._id.toString()
+            ) {
+              g1++;
+              if (!dates[1]) {
+                dates[1] = cardDocs[j].tracking[k].dateOut;
+              } else if (dates[1] > cardDocs[j].tracking[k].dateOut) {
+                dates[1] = cardDocs[j].tracking[k].dateOut;
+              }
+            }
+
+            //get start date of second group
+            if (
+              cardDocs[j].tracking[k].stage.toString() ===
+              stages[1].id._id.toString()
+            ) {
+              g2++;
+              if (!dates[2]) {
+                dates[2] = cardDocs[j].tracking[k].dateOut;
+              } else if (dates[2] > cardDocs[j].tracking[k].dateOut) {
+                dates[2] = cardDocs[j].tracking[k].dateOut;
+              }
+            }
+
+            //get end date of second group
+            if (
+              cardDocs[j].tracking[k].stage.toString() ===
+              stages[2].id._id.toString()
+            ) {
+              g2++;
+              if (!dates[3]) {
+                dates[3] = cardDocs[j].tracking[k].dateOut;
+              } else if (dates[3] > cardDocs[j].tracking[k].dateOut) {
+                dates[3] = cardDocs[j].tracking[k].dateOut;
+              }
+            }
+
+            //get start date of third group
+            if (
+              cardDocs[j].tracking[k].stage.toString() ===
+              stages[3].id._id.toString()
+            ) {
+              g3++;
+              if (!dates[4]) {
+                dates[4] = cardDocs[j].tracking[k].dateOut;
+              } else if (dates[4] > cardDocs[j].tracking[k].dateOut) {
+                dates[4] = cardDocs[j].tracking[k].dateOut;
+              }
+            }
+
+            //get end date of third group
+            if (
+              cardDocs[j].tracking[k].stage.toString() ===
+              stages[4].id._id.toString()
+            ) {
+              g3++;
+              if (!dates[5]) {
+                dates[5] = cardDocs[j].tracking[k].dateOut;
+              } else if (dates[5] > cardDocs[j].tracking[k].dateOut) {
+                dates[5] = cardDocs[j].tracking[k].dateOut;
+              }
+            }
+          }
+        }
+      }
+
+      //in case some cards still in 1st group
+      if (g1 !== cardDocs.length) {
+        dates[1] = null;
+        dates[3] = null;
+        dates[5] = null;
+      }
+      //in case some cards still in 2nd group
+      if (g2 / 2 !== cardDocs.length) {
+        dates[3] = null;
+        dates[5] = null;
+      }
+      //in case some cards still in 3rd group
+      if (g3 / 2 !== cardDocs.length) {
+        dates[5] = null;
+      }
+
+      result.push({
+        model: models[i],
+        group1: { start: dates[0] || null, end: dates[1] || null },
+        group2: { start: dates[2] || null, end: dates[3] || null },
+        group3: { start: dates[4] || null, end: dates[5] || null },
+      });
+    }
+
+    return res.status(200).json({ result });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "card.dateBounds".bgYellow);
+    if (process.env.PRODUCTION === "false") console.log(error);
+  }
+};
 
 module.exports = {
   create,
@@ -4698,4 +4890,5 @@ module.exports = {
   isTracked,
   getByCode,
   statics,
+  dateBounds,
 };
