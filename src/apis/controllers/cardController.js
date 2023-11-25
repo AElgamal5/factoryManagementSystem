@@ -4807,7 +4807,7 @@ const dateBounds = async (req, res) => {
             //get start date of third group
             if (
               cardDocs[j].tracking[k].stage.toString() ===
-              stages[3].id._id.toString()
+              stages[3]?.id?._id?.toString()
             ) {
               g3++;
               if (!dates[4]) {
@@ -4820,7 +4820,7 @@ const dateBounds = async (req, res) => {
             //get end date of third group
             if (
               cardDocs[j].tracking[k].stage.toString() ===
-              stages[4].id._id.toString()
+              stages[4]?.id?._id?.toString()
             ) {
               g3++;
               if (!dates[5]) {
