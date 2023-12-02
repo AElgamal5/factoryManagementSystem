@@ -4978,7 +4978,7 @@ const groupsProduction = async (req, res) => {
       let finalStages = [];
       for (let o = 0; o < stages.length; o++) {
         finalStages.push({
-          group: stages[o].type === "production" ? o : undefined,
+          group: stages[o].type === "production" ? true : false,
           stage: stages[o],
           done: subResult[o] || 0,
         });
@@ -5014,28 +5014,43 @@ const orderProduction = async (req, res) => {
 
     //get data from oid and mid
     const order = await Order.findById(oid)
-      .populate("models.color", "name code")
-      .populate("models.size", "name");
+      .select("models")
+      .populate("models.id", "name code");
+
     if (!order) {
       return res
         .status(404)
         .json(errorFormat(oid, "No order with this ID", "oid", "params"));
     }
-
-    return res.json({ order });
+    // return res.json({ order });
 
     let models = [];
     for (let i = 0; i < order.models.length; i++) {
-      // const exist = models.findIndex(obj=> obj.toString() === )
+      const exist = models.findIndex(
+        (obj) => obj.id.toString() === order.models[i].id._id.toString()
+      );
+      if (exist === -1) {
+        models.push({
+          id: order.models[i].id._id.toString(),
+          name: order.models[i].id.name,
+          code: order.models[i].id.code,
+          quantity: order.models[i].quantity,
+          produced: order.models[i].produced,
+        });
+      } else {
+        models[exist].quantity += order.models[i].quantity;
+        models[exist].produced += order.models[i].produced;
+      }
     }
+    // return res.json({ models });
 
     let result = [];
-    for (let i = 0; i < order.models.length; i++) {
+    for (let i = 0; i < models.length; i++) {
       let cut = 0;
       let subResult = [];
 
       //get model stages
-      const model = await Model.findById(order.models[i].id).populate(
+      const model = await Model.findById(models[i].id).populate(
         "stages.id",
         "type name rate"
       );
@@ -5044,10 +5059,10 @@ const orderProduction = async (req, res) => {
           .status(404)
           .json(
             errorFormat(
-              order.models[i].id,
+              models[i],
               "No model with this id",
-              `order.models[${i}].id`,
-              "params"
+              `models[${i}]`,
+              "other"
             )
           );
       }
@@ -5074,8 +5089,7 @@ const orderProduction = async (req, res) => {
       //cards for this combination: order, model, modelIndex
       const cardDocs = await Card.find({
         order: order._id,
-        model: order.models[i].id,
-        modelIndex: order.models[i]._id,
+        model: models[i].id,
       }).select("-history -currentErrors -cardErrors -globalErrors");
 
       for (let j = 0; j < cardDocs.length; j++) {
@@ -5100,12 +5114,13 @@ const orderProduction = async (req, res) => {
       for (let o = 0; o < stages.length; o++) {
         finalStages.push({
           stage: stages[o],
+          group: stages[o].type === "production" ? true : false,
           done: subResult[o],
         });
       }
 
       result.push({
-        model: order.models[i],
+        model: models[i],
         cut,
         stages: finalStages,
       });
@@ -5113,7 +5128,7 @@ const orderProduction = async (req, res) => {
 
     return res.status(200).json({ result });
   } catch (error) {
-    console.log("Error is in: ".bgRed, "card.groups".bgYellow);
+    console.log("Error is in: ".bgRed, "card.orderProduction".bgYellow);
     if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
@@ -5146,5 +5161,5 @@ module.exports = {
   statics,
   dateBounds,
   groupsProduction,
-  // orderProduction,
+  orderProduction,
 };

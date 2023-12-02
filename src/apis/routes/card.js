@@ -155,4 +155,6 @@ router.get("/order/:oid/model/:mid/dateBounds", cardController.dateBounds);
 
 router.get("/order/:oid/groupsProduction", cardController.groupsProduction);
 
+router.get("/order/:oid/orderProduction", cardController.orderProduction);
+
 module.exports = router;
