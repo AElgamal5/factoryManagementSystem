@@ -5073,11 +5073,15 @@ const orderProduction = async (req, res) => {
         if (model.stages[j].id.type === "preparations") {
           stages[0] = model.stages[j].id;
         }
+
         if (
           model.stages[j].id.type === "quality" &&
           model.stages[j - 1].id.type === "production"
         ) {
           stages[stages.length] = model.stages[j - 1].id;
+        }
+        if (model.stages[j].id.type === "quality") {
+          stages[stages.length] = model.stages[j].id;
         }
         if (model.stages[j].id.type === "finishing") {
           stages[stages.length] = model.stages[j].id;
