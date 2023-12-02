@@ -4880,6 +4880,10 @@ const dateBounds = async (req, res) => {
   }
 };
 
+/*
+ * method: GET
+ * path: /api/card/order/:oid/groupsProduction
+ */
 const groupsProduction = async (req, res) => {
   const { oid } = req.params;
   try {
@@ -4941,6 +4945,8 @@ const groupsProduction = async (req, res) => {
         }
       }
 
+      // return res.json({ stages });
+
       //cards for this combination: order, model, modelIndex
       const cardDocs = await Card.find({
         order: order._id,
@@ -4972,12 +4978,12 @@ const groupsProduction = async (req, res) => {
           finalStages.push({
             cut,
           });
-        } else {
-          finalStages.push({
-            stage: stages[o],
-            done: subResult[o],
-          });
         }
+        finalStages.push({
+          group: stages[o].type === "production" ? o : undefined,
+          stage: stages[o],
+          done: subResult[o],
+        });
       }
 
       result.push({
@@ -5021,4 +5027,5 @@ module.exports = {
   statics,
   dateBounds,
   groupsProduction,
+  orderProduction,
 };
