@@ -5119,7 +5119,7 @@ const orderProduction = async (req, res) => {
         finalStages.push({
           stage: stages[o],
           group: stages[o].type === "production" ? true : false,
-          done: subResult[o],
+          done: subResult[o] || 0,
         });
       }
 
