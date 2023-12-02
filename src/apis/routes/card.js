@@ -153,6 +153,6 @@ router.get("/order/:oid/model/:mid/date/:date", cardController.statics);
 
 router.get("/order/:oid/model/:mid/dateBounds", cardController.dateBounds);
 
-router.get("/order/:oid/groups", cardController.groups);
+router.get("/order/:oid/groupsProduction", cardController.groupsProduction);
 
 module.exports = router;

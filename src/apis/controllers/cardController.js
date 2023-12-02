@@ -4880,7 +4880,7 @@ const dateBounds = async (req, res) => {
   }
 };
 
-const groups = async (req, res) => {
+const groupsProduction = async (req, res) => {
   const { oid } = req.params;
   try {
     //data checks
@@ -5020,5 +5020,5 @@ module.exports = {
   getByCode,
   statics,
   dateBounds,
-  groups,
+  groupsProduction,
 };
