@@ -4977,11 +4977,6 @@ const groupsProduction = async (req, res) => {
 
       let finalStages = [];
       for (let o = 0; o < stages.length; o++) {
-        if (o === 0) {
-          finalStages.push({
-            cut,
-          });
-        }
         finalStages.push({
           group: stages[o].type === "production" ? o : undefined,
           stage: stages[o],
@@ -4991,6 +4986,127 @@ const groupsProduction = async (req, res) => {
 
       result.push({
         model: order.models[i],
+        cut,
+        stages: finalStages,
+      });
+    }
+
+    return res.status(200).json({ result });
+  } catch (error) {
+    console.log("Error is in: ".bgRed, "card.groupsProduction".bgYellow);
+    if (process.env.PRODUCTION === "false") console.log(error);
+  }
+};
+
+/*
+ * method: GET
+ * path: /api/card/order/:oid/orderProduction
+ */
+const orderProduction = async (req, res) => {
+  const { oid } = req.params;
+  try {
+    //data checks
+    if (!idCheck(oid)) {
+      res
+        .status(400)
+        .json(errorFormat(oid, "Invalid order ID", "oid", "params"));
+    }
+
+    //get data from oid and mid
+    const order = await Order.findById(oid)
+      .populate("models.color", "name code")
+      .populate("models.size", "name");
+    if (!order) {
+      return res
+        .status(404)
+        .json(errorFormat(oid, "No order with this ID", "oid", "params"));
+    }
+
+    return res.json({ order });
+
+    let models = [];
+    for (let i = 0; i < order.models.length; i++) {
+      // const exist = models.findIndex(obj=> obj.toString() === )
+    }
+
+    let result = [];
+    for (let i = 0; i < order.models.length; i++) {
+      let cut = 0;
+      let subResult = [];
+
+      //get model stages
+      const model = await Model.findById(order.models[i].id).populate(
+        "stages.id",
+        "type name rate"
+      );
+      if (!model) {
+        return res
+          .status(404)
+          .json(
+            errorFormat(
+              order.models[i].id,
+              "No model with this id",
+              `order.models[${i}].id`,
+              "params"
+            )
+          );
+      }
+
+      let stages = [];
+      //last preparations and end of each group
+      for (let j = 0; j < model.stages.length; j++) {
+        if (model.stages[j].id.type === "preparations") {
+          stages[0] = model.stages[j].id;
+        }
+        if (
+          model.stages[j].id.type === "quality" &&
+          model.stages[j - 1].id.type === "production"
+        ) {
+          stages[stages.length] = model.stages[j - 1].id;
+        }
+        if (model.stages[j].id.type === "finishing") {
+          stages[stages.length] = model.stages[j].id;
+        }
+      }
+
+      // return res.json({ stages });
+
+      //cards for this combination: order, model, modelIndex
+      const cardDocs = await Card.find({
+        order: order._id,
+        model: order.models[i].id,
+        modelIndex: order.models[i]._id,
+      }).select("-history -currentErrors -cardErrors -globalErrors");
+
+      for (let j = 0; j < cardDocs.length; j++) {
+        cut += +cardDocs[j].quantity;
+
+        for (let k = 0; k < stages.length; k++) {
+          const index = cardDocs[j].tracking.findIndex(
+            (obj) => obj.stage.toString() === stages[k]._id.toString()
+          );
+
+          if (index !== -1) {
+            if (subResult[k]) {
+              subResult[k] += +cardDocs[j].quantity;
+            } else {
+              subResult[k] = +cardDocs[j].quantity;
+            }
+          }
+        }
+      }
+
+      let finalStages = [];
+      for (let o = 0; o < stages.length; o++) {
+        finalStages.push({
+          stage: stages[o],
+          done: subResult[o],
+        });
+      }
+
+      result.push({
+        model: order.models[i],
+        cut,
         stages: finalStages,
       });
     }
@@ -5001,124 +5117,6 @@ const groupsProduction = async (req, res) => {
     if (process.env.PRODUCTION === "false") console.log(error);
   }
 };
-
-/*
- * method: GET
- * path: /api/card/order/:oid/orderProduction
- */
-// const orderProduction = async (req, res) => {
-//   const { oid } = req.params;
-//   try {
-//     //data checks
-//     if (!idCheck(oid)) {
-//       res
-//         .status(400)
-//         .json(errorFormat(oid, "Invalid order ID", "oid", "params"));
-//     }
-
-//     //get data from oid and mid
-//     const order = await Order.findById(oid)
-//       .populate("models.color", "name code")
-//       .populate("models.size", "name");
-//     if (!order) {
-//       return res
-//         .status(404)
-//         .json(errorFormat(oid, "No order with this ID", "oid", "params"));
-//     }
-
-//     let models = [];
-//     for (let i = 0; i < order.models.length; i++) {
-//       // const exist = models.findIndex(obj=> obj.toString() === )
-//     }
-
-//     let result = [];
-//     for (let i = 0; i < order.models.length; i++) {
-//       let cut = 0;
-//       let subResult = [];
-
-//       //get model stages
-//       const model = await Model.findById(order.models[i].id).populate(
-//         "stages.id",
-//         "type name rate"
-//       );
-//       if (!model) {
-//         return res
-//           .status(404)
-//           .json(
-//             errorFormat(
-//               order.models[i].id,
-//               "No model with this id",
-//               `order.models[${i}].id`,
-//               "params"
-//             )
-//           );
-//       }
-
-//       let stages = [];
-//       //last preparations and end of each group
-//       for (let j = 0; j < model.stages.length; j++) {
-//         if (model.stages[j].id.type === "preparations") {
-//           stages[0] = model.stages[j].id;
-//         }
-//         if (
-//           model.stages[j].id.type === "quality" &&
-//           model.stages[j - 1].id.type === "production"
-//         ) {
-//           stages[stages.length] = model.stages[j - 1].id;
-//         }
-//         if (model.stages[j].id.type === "finishing") {
-//           stages[stages.length] = model.stages[j].id;
-//         }
-//       }
-
-//       // return res.json({ stages });
-
-//       //cards for this combination: order, model, modelIndex
-//       const cardDocs = await Card.find({
-//         order: order._id,
-//         model: order.models[i].id,
-//         modelIndex: order.models[i]._id,
-//       }).select("-history -currentErrors -cardErrors -globalErrors");
-
-//       for (let j = 0; j < cardDocs.length; j++) {
-//         cut += +cardDocs[j].quantity;
-
-//         for (let k = 0; k < stages.length; k++) {
-//           const index = cardDocs[j].tracking.findIndex(
-//             (obj) => obj.stage.toString() === stages[k]._id.toString()
-//           );
-
-//           if (index !== -1) {
-//             if (subResult[k]) {
-//               subResult[k] += +cardDocs[j].quantity;
-//             } else {
-//               subResult[k] = +cardDocs[j].quantity;
-//             }
-//           }
-//         }
-//       }
-
-//       let finalStages = [];
-//       for (let o = 0; o < stages.length; o++) {
-//         finalStages.push({
-//           stage: stages[o],
-//           done: subResult[o],
-//         });
-//       }
-
-//       result.push({
-//         model: order.models[i],
-//         cut,
-//         stages: finalStages,
-//       });
-//     }
-
-//     return res.status(200).json({ result });
-//   } catch (error) {
-//     console.log("Error is in: ".bgRed, "card.groups".bgYellow);
-//     if (process.env.PRODUCTION === "false") console.log(error);
-//   }
-// };
 
 module.exports = {
   create,
