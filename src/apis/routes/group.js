@@ -31,4 +31,9 @@ router.patch(
 
 router.delete("/:id", groupController.deleteOne);
 
+router.get(
+  "/production/order/:oid/model/:mid/date/:date",
+  groupController.dailyProduction
+);
+
 module.exports = router;
