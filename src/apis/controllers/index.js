@@ -25,4 +25,5 @@ module.exports = {
   salaryController: require("./salaryController"),
   workController: require("./workController"),
   stageEmployeeController: require("./stageEmployeeController"),
+  groupController: require("./groupController"),
 };

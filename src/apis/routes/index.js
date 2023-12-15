@@ -25,4 +25,5 @@ module.exports = {
   salary: require("./salary"),
   work: require("./work"),
   stageEmployee: require("./stageEmployee"),
+  group: require("./group"),
 };

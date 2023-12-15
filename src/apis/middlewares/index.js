@@ -25,4 +25,5 @@ module.exports = {
   userEmployeeMiddlewares: require("./userEmployeeMiddlewares"),
   cardMiddlewares: require("./cardMiddlewares"),
   salaryMiddlewares: require("./salaryMiddlewares"),
+  groupMiddlewares: require("./groupMiddlewares"),
 };

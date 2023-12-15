@@ -28,4 +28,5 @@ module.exports = {
   Work: require("./workModel"),
   StageEmployee: require("./stageEmployeeModel"),
   StageStatics: require("./stageStaticsModel"),
+  Group: require("./groupModel"),
 };
