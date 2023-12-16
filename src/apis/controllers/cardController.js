@@ -8,6 +8,7 @@ const {
   Work,
   StageEmployee,
   StageStatics,
+  Group,
 } = require("../models");
 const { idCheck, errorFormat, currentTime } = require("../utils");
 
@@ -1259,6 +1260,15 @@ const addTracking = async (req, res) => {
     // stageStaticsDoc.totalQuantity += card.quantity;
     // await stageStaticsDoc.save();
 
+    //check if the the tracked stage is the endStage of a group
+    const groupDocs = await Group.find({ endStage: stageID });
+
+    let groups = [];
+
+    for (let i = 0; i < groupDocs.length; i++) {
+      groups.push(groupDocs[i]._id.toString());
+    }
+
     io.emit("addTracking", {
       cardID: card._id,
       cardCode: card.code,
@@ -1267,6 +1277,8 @@ const addTracking = async (req, res) => {
       lastStageType: stage.type,
       lastStageDate: current,
       trackingLength: card.tracking.length,
+      groups,
+      quantity: card.quantity,
     });
 
     res.status(200).json({ msg: "Tracking added tmam" });
@@ -3775,9 +3787,9 @@ const confirmAll = async (req, res) => {
       card.currentErrors.pull(stages[i]);
     }
 
-    console.log(doneBys);
-    console.log(stages);
-    console.log(occurrence);
+    // console.log(doneBys);
+    // console.log(stages);
+    // console.log(occurrence);
 
     //update salary docs
     for (let i = 0; i < stages.length; i++) {
@@ -4630,7 +4642,7 @@ const statics = async (req, res) => {
       //card.cardErrors
       for (let j = 0; j < cards[i].cardErrors.length; j++) {
         for (let k = 0; k < cards[i].cardErrors[j].pieceErrors.length; k++) {
-          console.log(cards[i].cardErrors[j].pieceErrors[k].dateIn);
+          // console.log(cards[i].cardErrors[j].pieceErrors[k].dateIn);
           const addedDate = new Date(
             cards[i].cardErrors[j].pieceErrors[k].dateIn
           );
@@ -4647,7 +4659,7 @@ const statics = async (req, res) => {
               );
             });
             if (stageIndex !== -1) {
-              console.log("1".repeat(30));
+              // console.log("1".repeat(30));
               result[stageIndex].totalError += 1;
 
               const addHour = addedDate.getHours();
